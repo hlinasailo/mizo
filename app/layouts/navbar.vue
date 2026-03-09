@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
+import { useRoute } from '#imports'
 import { useUserStore } from '~/stores/user'
 
 const userStore = useUserStore()
+const route = useRoute()
 const isMobileMenuOpen = ref(false)
 const isMobileCategoryOpen = ref(false)
 
@@ -17,6 +19,20 @@ const toggleMobileMenu = () => {
 const toggleMobileCategory = () => {
   isMobileCategoryOpen.value = !isMobileCategoryOpen.value
 }
+
+const isSearchOpen = ref(false)
+const isMobileSearchOpen = ref(false)
+
+const toggleSearch = () => {
+  isSearchOpen.value = !isSearchOpen.value
+}
+
+
+const toggleMobileSearch = () => {
+  isMobileSearchOpen.value = !isMobileSearchOpen.value
+}
+//login page route check
+const isLoginPage = computed(() => route.path === '/login')
 </script>
 
 <template>
@@ -65,11 +81,6 @@ const toggleMobileCategory = () => {
         <a href="#" class="block px-4 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-colors">Others</a>
       </div>
     </div>
-
-    <!-- Disabled -->
-    <span class="text-zinc-600 uppercase tracking-wide cursor-not-allowed select-none">
-      Disabled
-    </span>
   </nav>
 
   <!-- Mobile Menu Button -->
@@ -85,18 +96,23 @@ const toggleMobileCategory = () => {
 
   <!-- Right Side: Search + Auth -->
   <div class="hidden md:flex items-center gap-4">
+  
     
-    <!-- Search -->
-    <div class="flex items-center gap-2">
-      <input
-        type="search"
-        placeholder="Search"
-        class="bg-white/5 border border-white/10 text-white text-sm placeholder-zinc-500 px-3 py-1.5 focus:outline-none focus:border-white/30 transition-colors w-36"
-      >
-      <button class="px-3 py-1.5 text-sm font-bold border border-white text-white hover:bg-white hover:text-black uppercase tracking-wide transition-all duration-300">
-        Search
-      </button>
-    </div>
+    <!-- Desktop Search -->
+    <div v-if="!isLoginPage" class="hidden md:flex items-center gap-4">
+    <input
+    type="search"
+    placeholder="Search"
+    :class="isSearchOpen ? 'w-36 opacity-100 px-3' : 'w-0 opacity-0 px-0'"
+    class="bg-white/5 border border-white/10 text-white text-sm placeholder-zinc-500 py-1.5 focus:outline-none focus:border-white/30 transition-all duration-300 ease-in-out"
+    >
+    <button 
+    class="px-3 py-1.5 text-sm font-bold border border-white text-white hover:bg-white hover:text-black uppercase tracking-wide transition-all duration-300 rounded-full"
+    @click="toggleSearch"
+    >
+    {{ isSearchOpen ? 'Cancel' : 'Search' }}
+    </button>
+  </div>
 
     <!-- Auth -->
     <template v-if="userStore.isAuthenticated">
@@ -110,7 +126,7 @@ const toggleMobileCategory = () => {
         Logout
       </button>
     </template>
-    <template v-else>
+    <template v-else-if="!isLoginPage">
       <NuxtLink
         to="/login"
         class="px-5 py-2 text-sm font-bold text-black bg-white hover:bg-zinc-200 uppercase tracking-wide transition-all duration-300 shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:shadow-[0_0_20px_rgba(255,255,255,0.2)]"
@@ -129,7 +145,7 @@ const toggleMobileCategory = () => {
       <NuxtLink to="/" class="text-zinc-400 hover:text-white transition-colors uppercase tracking-wide" @click="toggleMobileMenu">
         Home
       </NuxtLink>
-      <NuxtLink to="/explore" class="text-zinc-400 hover:text-white transition-colors uppercase tracking-wide" @click="toggleMobileMenu">
+      <NuxtLink to="/about" class="text-zinc-400 hover:text-white transition-colors uppercase tracking-wide" @click="toggleMobileMenu">
         About
       </NuxtLink>
 
@@ -150,7 +166,7 @@ const toggleMobileCategory = () => {
           <a href="#" class="block text-sm text-zinc-400 hover:text-white transition-colors" @click="toggleMobileMenu">Gospel</a>
           <a href="#" class="block text-sm text-zinc-400 hover:text-white transition-colors" @click="toggleMobileMenu">Hriselna</a>
           <a href="#" class="block text-sm text-zinc-400 hover:text-white transition-colors" @click="toggleMobileMenu">Thiamna</a>
-          <a href="#" class="block text-sm text-zinc-400 hover:text-white transition-colors" @click="toggleMobileMenu">Beuty &amp; Fashion</a>
+          <a href="#" class="block text-sm text-zinc-400 hover:text-white transition-colors" @click="toggleMobileMenu">Beauty &amp; Fashion</a>
           <a href="#" class="block text-sm text-zinc-400 hover:text-white transition-colors" @click="toggleMobileMenu">Story</a>
           <a href="#" class="block text-sm text-zinc-400 hover:text-white transition-colors" @click="toggleMobileMenu">Politics</a>
           <a href="#" class="block text-sm text-zinc-400 hover:text-white transition-colors" @click="toggleMobileMenu">Infiamna</a>
@@ -159,18 +175,22 @@ const toggleMobileCategory = () => {
       </div>
       
       <!-- Mobile Search -->
-      <div class="pt-2 border-t border-white/10">
-        <div class="flex items-center gap-2">
-          <input
-            type="search"
-            placeholder="Search"
-            class="flex-1 bg-white/5 border border-white/10 text-white text-sm placeholder-zinc-500 px-3 py-2 focus:outline-none focus:border-white/30 transition-colors"
-          >
-          <button class="px-4 py-2 text-sm font-bold border border-white text-white hover:bg-white hover:text-black uppercase tracking-wide transition-all duration-300">
-            Search
-          </button>
-        </div>
-      </div>
+<div v-if="!isLoginPage" class="pt-2 border-t border-white/10">
+  <div class="flex items-center gap-2">
+    <input
+      type="search"
+      placeholder="Search"
+      :class="isMobileSearchOpen ? 'flex-1 px-3' : 'w-0 px-0 opacity-0'"
+      class="bg-white/5 border border-white/10 text-white text-sm placeholder-zinc-500 py-2 focus:outline-none focus:border-white/30 transition-all duration-300 ease-in-out"
+    >
+    <button 
+      class="px-4 py-2 text-sm font-bold border border-white text-white hover:bg-white hover:text-black uppercase tracking-wide transition-all duration-300 rounded-full flex-shrink-0"
+      @click="toggleMobileSearch"
+    >
+      {{ isMobileSearchOpen ? 'Cancel' : 'Search' }}
+    </button>
+  </div>
+</div>
 
       <!-- Mobile Auth -->
       <div class="pt-2 border-t border-white/10">
@@ -185,7 +205,7 @@ const toggleMobileCategory = () => {
             Logout
           </button>
         </template>
-        <template v-else>
+        <template v-else-if="!isLoginPage">
           <NuxtLink
             to="/login"
             class="block w-full text-center px-5 py-2 text-sm font-bold text-black bg-white hover:bg-zinc-200 uppercase tracking-wide transition-all duration-300"
