@@ -10,6 +10,9 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "@tiptap/extension-image": "^2.26.1",
+    "@tiptap/starter-kit": "^2.26.1",
+    "@tiptap/vue-3": "^2.26.1",
     "@nuxt/content": "^3.12.0",
     "@nuxt/eslint": "^1.15.2",
     "@nuxt/fonts": "^0.14.0",
