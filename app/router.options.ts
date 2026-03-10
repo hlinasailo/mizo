@@ -2,7 +2,23 @@ import type { RouterConfig } from '@nuxt/schema'
 
 export default <RouterConfig>{
   routes: (routes) => {
-    routes.push(
+    return [
+      ...routes,
+      {
+        name: 'dashboard',
+        path: '/dashboard',
+        component: () => import('./blog/userDashboard.vue')
+      },
+      {
+        name: 'use-dashboard',
+        path: '/userDashboard',
+        component: () => import('./blog/userDashboard.vue')
+      },
+      {
+        name: 'user-dashboard',
+        path: '/user-dashboard',
+        component: () => import('./blog/userDashboard.vue')
+      },
       {
         name: 'create',
         path: '/create',
@@ -13,8 +29,6 @@ export default <RouterConfig>{
         path: '/blog/create',
         component: () => import('./blog/create.vue')
       }
-    )
-
-    return routes
+    ]
   }
 }

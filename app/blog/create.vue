@@ -62,7 +62,7 @@ const ResizableImage = Node.create({
       img.addEventListener('click', (e) => { e.stopPropagation(); select() })
 
       const globalClickHandler = (e: MouseEvent) => {
-        if (e.target && !wrapper.contains(e.target as Node)) deselect()
+        if (e.target instanceof HTMLElement && !wrapper.contains(e.target)) deselect()
       }
       document.addEventListener('click', globalClickHandler)
 
@@ -154,13 +154,13 @@ const ResizableImage = Node.create({
   }
 })
 
-// ─── Page state ───────────────────────────────────────────────────────────────
+// ─── Page state ──────────────────────────
 const title    = ref('')
 const slug     = ref('')
 const category = ref('Others')
-const summary  = ref('')
 const imageUrl = ref('')
 const isSubmitting  = ref(false)
+const isSavingDraft = ref(false)
 const showImageUrl  = ref(false)
 
 const categories = [
@@ -168,7 +168,7 @@ const categories = [
   'Beauty & Fashion','Story','Politics','Infiamna','Others'
 ]
 
-// ─── Editor ───────────────────────────────────────────────────────────────────
+// ─── Editor ───────────────────────────────────
 const editor = useEditor({
   content: '',
   extensions: [StarterKit, ResizableImage],
@@ -223,13 +223,29 @@ const submitPost = async () => {
       title: title.value,
       slug: slug.value,
       category: category.value,
-      summary: summary.value,
       content: editor.value?.getHTML() ?? ''
     }
     console.log('Blog payload:', payload)
     await new Promise(r => setTimeout(r, 500))
   } finally {
     isSubmitting.value = false
+  }
+}
+
+const saveDraft = async () => {
+  isSavingDraft.value = true
+  try {
+    const draftPayload = {
+      title: title.value,
+      slug: slug.value,
+      category: category.value,
+      content: editor.value?.getHTML() ?? '',
+      isDraft: true
+    }
+    console.log('Draft payload:', draftPayload)
+    await new Promise(r => setTimeout(r, 500))
+  } finally {
+    isSavingDraft.value = false
   }
 }
 
@@ -241,10 +257,17 @@ onBeforeUnmount(() => { editor.value?.destroy() })
     <section class="max-w-5xl mx-auto">
 
       <div class="mb-10">
-        <h1 class="font-black tracking-tighter leading-[1] uppercase text-4xl sm:text-5xl md:text-6xl lg:text-[4.5rem]">
-          Create <span class="text-zinc-400">Blog</span>
-        </h1>
-        <div class="w-24 h-1 bg-zinc-400 mt-4" />
+        <div class="flex items-start justify-between gap-4 mb-4">
+          <h1 class="font-black tracking-tighter leading-[1] uppercase text-4xl sm:text-5xl md:text-6xl lg:text-[4.5rem]">
+            Create <span class="text-zinc-400">Blog</span>
+          </h1>
+          <button class="text-zinc-400 hover:text-white transition-colors duration-200 mt-2 cursor-pointer bg-none border-none p-0" title="Go back" @click="$router.back()">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+          </button>
+        </div>
+        <div class="w-24 h-1 bg-zinc-400" />
         <p class="text-zinc-400 mt-4 text-sm sm:text-base">Write and publish with the same Mizomade style.</p>
       </div>
 
@@ -262,16 +285,12 @@ onBeforeUnmount(() => { editor.value?.destroy() })
           </label>
         </div>
 
-        <!-- Summary + Category -->
-        <div class="grid md:grid-cols-[2fr_1fr] gap-6">
-          <label class="space-y-2 block">
-            <span class="text-zinc-400 uppercase tracking-widest text-[10px] font-semibold">Summary</span>
-            <textarea v-model="summary" rows="4" placeholder="Short summary for preview cards" class="field-input resize-none" />
-          </label>
+        <!-- Category -->
+        <div>
           <label class="space-y-2 block">
             <span class="text-zinc-400 uppercase tracking-widest text-[10px] font-semibold">Category</span>
             <select v-model="category" class="field-input">
-              <option v-for="item in categories" :key="item" :value="item" class="bg-zinc-900 text-white">{{ item }}</option>
+              <option v-for="item in categories" :key="item" :value="item" class="bg-white text-black">{{ item }}</option>
             </select>
           </label>
         </div>
@@ -280,7 +299,8 @@ onBeforeUnmount(() => { editor.value?.destroy() })
         <div class="bg-zinc-900 border border-white/10 rounded-sm overflow-hidden">
 
           <!-- Toolbar -->
-          <div class="flex flex-wrap items-center gap-1 px-3 py-2.5 border-b border-white/10 bg-zinc-950/60">
+          <div class="toolbar-container border-b border-white/10 bg-zinc-950/60">
+            <div class="toolbar-scroll">
 
             <!-- Format group -->
             <div class="flex items-center gap-1 pr-2 mr-1 border-r border-white/10">
@@ -353,6 +373,7 @@ onBeforeUnmount(() => { editor.value?.destroy() })
                 </svg>
               </button>
             </div>
+            </div>
           </div>
 
           <!-- Image URL panel -->
@@ -376,15 +397,25 @@ onBeforeUnmount(() => { editor.value?.destroy() })
         </div>
 
         <!-- Resize hint -->
-        <p class="text-zinc-500 text-xs">
-          💡 Click any image to reveal resize handles — drag corners to scale proportionally, edges to stretch freely.
-        </p>
+        <!--<p class="text-zinc-500 text-xs">
+           Click any image to reveal resize handles — drag corners to scale proportionally, edges to stretch freely.
+        </p>-->
 
-        <div class="flex justify-end pt-2">
+        <div class="flex justify-end gap-3 pt-2">
           <button
-type="submit" :disabled="isSubmitting"
-            class="px-8 py-3.5 text-xs font-black text-zinc-900 bg-white hover:bg-zinc-100 uppercase tracking-widest transition-all duration-200 disabled:opacity-40">
-            {{ isSubmitting ? 'Publishing…' : 'Publish Post' }}
+            type="button"
+            :disabled="isSavingDraft"
+            class="draft-btn"
+            @click="saveDraft"
+          >
+            <span class="relative z-10">{{ isSavingDraft ? 'Saving…' : 'Save Draft' }}</span>
+          </button>
+          <button
+            type="submit"
+            :disabled="isSubmitting"
+            class="publish-btn group"
+          >
+            <span class="relative z-10">{{ isSubmitting ? 'Publishing…' : 'Publish Post' }}</span>
           </button>
         </div>
       </form>
@@ -409,6 +440,58 @@ type="submit" :disabled="isSubmitting"
 .field-input:focus { border-color: rgba(255,255,255,0.35); }
 
 /* ── Toolbar ── */
+.toolbar-container {
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.2) transparent;
+}
+
+.toolbar-container::-webkit-scrollbar {
+  height: 4px;
+}
+
+.toolbar-container::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.toolbar-container::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.2);
+  border-radius: 2px;
+}
+
+.toolbar-scroll {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.625rem 0.75rem;
+  min-width: min-content;
+}
+
+@media (min-width: 768px) {
+  .toolbar-scroll {
+    flex-wrap: wrap;
+  }
+}
+
+.toolbar-scroll > div {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding-right: 0.5rem;
+  margin-right: 0.25rem;
+  border-right: 1px solid rgba(255,255,255,0.1);
+  flex-shrink: 0;
+}
+
+.toolbar-scroll > div:last-child {
+  margin-left: auto;
+  border-right: none;
+  padding-right: 0;
+  margin-right: 0;
+}
+
 .toolbar-btn {
   display: inline-flex;
   align-items: center;
@@ -427,37 +510,80 @@ type="submit" :disabled="isSubmitting"
 .toolbar-btn.is-active { color: #fff; background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.25); }
 
 /* ── Editor shell ── */
-.editor-shell { min-height: 360px; background: rgba(20,20,23,0.85); }
+.editor-shell { min-height: 360px; background: #ffffff; }
 
 .editor-shell :deep(.ProseMirror) {
   min-height: 320px;
   padding: 1.25rem 1.5rem;
-  color: #e4e4e7;
+  color: #18181b;
   font-size: 0.9375rem;
   line-height: 1.75;
   outline: none;
-  caret-color: #fff;
+  caret-color: #000;
 }
 
 .editor-shell :deep(.ProseMirror p.is-editor-empty:first-child::before) {
   content: 'Write your story…';
-  color: rgba(255,255,255,0.25);
+  color: rgba(0,0,0,0.3);
   pointer-events: none;
   float: left;
   height: 0;
 }
 
-.editor-shell :deep(.ProseMirror h2) { font-size:1.5rem; font-weight:800; color:#fff; margin:1.5rem 0 0.5rem; letter-spacing:-0.02em; }
-.editor-shell :deep(.ProseMirror h3) { font-size:1.2rem; font-weight:700; color:#e4e4e7; margin:1.25rem 0 0.4rem; }
+.editor-shell :deep(.ProseMirror h2) { font-size:1.5rem; font-weight:800; color:#000; margin:1.5rem 0 0.5rem; letter-spacing:-0.02em; }
+.editor-shell :deep(.ProseMirror h3) { font-size:1.2rem; font-weight:700; color:#18181b; margin:1.25rem 0 0.4rem; }
 .editor-shell :deep(.ProseMirror p)  { margin: 0.5rem 0; }
+
 .editor-shell :deep(.ProseMirror ul),
-.editor-shell :deep(.ProseMirror ol) { padding-left:1.5rem; margin:0.5rem 0; color:#e4e4e7; }
-.editor-shell :deep(.ProseMirror li) { margin:0.25rem 0; }
-.editor-shell :deep(.ProseMirror blockquote) { border-left:3px solid rgba(255,255,255,0.3); margin:1rem 0; padding-left:1.25rem; color:rgba(255,255,255,0.7); font-style:italic; }
-.editor-shell :deep(.ProseMirror code) { background:rgba(255,255,255,0.1); padding:0.15em 0.4em; border-radius:3px; font-size:0.85em; color:#a5f3fc; }
-.editor-shell :deep(.ProseMirror hr)  { border:none; border-top:1px solid rgba(255,255,255,0.15); margin:1.5rem 0; }
-.editor-shell :deep(.ProseMirror strong) { color:#fff; font-weight:700; }
-.editor-shell :deep(.ProseMirror em)     { color:#d4d4d8; }
+.editor-shell :deep(.ProseMirror ol) { 
+  padding-left: 1.5rem; 
+  margin: 0.75rem 0; 
+  color: #27272a;
+  list-style-position: outside;
+}
+
+.editor-shell :deep(.ProseMirror ul) { 
+  list-style-type: disc; 
+}
+
+.editor-shell :deep(.ProseMirror ol) { 
+  list-style-type: decimal; 
+}
+
+.editor-shell :deep(.ProseMirror li) { 
+  margin: 0.35rem 0; 
+  display: list-item;
+  color: #18181b;
+}
+
+.editor-shell :deep(.ProseMirror li p) { 
+  margin: 0; 
+}
+
+.editor-shell :deep(.ProseMirror blockquote) { 
+  border-left: 4px solid #27272a; 
+  margin: 1rem 0; 
+  padding: 0.75rem 1.25rem; 
+  background: rgba(0,0,0,0.04);
+  color: #3f3f46; 
+  font-style: italic; 
+  border-radius: 0 3px 3px 0;
+}
+.editor-shell :deep(.ProseMirror code) { background:rgba(0,0,0,0.08); padding:0.15em 0.4em; border-radius:3px; font-size:0.85em; color:#0891b2; }
+.editor-shell :deep(.ProseMirror hr)  { border:none; border-top:1px solid rgba(0,0,0,0.15); margin:1.5rem 0; }
+.editor-shell :deep(.ProseMirror strong) { color:#000; font-weight:700; }
+.editor-shell :deep(.ProseMirror em)     { color:#3f3f46; }
+
+/* Text selection */
+.editor-shell :deep(.ProseMirror ::selection) {
+  background: rgba(0,0,0,0.15);
+  color: inherit;
+}
+
+.editor-shell :deep(.ProseMirror ::-moz-selection) {
+  background: rgba(0,0,0,0.15);
+  color: inherit;
+}
 
 /* ── Resizable image wrapper ── */
 .editor-shell :deep(.img-resize-wrapper) {
@@ -472,18 +598,18 @@ type="submit" :disabled="isSubmitting"
 .editor-shell :deep(.img-resize-wrapper img) {
   display: block;
   max-width: 100%;
-  border: 1.5px solid rgba(255,255,255,0.12);
+  border: 1.5px solid rgba(0,0,0,0.15);
   border-radius: 2px;
   transition: border-color 0.15s, box-shadow 0.15s;
 }
 
 .editor-shell :deep(.img-resize-wrapper:hover img) {
-  border-color: rgba(255,255,255,0.28);
+  border-color: rgba(0,0,0,0.3);
 }
 
 .editor-shell :deep(.img-resize-wrapper.selected img) {
-  border-color: rgba(255,255,255,0.6);
-  box-shadow: 0 0 0 3px rgba(255,255,255,0.1);
+  border-color: rgba(0,0,0,0.6);
+  box-shadow: 0 0 0 3px rgba(0,0,0,0.08);
 }
 
 /* ── Resize handles (8 directions) ── */
@@ -538,5 +664,103 @@ type="submit" :disabled="isSubmitting"
 
 .editor-shell :deep(.img-resize-wrapper.selected .resize-tooltip) {
   opacity: 1;
+}
+
+/* ── Publish button ── */
+.publish-btn {
+  position: relative;
+  padding: 1rem 2.5rem;
+  font-size: 0.75rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #fff;
+  background: transparent;
+  border: 2px solid rgba(255,255,255,0.25);
+  cursor: pointer;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.publish-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: #fff;
+  transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 0;
+}
+
+.publish-btn:hover {
+  border-color: rgba(255,255,255,0.9);
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.15);
+}
+
+.publish-btn:hover::before {
+  left: 0;
+}
+
+.publish-btn:hover span {
+  color: #18181b;
+}
+
+.publish-btn:active {
+  transform: scale(0.98);
+}
+
+.publish-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* ── Draft button ── */
+.draft-btn {
+  position: relative;
+  padding: 1rem 2rem;
+  font-size: 0.75rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.7);
+  background: transparent;
+  border: 2px solid rgba(255,255,255,0.3);
+  cursor: pointer;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.draft-btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: rgba(255,255,255,0.1);
+  transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 0;
+}
+
+.draft-btn:hover {
+  border-color: rgba(255,255,255,0.6);
+  color: #fff;
+}
+
+.draft-btn:hover::before {
+  left: 0;
+}
+
+.draft-btn:active {
+  transform: scale(0.98);
+}
+
+.draft-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
 }
 </style>

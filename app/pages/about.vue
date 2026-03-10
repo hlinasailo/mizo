@@ -1,7 +1,7 @@
 <template>
 	<div :class="$style.aboutPage">
 		<!-- Section 1: Hero/Introduction - Dark -->
-		<section class="relative bg-zinc-700 text-white py-20 md:py-32 overflow-hidden">
+		<section class="relative bg-zinc-900 text-white py-20 md:py-32 overflow-hidden">
 			<!-- Animated background elements -->
 			<div class="absolute inset-0 overflow-hidden">
 				<div :class="$style.floatingCircles">
@@ -13,7 +13,7 @@
 
 			<div class="container mx-auto px-6 md:px-12 relative z-10">
 				<div class="max-w-4xl mx-auto text-center" :class="$style.fadeInUp" data-animate>
-					<h1 class="text-4xl md:text-6xl font-bold mb-6 tracking-tight">
+					<h1 class="font-black tracking-tighter leading-[1] uppercase text-5xl sm:text-6xl md:text-7xl lg:text-[5rem] mb-6">
 						About <span class="text-zinc-200">MizoMade</span>
 					</h1>
 					<div class="w-24 h-1 bg-zinc-200 mx-auto mb-8" />
@@ -38,7 +38,7 @@
 					<div class="grid md:grid-cols-2 gap-6 items-stretch">
 						<!-- Left: Content -->
 						<div class="bg-white/70 backdrop-blur-md p-8 md:p-10" :class="$style.slideInLeft" data-animate>
-							<h2 class="text-3xl md:text-5xl font-bold mb-6 text-zinc-900">
+						<h2 class="font-black tracking-tighter leading-[1] uppercase text-3xl sm:text-4xl md:text-5xl lg:text-4xl mb-6 text-zinc-900">
 								Our Mission
 							</h2>
 							<div class="w-20 h-1 bg-zinc-700 mb-6" />
@@ -52,7 +52,7 @@
 
 						<!-- Right: Feature Cards -->
 						<div class="bg-zinc-900 p-8 md:p-10" :class="$style.slideInRight" data-animate>
-							<h3 class="text-2xl font-semibold mb-6 text-zinc-100">What We Focus On</h3>
+							<h3 class="font-black tracking-tighter leading-[1] uppercase text-3xl sm:text-4xl md:text-5xl lg:text-4xl mb-6 text-zinc-100">What We Focus On</h3>
 							<div class="space-y-6">
 								<div :class="[$style.featureCard, 'group']" data-animate>
 									<div class="flex items-start space-x-4">
@@ -89,7 +89,7 @@
 								<div :class="[$style.featureCard, 'group']" data-animate>
 									<div class="flex items-start space-x-4">
 										<div class="flex-shrink-0">
-											<div class="w-12 h-12 bg-zinc-500 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+											<div class="w-12 h-12 bg-zinc-600 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
 												<svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 													<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
 												</svg>
@@ -109,11 +109,14 @@
 		</section>
 
 		<!-- Section 3: Design Philosophy - Light Gray -->
-		<section class="bg-zinc-800 text-white py-20 md:py-32">
+		<section class="bg-zinc-950 text-white py-20 md:py-32">
 			<div class="container mx-auto px-6 md:px-12">
 				<div class="max-w-5xl mx-auto text-center" :class="$style.fadeInUp" data-animate>
-					<h2 class="text-3xl md:text-5xl font-bold mb-6 text-white">
-						Designed for Everyone
+					<h2 class="font-black tracking-tighter leading-[1] uppercase text-5xl sm:text-6xl md:text-7xl lg:text-[5rem] mb-6 text-white">
+						Designed for 
+					</h2>
+					<h2 class="text-zinc-700 font-black tracking-tighter leading-[1] uppercase text-5xl sm:text-6xl md:text-7xl lg:text-[5rem] mb-6 text-white">
+						 Everyone
 					</h2>
 					<div class="w-20 h-1 bg-zinc-300 mx-auto mb-8" />
 					<p class="text-lg md:text-xl text-zinc-300 leading-relaxed mb-12">
@@ -163,7 +166,7 @@
 				<div class="max-w-4xl mx-auto">
 					<!-- Vision Statement -->
 					<div class="text-center mb-16" :class="$style.fadeInUp" data-animate>
-						<h2 class="text-3xl md:text-5xl font-bold mb-6">Our Vision</h2>
+						<h2 class="font-black tracking-tighter leading-[1] uppercase text-5xl sm:text-6xl md:text-7xl lg:text-[5rem] mb-6">Our Vision</h2>
 						<div class="w-20 h-1 bg-zinc-200 mx-auto mb-8" />
 						<p class="text-lg md:text-xl text-zinc-300 leading-relaxed">
 							MizoMade.com is designed with a minimalistic and intuitive approach so that even non-sophisticated users may know how to utilize the resources. We envision a future where every member of the Mizo community has equal access to knowledge and digital resources, regardless of their technical literacy.

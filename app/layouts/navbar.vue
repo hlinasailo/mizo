@@ -69,16 +69,16 @@ const isLoginPage = computed(() => route.path === '/login')
       </button>
       <!-- Dropdown Menu -->
       <div class="absolute top-full left-0 mt-2 w-48 bg-black/90 border border-white/10 backdrop-blur-md opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
-        <a href="#" class="block px-4 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-colors">Zirna</a>
-        <a href="#" class="block px-4 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-colors">Gospel</a>
-        <a href="#" class="block px-4 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-colors">Hriselna</a>
-        <a href="#" class="block px-4 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-colors">Thiamna</a>
-        <a href="#" class="block px-4 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-colors">Beuty & Fashion</a>
-        <a href="#" class="block px-4 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-colors">Story</a>
-        <a href="#" class="block px-4 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-colors">Politics</a>
-        <a href="#" class="block px-4 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-colors">Infiamna</a>
+        <NuxtLink to="/zirna" class="block px-4 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-colors">Zirna</NuxtLink>
+        <NuxtLink to="/gospel" class="block px-4 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-colors">Gospel</NuxtLink>
+        <NuxtLink to="/hriselna" class="block px-4 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-colors">Hriselna</NuxtLink>
+        <NuxtLink to="/thiamna" class="block px-4 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-colors">Thiamna</NuxtLink>
+        <NuxtLink to="/beauty-fashion" class="block px-4 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-colors">Beuty & Fashion</NuxtLink>
+        <NuxtLink to="/story" class="block px-4 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-colors">Story</NuxtLink>
+        <NuxtLink to="/politics" class="block px-4 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-colors">Politics</NuxtLink>
+        <NuxtLink to="/infiamna" class="block px-4 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-colors">Infiamna</NuxtLink>
         <hr class="border-white/10 my-1">
-        <a href="#" class="block px-4 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-colors">Others</a>
+        <NuxtLink to="/others" class="block px-4 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-colors">Others</NuxtLink>
       </div>
     </div>
   </nav>
@@ -162,15 +162,15 @@ const isLoginPage = computed(() => route.path === '/login')
         </button>
 
         <div class="pl-3 pt-3 space-y-2 overflow-hidden transition-all duration-300" :class="isMobileCategoryOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'">
-          <a href="#" class="block text-sm text-zinc-400 hover:text-white transition-colors" @click="toggleMobileMenu">Zirna</a>
-          <a href="#" class="block text-sm text-zinc-400 hover:text-white transition-colors" @click="toggleMobileMenu">Gospel</a>
-          <a href="#" class="block text-sm text-zinc-400 hover:text-white transition-colors" @click="toggleMobileMenu">Hriselna</a>
-          <a href="#" class="block text-sm text-zinc-400 hover:text-white transition-colors" @click="toggleMobileMenu">Thiamna</a>
-          <a href="#" class="block text-sm text-zinc-400 hover:text-white transition-colors" @click="toggleMobileMenu">Beauty &amp; Fashion</a>
-          <a href="#" class="block text-sm text-zinc-400 hover:text-white transition-colors" @click="toggleMobileMenu">Story</a>
-          <a href="#" class="block text-sm text-zinc-400 hover:text-white transition-colors" @click="toggleMobileMenu">Politics</a>
-          <a href="#" class="block text-sm text-zinc-400 hover:text-white transition-colors" @click="toggleMobileMenu">Infiamna</a>
-          <a href="#" class="block text-sm text-zinc-400 hover:text-white transition-colors" @click="toggleMobileMenu">Others</a>
+          <NuxtLink to="/zirna" class="block text-sm text-zinc-400 hover:text-white transition-colors" @click="toggleMobileMenu">Zirna</NuxtLink>
+          <NuxtLink to="/gospel" class="block text-sm text-zinc-400 hover:text-white transition-colors" @click="toggleMobileMenu">Gospel</NuxtLink>
+          <NuxtLink to="/hriselna" class="block text-sm text-zinc-400 hover:text-white transition-colors" @click="toggleMobileMenu">Hriselna</NuxtLink>
+          <NuxtLink to="/thiamna" class="block text-sm text-zinc-400 hover:text-white transition-colors" @click="toggleMobileMenu">Thiamna</NuxtLink>
+          <NuxtLink to="/beauty-fashion" class="block text-sm text-zinc-400 hover:text-white transition-colors" @click="toggleMobileMenu">Beauty &amp; Fashion</NuxtLink>
+          <NuxtLink to="/story" class="block text-sm text-zinc-400 hover:text-white transition-colors" @click="toggleMobileMenu">Story</NuxtLink>
+          <NuxtLink to="/politics" class="block text-sm text-zinc-400 hover:text-white transition-colors" @click="toggleMobileMenu">Politics</NuxtLink>
+          <NuxtLink to="/infiamna" class="block text-sm text-zinc-400 hover:text-white transition-colors" @click="toggleMobileMenu">Infiamna</NuxtLink>
+          <NuxtLink to="/others" class="block text-sm text-zinc-400 hover:text-white transition-colors" @click="toggleMobileMenu">Others</NuxtLink>
         </div>
       </div>
       
