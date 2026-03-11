@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute } from '#imports'
 import { useUserStore } from '~/stores/user'
 
@@ -31,6 +31,35 @@ const toggleSearch = () => {
 const toggleMobileSearch = () => {
   isMobileSearchOpen.value = !isMobileSearchOpen.value
 }
+
+const isDarkMode = ref(true)
+
+const applyTheme = (dark: boolean) => {
+  if (!import.meta.client) return
+
+  document.documentElement.classList.toggle('dark', dark)
+  localStorage.setItem('theme', dark ? 'dark' : 'light')
+}
+
+const toggleTheme = () => {
+  isDarkMode.value = !isDarkMode.value
+}
+
+onMounted(() => {
+  const savedTheme = localStorage.getItem('theme')
+
+  if (savedTheme === 'dark' || savedTheme === 'light') {
+    isDarkMode.value = savedTheme === 'dark'
+  } else {
+    isDarkMode.value = window.matchMedia('(prefers-color-scheme: dark)').matches
+  }
+
+  applyTheme(isDarkMode.value)
+})
+
+watch(isDarkMode, (dark) => {
+  applyTheme(dark)
+})
 //login page route check
 const isLoginPage = computed(() => route.path === '/login')
 </script>
@@ -98,6 +127,22 @@ const isLoginPage = computed(() => route.path === '/login')
 
   <!-- Right Side: Search + Auth -->
   <div class="hidden md:flex items-center gap-4">
+
+    <!-- Desktop Theme Toggle -->
+    <button
+      :aria-label="isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'"
+      :title="isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'"
+      class="w-9 h-9 flex items-center justify-center border border-white text-white hover:bg-white hover:text-black transition-all duration-300 rounded-full"
+      @click="toggleTheme"
+    >
+      <svg v-if="isDarkMode" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v2m0 14v2m9-9h-2M5 12H3m15.364 6.364-1.414-1.414M7.05 7.05 5.636 5.636m12.728 0L16.95 7.05M7.05 16.95l-1.414 1.414M12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z"/>
+      </svg>
+      <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"/>
+      </svg>
+      <span class="sr-only">{{ isDarkMode ? 'Switch to light mode' : 'Switch to dark mode' }}</span>
+    </button>
   
     
     <!-- Desktop Search -->
@@ -182,7 +227,7 @@ const isLoginPage = computed(() => route.path === '/login')
       
       <!-- Mobile Search -->
 <div v-if="!isLoginPage" class="pt-2 border-t border-white/10">
-  <div class="flex items-center gap-2">
+  <div class="flex items-center ">
     <input
       type="search"
       placeholder="Search"
@@ -197,6 +242,24 @@ const isLoginPage = computed(() => route.path === '/login')
     </button>
   </div>
 </div>
+
+      <!-- Mobile Theme Toggle -->
+      <div class="pt-2 border-t border-white/10 flex justify-left">
+        <button
+          :aria-label="isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'"
+          :title="isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'"
+          class="w-10 h-10 flex items-center justify-center border border-white text-white hover:bg-white hover:text-black transition-all duration-300 rounded-full"
+          @click="toggleTheme"
+        >
+          <svg v-if="isDarkMode" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v2m0 14v2m9-9h-2M5 12H3m15.364 6.364-1.414-1.414M7.05 7.05 5.636 5.636m12.728 0L16.95 7.05M7.05 16.95l-1.414 1.414M12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z"/>
+          </svg>
+          <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"/>
+          </svg>
+          <span class="sr-only">{{ isDarkMode ? 'Switch to light mode' : 'Switch to dark mode' }}</span>
+        </button>
+      </div>
 
       <!-- Mobile Auth -->
       <div class="pt-2 border-t border-white/10">

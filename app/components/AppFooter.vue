@@ -131,7 +131,7 @@
 <script setup>
 const directoryLinks = [
   { text: 'Landing', url: '/index' },
-  { text: 'Blog', url: '/blog' },
+  { text: 'Blog', url: '/blogs' },
   { text: 'Service', url: '/ServicesPage' },
   { text: 'Company', url: '/CompanyPage' }
 ]

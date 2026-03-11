@@ -88,41 +88,10 @@
     </section>
 
     <!-- Footer -->
-    <footer class="border-t border-zinc-900 bg-black pt-20 pb-10 relative z-10">
-      <div class="max-w-7xl mx-auto px-6 lg:px-12 grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
-        <div class="col-span-1 md:col-span-2">
-           <div class="flex items-center gap-3 mb-6">
-              <div class="w-8 h-8 border border-white bg-white flex items-center justify-center font-black text-black tracking-widest text-sm">M</div>
-              <span class="text-xl font-bold text-white tracking-tight uppercase">Mizomade</span>
-            </div>
-            <p class="text-zinc-500 font-light text-sm max-w-sm leading-relaxed">The premier black-tie experience for discovering content. Built with uncompromising standards.</p>
-        </div>
-        <div>
-          <h4 class="text-white font-bold mb-6 uppercase tracking-widest text-sm">Directory</h4>
-          <ul class="space-y-3 text-sm text-zinc-500 font-light tracking-wide">
-            <li><NuxtLink to="/explore" class="hover:text-white transition-colors">Explore</NuxtLink></li>
-            <li><NuxtLink to="/categories" class="hover:text-white transition-colors">Categories</NuxtLink></li>
-            <li><NuxtLink to="/contact" class="hover:text-white transition-colors">Contact</NuxtLink></li>
-          </ul>
-        </div>
-        <div>
-          <h4 class="text-white font-bold mb-6 uppercase tracking-widest text-sm">Legal</h4>
-          <ul class="space-y-3 text-sm text-zinc-500 font-light tracking-wide">
-            <li><NuxtLink to="/privacy" class="hover:text-white transition-colors">Privacy Policy</NuxtLink></li>
-            <li><NuxtLink to="/terms" class="hover:text-white transition-colors">Terms of Use</NuxtLink></li>
-          </ul>
-        </div>
-      </div>
-      <div class="max-w-7xl mx-auto px-6 lg:px-12 flex flex-col md:flex-row items-center justify-between text-zinc-600 text-sm font-light uppercase tracking-wider">
-        <p>&copy; {{ new Date().getFullYear() }} Mizomade. All Rights Reserved.</p>
-        <div class="flex items-center gap-6 mt-6 md:mt-0">
-          <NuxtLink to="#" class="hover:text-white transition-colors"><Icon name="uil:twitter" class="w-5 h-5" /></NuxtLink>
-          <NuxtLink to="#" class="hover:text-white transition-colors"><Icon name="uil:github" class="w-5 h-5" /></NuxtLink>
-          <NuxtLink to="#" class="hover:text-white transition-colors"><Icon name="uil:discord" class="w-5 h-5" /></NuxtLink>
-        </div>
-      </div>
-    </footer>
+      <AppFooter />
+    <ButtomFooter />
   </main>
+
 </template>
 
 <style scoped>

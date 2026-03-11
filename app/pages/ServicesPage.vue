@@ -3,10 +3,12 @@
 
     <!-- Hero Header -->
     <header class="relative min-h-[60vh] flex flex-col justify-end px-6 md:px-16 lg:px-28 pt-24 pb-16 border-b border-white/10">
-      <div class="absolute inset-0 opacity-[0.04]"
+      <div
+        class="absolute inset-0 opacity-[0.04]"
         style="background-image: linear-gradient(white 1px, transparent 1px), linear-gradient(90deg, white 1px, transparent 1px); background-size: 60px 60px;"
       />
-      <div class="absolute top-0 right-0 w-[600px] h-[600px] rounded-full opacity-[0.04] blur-3xl"
+      <div
+        class="absolute top-0 right-0 w-[600px] h-[600px] rounded-full opacity-[0.04] blur-3xl"
         style="background: radial-gradient(circle, white, transparent 70%);"
       />
       <div class="relative z-10 max-w-5xl">
@@ -36,14 +38,20 @@
         @mouseleave="hovered = null"
       >
         <!-- Card Header -->
-        <div class="flex items-center justify-between px-8 py-7 border-b border-white/5"
-          :class="hovered === i ? 'bg-white/[0.03]' : ''"
-          style="transition: background 0.3s"
-        >
+        <div class="px-8 py-6 flex items-center justify-between gap-6 border-b border-white/10">
           <div class="flex items-center gap-5">
-            <span class="text-white/20 text-xs font-mono tracking-widest shrink-0">
-              {{ String(i + 1).padStart(2, '0') }}
-            </span>
+            <div
+              class="w-12 h-12 border rounded-sm flex items-center justify-center transition-all duration-300 overflow-hidden"
+              :class="hovered === i ? 'border-white/40 bg-white/[0.06] scale-110' : 'border-white/10 bg-white/[0.02]'"
+            >
+              <img
+                v-if="service.icon.startsWith('/')"
+                :src="service.icon"
+                :alt="`${service.title} icon`"
+                class="w-8 h-8 object-contain"
+              >
+              <span v-else class="text-xl">{{ service.icon }}</span>
+            </div>
             <h3 class="text-lg md:text-2xl font-bold tracking-tight text-white">
               {{ service.title }}
             </h3>
@@ -63,13 +71,6 @@
 
         <!-- Card Body -->
         <div class="px-8 py-6 flex flex-col md:flex-row md:items-start gap-6 md:gap-12">
-          <!-- Icon -->
-          <div class="shrink-0">
-            <div
-              class="w-12 h-12 border rounded-sm flex items-center justify-center text-xl transition-all duration-300"
-              :class="hovered === i ? 'border-white/40 bg-white/[0.06] scale-110' : 'border-white/10 bg-white/[0.02]'"
-            >{{ service.icon }}</div>
-          </div>
           <!-- Text -->
           <div class="flex-1">
             <p class="text-white/50 text-sm leading-relaxed mb-4 max-w-2xl">{{ service.desc }}</p>
@@ -121,7 +122,7 @@ const services = [
     id: 'chatbot',
     title: 'Hriatna Mizo Chatbot',
     tag: 'AI · Language',
-    icon: '🤖',
+    icon: '/images/images/hriatna.png',
     desc: 'An AI assistant trained on Mizoram dialects that helps answer questions, support learning, and generate culturally relevant content — built for the community, by the community.',
     features: ['Dialect Training', 'Cultural Context', 'Q&A Engine', 'Content Generation'],
   },
