@@ -217,7 +217,6 @@ const getGradient = (category: string) =>
 
 .post-card {
   min-height: 100px;
-  max-height: 120px;
   background-color: rgba(115, 115, 115, 0.638);
   backdrop-filter: blur(8px);
 -webkit-backdrop-filter: blur(8px);

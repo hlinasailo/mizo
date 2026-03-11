@@ -69,16 +69,18 @@ const isLoginPage = computed(() => route.path === '/login')
       </button>
       <!-- Dropdown Menu -->
       <div class="absolute top-full left-0 mt-2 w-48 bg-black/90 border border-white/10 backdrop-blur-md opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
-        <NuxtLink to="/zirna" class="block px-4 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-colors">Zirna</NuxtLink>
-        <NuxtLink to="/gospel" class="block px-4 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-colors">Gospel</NuxtLink>
-        <NuxtLink to="/hriselna" class="block px-4 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-colors">Hriselna</NuxtLink>
-        <NuxtLink to="/thiamna" class="block px-4 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-colors">Thiamna</NuxtLink>
-        <NuxtLink to="/beauty-fashion" class="block px-4 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-colors">Beuty & Fashion</NuxtLink>
-        <NuxtLink to="/story" class="block px-4 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-colors">Story</NuxtLink>
-        <NuxtLink to="/politics" class="block px-4 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-colors">Politics</NuxtLink>
-        <NuxtLink to="/infiamna" class="block px-4 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-colors">Infiamna</NuxtLink>
+        <NuxtLink to="/blogs" class="block px-4 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-colors">All Posts</NuxtLink>
         <hr class="border-white/10 my-1">
-        <NuxtLink to="/others" class="block px-4 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-colors">Others</NuxtLink>
+        <NuxtLink :to="{ path: '/blogs', query: { category: 'Zirna' } }" class="block px-4 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-colors">Zirna</NuxtLink>
+        <NuxtLink :to="{ path: '/blogs', query: { category: 'Gospel' } }" class="block px-4 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-colors">Gospel</NuxtLink>
+        <NuxtLink :to="{ path: '/blogs', query: { category: 'Hriselna' } }" class="block px-4 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-colors">Hriselna</NuxtLink>
+        <NuxtLink :to="{ path: '/blogs', query: { category: 'Thiamna' } }" class="block px-4 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-colors">Thiamna</NuxtLink>
+        <NuxtLink :to="{ path: '/blogs', query: { category: 'Beauty & Fashion' } }" class="block px-4 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-colors">Beauty &amp; Fashion</NuxtLink>
+        <NuxtLink :to="{ path: '/blogs', query: { category: 'Story' } }" class="block px-4 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-colors">Story</NuxtLink>
+        <NuxtLink :to="{ path: '/blogs', query: { category: 'Politics' } }" class="block px-4 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-colors">Politics</NuxtLink>
+        <NuxtLink :to="{ path: '/blogs', query: { category: 'Infiamna' } }" class="block px-4 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-colors">Infiamna</NuxtLink>
+        <hr class="border-white/10 my-1">
+        <NuxtLink :to="{ path: '/blogs', query: { category: 'Others' } }" class="block px-4 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-colors">Others</NuxtLink>
       </div>
     </div>
   </nav>
@@ -148,6 +150,9 @@ const isLoginPage = computed(() => route.path === '/login')
       <NuxtLink to="/about" class="text-zinc-400 hover:text-white transition-colors uppercase tracking-wide" @click="toggleMobileMenu">
         About
       </NuxtLink>
+      <NuxtLink to="/blogs" class="text-zinc-400 hover:text-white transition-colors uppercase tracking-wide" @click="toggleMobileMenu">
+        Blog
+      </NuxtLink>
 
       <div class="border-t border-white/10 pt-3">
         <button
@@ -162,15 +167,16 @@ const isLoginPage = computed(() => route.path === '/login')
         </button>
 
         <div class="pl-3 pt-3 space-y-2 overflow-hidden transition-all duration-300" :class="isMobileCategoryOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'">
-          <NuxtLink to="/zirna" class="block text-sm text-zinc-400 hover:text-white transition-colors" @click="toggleMobileMenu">Zirna</NuxtLink>
-          <NuxtLink to="/gospel" class="block text-sm text-zinc-400 hover:text-white transition-colors" @click="toggleMobileMenu">Gospel</NuxtLink>
-          <NuxtLink to="/hriselna" class="block text-sm text-zinc-400 hover:text-white transition-colors" @click="toggleMobileMenu">Hriselna</NuxtLink>
-          <NuxtLink to="/thiamna" class="block text-sm text-zinc-400 hover:text-white transition-colors" @click="toggleMobileMenu">Thiamna</NuxtLink>
-          <NuxtLink to="/beauty-fashion" class="block text-sm text-zinc-400 hover:text-white transition-colors" @click="toggleMobileMenu">Beauty &amp; Fashion</NuxtLink>
-          <NuxtLink to="/story" class="block text-sm text-zinc-400 hover:text-white transition-colors" @click="toggleMobileMenu">Story</NuxtLink>
-          <NuxtLink to="/politics" class="block text-sm text-zinc-400 hover:text-white transition-colors" @click="toggleMobileMenu">Politics</NuxtLink>
-          <NuxtLink to="/infiamna" class="block text-sm text-zinc-400 hover:text-white transition-colors" @click="toggleMobileMenu">Infiamna</NuxtLink>
-          <NuxtLink to="/others" class="block text-sm text-zinc-400 hover:text-white transition-colors" @click="toggleMobileMenu">Others</NuxtLink>
+          <NuxtLink to="/blogs" class="block text-sm text-zinc-400 hover:text-white transition-colors" @click="toggleMobileMenu">All Posts</NuxtLink>
+          <NuxtLink :to="{ path: '/blogs', query: { category: 'Zirna' } }" class="block text-sm text-zinc-400 hover:text-white transition-colors" @click="toggleMobileMenu">Zirna</NuxtLink>
+          <NuxtLink :to="{ path: '/blogs', query: { category: 'Gospel' } }" class="block text-sm text-zinc-400 hover:text-white transition-colors" @click="toggleMobileMenu">Gospel</NuxtLink>
+          <NuxtLink :to="{ path: '/blogs', query: { category: 'Hriselna' } }" class="block text-sm text-zinc-400 hover:text-white transition-colors" @click="toggleMobileMenu">Hriselna</NuxtLink>
+          <NuxtLink :to="{ path: '/blogs', query: { category: 'Thiamna' } }" class="block text-sm text-zinc-400 hover:text-white transition-colors" @click="toggleMobileMenu">Thiamna</NuxtLink>
+          <NuxtLink :to="{ path: '/blogs', query: { category: 'Beauty & Fashion' } }" class="block text-sm text-zinc-400 hover:text-white transition-colors" @click="toggleMobileMenu">Beauty &amp; Fashion</NuxtLink>
+          <NuxtLink :to="{ path: '/blogs', query: { category: 'Story' } }" class="block text-sm text-zinc-400 hover:text-white transition-colors" @click="toggleMobileMenu">Story</NuxtLink>
+          <NuxtLink :to="{ path: '/blogs', query: { category: 'Politics' } }" class="block text-sm text-zinc-400 hover:text-white transition-colors" @click="toggleMobileMenu">Politics</NuxtLink>
+          <NuxtLink :to="{ path: '/blogs', query: { category: 'Infiamna' } }" class="block text-sm text-zinc-400 hover:text-white transition-colors" @click="toggleMobileMenu">Infiamna</NuxtLink>
+          <NuxtLink :to="{ path: '/blogs', query: { category: 'Others' } }" class="block text-sm text-zinc-400 hover:text-white transition-colors" @click="toggleMobileMenu">Others</NuxtLink>
         </div>
       </div>
       
