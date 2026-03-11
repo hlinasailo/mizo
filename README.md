@@ -1,0 +1,89 @@
+# MizoMade Frontend (Nuxt)
+
+Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+
+## Setup
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+## Development
+
+Start dev server:
+
+```bash
+npm run dev
+```
+
+> Note: if `3000` is busy, Nuxt may auto-switch to `3001` (or another port).
+
+## Production
+
+Build:
+
+```bash
+npm run build
+```
+
+Preview:
+
+```bash
+npm run preview
+```
+
+## Recent update (Blog editor)
+
+### What was added
+
+- New Tiptap-based blog editor at `app/blog/create.vue`
+- Custom route mapping in `app/router.options.ts`:
+	- `/create`
+	- `/blog/create`
+
+### New dependencies installed
+
+- `@tiptap/vue-3`
+- `@tiptap/starter-kit`
+- `@tiptap/extension-image`
+
+These were added to:
+
+- `package.json`
+- `package-lock.json`
+
+### Other files changed during this work
+
+- `app/layouts/navbar.vue`
+- `app/pages/about.vue`
+- `app/pages/login.vue`
+- `app/pages/index.vue`
+
+## What to commit (recommended clean push)
+
+Commit these app/source files:
+
+- `app/blog/create.vue`
+- `app/router.options.ts`
+- `package.json`
+- `package-lock.json`
+- `README.md`
+
+Also include UI/theme files only if those changes are intentional:
+
+- `app/layouts/navbar.vue`
+- `app/pages/about.vue`
+- `app/pages/login.vue`
+- `app/pages/index.vue`
+
+Avoid committing generated/runtime files:
+
+- `.nuxt/**`
+- `.data/**`
+- `.output/**`
+
+## Manager update (copy/paste)
+
+Implemented a new rich text blog creation page using Tiptap with image support (URL + upload) and aligned it with the existing Mizomade dark theme. Added URL access via `/create` and `/blog/create` through custom Nuxt router options. Updated project dependencies (`@tiptap/vue-3`, `@tiptap/starter-kit`, `@tiptap/extension-image`) and verified no file-level errors in the new blog editor and routing config.
