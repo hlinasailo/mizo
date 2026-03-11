@@ -28,6 +28,16 @@ export default <RouterConfig>{
         name: 'blog-create',
         path: '/blog/create',
         component: () => import('./blog/create.vue')
+      },
+      {
+        name: 'blogs',
+        path: '/blogs',
+        component: () => import('./blog/blogCards.vue')
+      },
+      {
+        name: 'blog-post',
+        path: '/blog/:slug',
+        component: () => import('./blog/blogPost.vue')
       }
     ]
   }
