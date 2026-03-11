@@ -203,7 +203,10 @@ const getGradient = (category: string) =>
       </div>
 
     </section>
+
   </main>
+    <AppFooter/>
+  <ButtomFooter/>
 </template>
 
 <style scoped>
@@ -216,7 +219,7 @@ const getGradient = (category: string) =>
 }
 
 .post-card {
-  min-height: 100px;
+  min-height: 100px;  
   background-color: rgba(115, 115, 115, 0.638);
   backdrop-filter: blur(8px);
 -webkit-backdrop-filter: blur(8px);
