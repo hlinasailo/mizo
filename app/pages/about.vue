@@ -1,395 +1,453 @@
 <template>
-	<div :class="$style.aboutPage">
-		<!-- Section 1: Hero/Introduction - Dark -->
-		<section class="relative bg-black text-white py-20 md:py-32 overflow-hidden">
-			<!-- Animated background elements -->
-			<div class="absolute inset-0 overflow-hidden">
-				<div :class="$style.floatingCircles">
-					<div :class="[$style.circle, $style.circle1]" />
-					<div :class="[$style.circle, $style.circle2]" />
-					<div :class="[$style.circle, $style.circle3]" />
-				</div>
-			</div>
+  <main>
+    <div :class="$style.aboutPage">
 
-			<div class="container mx-auto px-6 md:px-12 relative z-10">
-				<div class="max-w-4xl mx-auto text-center" :class="$style.fadeInUp" data-animate>
-					<h1 class="font-black tracking-tighter leading-[1] uppercase text-5xl sm:text-6xl md:text-7xl lg:text-[5rem] mb-6">
-						About <span class="text-zinc-200">MizoMade</span>
-					</h1>
-					<div class="w-24 h-1 bg-zinc-200 mx-auto mb-8" />
-					<p class="text-lg md:text-xl text-zinc-200 leading-relaxed">
-						Founded in 2019, MizoMade.com is an online Mizo web community where people can share articles and blogs that may enrich the society with new ideas and knowledge.
-					</p>
-				</div>
-			</div>
+      <!-- ── Hero ─────────────────────────────────────────── -->
+      <section :class="[$style.section, $style.hero]">
+        <div :class="$style.floatingCircles">
+          <div :class="[$style.circle, $style.c1]" />
+          <div :class="[$style.circle, $style.c2]" />
+          <div :class="[$style.circle, $style.c3]" />
+        </div>
 
-			<!-- Scroll indicator -->
-			<div class="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
-				<svg class="w-6 h-6 text-zinc-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-				</svg>
-			</div>
-		</section>
+        <div :class="$style.container">
+          <div :class="[$style.heroInner, $style.fadeInUp]" data-animate>
+            <h1 :class="$style.h1">About <span :class="$style.muted">MizoMade</span></h1>
+            <div :class="$style.divider" />
+            <p :class="$style.lead">
+              Founded in 2019, MizoMade.com is an online Mizo web community where people can share
+              articles and blogs that may enrich the society with new ideas and knowledge.
+            </p>
+          </div>
+        </div>
 
-		<!-- Section 2: Mission & Purpose - Light -->
-		<section class="bg-zinc-900 text-white py-20 md:py-32">
-			<div class="container mx-auto px-6 md:px-12">
-				<div class="max-w-6xl mx-auto">
-					<div class="grid md:grid-cols-2 gap-6 items-stretch">
-						<!-- Left: Content -->
-						<div class=" backdrop-blur-md p-8 md:p-10" :class="$style.slideInLeft" data-animate>
-						<h2 class="font-black tracking-tighter leading-[1] uppercase text-3xl sm:text-4xl md:text-5xl lg:text-4xl mb-6 text-white">
-								Our Mission
-							</h2>
-							<div class="w-20 h-1  mb-6" />
-							<p class="text-lg text-white leading-relaxed mb-6">
-								The goal is to share one's knowledge and experiences through our web blog community. We believe in the power of collective wisdom and community-driven content.
-							</p>
-							<p class="text-lg text-white leading-relaxed">
-								As only a small portion of the Mizo community is technologically literate and almost 60% of the Mizo population does not know how to use a website, the resources available to the people are very limited, resulting in unequal resource availability.
-							</p>
-						</div>
+        <div :class="[$style.scrollArrow, $style.bounce]">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+          </svg>
+        </div>
+      </section>
 
-						<!-- Right: Feature Cards -->
-						<div class=" p-8 md:p-10" :class="$style.slideInRight" data-animate>
-							<h3 class="font-black tracking-tighter leading-[1] uppercase text-3xl sm:text-4xl md:text-5xl lg:text-4xl mb-6 text-zinc-100">What We Focus On</h3>
-							<div class="space-y-6">
-								<div :class="[$style.featureCard, 'group']" data-animate>
-									<div class="flex items-start space-x-4">
-										<div class="flex-shrink-0">
-											<div class="w-12 h-12 bg-zinc-700 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-												<svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-													<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-												</svg>
-											</div>
-										</div>
-										<div>
-											<h3 class="text-xl font-semibold mb-2 text-zinc-100">Knowledge Sharing</h3>
-											<p class="text-zinc-300">Empowering the community through shared experiences and insights</p>
-										</div>
-									</div>
-								</div>
+      <!-- ── Mission ───────────────────────────────────────── -->
+      <section :class="[$style.section, $style.alt]">
+        <div :class="$style.container">
+          <div :class="$style.missionGrid">
 
-								<div :class="[$style.featureCard, 'group']" data-animate>
-									<div class="flex items-start space-x-4">
-										<div class="flex-shrink-0">
-											<div class="w-12 h-12 bg-zinc-600 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-												<svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-													<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
-												</svg>
-											</div>
-										</div>
-										<div>
-											<h3 class="text-xl font-semibold mb-2 text-zinc-100">Language Accessibility</h3>
-											<p class="text-zinc-300">Breaking language barriers with content in Mizo</p>
-										</div>
-									</div>
-								</div>
+            <div :class="[$style.glassCard, $style.slideLeft]" data-animate>
+              <h2 :class="$style.sectionTitle">Our Mission</h2>
+              <div :class="[$style.divider, $style.dividerLeft]" />
+              <p :class="[$style.lead, $style.mb]">
+                The goal is to share one's knowledge and experiences through our web blog community.
+                We believe in the power of collective wisdom and community-driven content.
+              </p>
+              <p :class="$style.lead">
+                As only a small portion of the Mizo community is technologically literate and almost
+                60% of the Mizo population does not know how to use a website, the resources
+                available to the people are very limited, resulting in unequal resource availability.
+              </p>
+            </div>
 
-								<div :class="[$style.featureCard, 'group']" data-animate>
-									<div class="flex items-start space-x-4">
-										<div class="flex-shrink-0">
-											<div class="w-12 h-12 bg-zinc-600 rounded-lg flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
-												<svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-													<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-												</svg>
-											</div>
-										</div>
-										<div>
-											<h3 class="text-xl font-semibold mb-2 text-zinc-100">Community First</h3>
-											<p class="text-zinc-300">Built by the community, for the community</p>
-										</div>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</section>
+            <div :class="$style.slideRight" data-animate>
+              <h2 :class="$style.sectionTitle">What We Focus On</h2>
+              <div
+                v-for="feat in features"
+                :key="feat.title"
+                :class="$style.featureItem"
+              >
+                <div :class="$style.iconBox">
+                  <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" :d="feat.icon" />
+                  </svg>
+                </div>
+                <div>
+                  <div :class="$style.featureTitle">{{ feat.title }}</div>
+                  <div :class="$style.featureDesc">{{ feat.desc }}</div>
+                </div>
+              </div>
+            </div>
 
-		<!-- Section 3: Design Philosophy - Light Gray -->
-		<section class="bg-zinc-950 text-white py-20 md:py-32">
-			<div class="container mx-auto px-6 md:px-12">
-				<div class="max-w-5xl mx-auto text-center" :class="$style.fadeInUp" data-animate>
-					<h2 class="font-black tracking-tighter leading-[1] uppercase text-5xl sm:text-6xl md:text-7xl lg:text-[5rem] mb-6 text-white">
-						Designed for 
-					</h2>
-					<h2 class="text-zinc-700 font-black tracking-tighter leading-[1] uppercase text-5xl sm:text-6xl md:text-7xl lg:text-[5rem] mb-6 text-white">
-						 Everyone
-					</h2>
-					<div class="w-20 h-1 bg-zinc-300 mx-auto mb-8" />
-					<p class="text-lg md:text-xl text-zinc-300 leading-relaxed mb-12">
-						Since many online contents are written in languages other than Mizo, the language barrier has set a bigger barrier among the people to even learn how to work around it.
-					</p>
+          </div>
+        </div>
+      </section>
 
-					<!-- Stats/Features Grid -->
-					<div class="grid md:grid-cols-3 gap-8 mt-16">
-						<div :class="$style.statCard" data-animate>
-							<div class="text-5xl md:text-6xl font-bold text-zinc-800 mb-4">100%</div>
-							<h3 class="text-xl font-semibold mb-2 text-zinc-800">Free Access</h3>
-							<p class="text-zinc-800">All resources completely free for everyone</p>
-						</div>
+      <!-- ── Design / Stats ────────────────────────────────── -->
+      <section :class="$style.section">
+        <div :class="$style.container">
+          <div :class="[$style.statsWrap, $style.fadeInUp]" data-animate>
+            <div :class="$style.displayStacked">
+              <span :class="$style.displayText">Designed For</span>
+              <span :class="[$style.displayText, $style.displayGhost]">Everyone</span>
+            </div>
+            <div :class="$style.divider" />
+            <p :class="[$style.lead, $style.centered]">
+              Since many online contents are written in languages other than Mizo, the language
+              barrier has set a bigger barrier among the people to even learn how to work around it.
+            </p>
+          </div>
 
-						<div :class="$style.statCard" data-animate>
-							<div class="text-5xl md:text-6xl font-bold text-zinc-800 mb-4">
-								<svg class="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-								</svg>
-							</div>
-							<h3 class="text-xl font-semibold mb-2 text-zinc-800">Minimalistic</h3>
-							<p class="text-zinc-800">Intuitive design for easy navigation</p>
-						</div>
+          <div :class="$style.statsGrid">
+            <div
+              v-for="(stat, i) in stats"
+              :key="stat.label"
+              :class="$style.statCard"
+              :style="{ transitionDelay: `${i * 0.12}s` }"
+              data-animate
+            >
+              <div v-if="stat.num" :class="$style.statNum">{{ stat.num }}</div>
+              <svg v-else :class="$style.statIcon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" :d="stat.icon" />
+              </svg>
+              <div :class="$style.statLabel">{{ stat.label }}</div>
+              <div :class="$style.statSub">{{ stat.sub }}</div>
+            </div>
+          </div>
+        </div>
+      </section>
 
-						<div :class="$style.statCard" data-animate>
-							<div class="text-5xl md:text-6xl font-bold text-zinc-800 mb-4">
-								<svg class="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-								</svg>
-							</div>
-							<h3 class="text-xl font-semibold mb-2 text-zinc-800">Inclusive</h3>
-							<p class="text-zinc-800">Accessible to non-sophisticated users</p>
-						</div>
-					</div>
-				</div>
-			</div>
-		</section>
+      <!-- ── Vision ────────────────────────────────────────── -->
+      <section :class="[$style.section, $style.alt, $style.visionSection]">
+        <div :class="$style.gridPattern" />
+        <div :class="$style.container">
+          <div :class="$style.visionInner">
+            <div :class="$style.fadeInUp" data-animate>
+              <div :class="$style.visionTitle">Our Vision</div>
+              <div :class="$style.divider" />
+              <p :class="[$style.lead, $style.centered]">
+                MizoMade.com is designed with a minimalistic and intuitive approach so that even
+                non-sophisticated users may know how to utilize the resources. We envision a future
+                where every member of the Mizo community has equal access to knowledge and digital
+                resources, regardless of their technical literacy.
+              </p>
+            </div>
 
-		<!-- Section 4: Vision & Contact - Dark -->
-		<section class="relative bg-zinc-900 text-white py-20 md:py-32 overflow-hidden">
-			<!-- Animated background pattern -->
-			<div class="absolute inset-0 opacity-10">
-				<div :class="$style.gridPattern" />
-			</div>
+            <div :class="[$style.location, $style.slideUp]" data-animate>
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                <path stroke-linecap="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              <span>Aizawl, Mizoram 796001</span>
+            </div>
 
-			<div class="container mx-auto px-6 md:px-12 relative z-10">
-				<div class="max-w-4xl mx-auto">
-					<!-- Vision Statement -->
-					<div class="text-center mb-16" :class="$style.fadeInUp" data-animate>
-						<h2 class="font-black tracking-tighter leading-[1] uppercase text-5xl sm:text-6xl md:text-7xl lg:text-[5rem] mb-6">Our Vision</h2>
-						<div class="w-20 h-1 bg-zinc-200 mx-auto mb-8" />
-						<p class="text-lg md:text-xl text-zinc-300 leading-relaxed">
-							MizoMade.com is designed with a minimalistic and intuitive approach so that even non-sophisticated users may know how to utilize the resources. We envision a future where every member of the Mizo community has equal access to knowledge and digital resources, regardless of their technical literacy.
-						</p>
-					</div>
+            <div :class="[$style.tagline, $style.fadeInUp]" data-animate>
+              "Empowering the Mizo community through accessible knowledge sharing"
+            </div>
+          </div>
+        </div>
+      </section>
 
-					<!-- Location only -->
-					<div class="flex items-center justify-center text-zinc-300" :class="$style.slideInUp" data-animate>
-						<div class="flex items-center space-x-3">
-							<svg class="w-6 h-6 text-zinc-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-							</svg>
-							<span class="text-lg md:text-xl">Aizawl, Mizoram 796001</span>
-						</div>
-					</div>
+    </div>
 
-					<!-- Footer Tagline -->
-					<div class="text-center mt-16" :class="$style.fadeInUp" data-animate>
-						<p class="text-xl md:text-2xl font-light text-zinc-400 italic">
-							"Empowering the Mizo community through accessible knowledge sharing"
-						</p>
-					</div>
-				</div>
-			</div>
-		</section>
-	</div>
+    <AppFooter />
+    <ButtomFooter />
+  </main>
 </template>
 
 <script setup>
-import { onBeforeUnmount, onMounted } from 'vue';
+import { onBeforeUnmount, onMounted } from 'vue'
 
-let observer;
+// ── Data ──────────────────────────────────────────────────
+const features = [
+  {
+    title: 'Knowledge Sharing',
+    desc: 'Empowering the community through shared experiences and insights',
+    icon: 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253',
+  },
+  {
+    title: 'Language Accessibility',
+    desc: 'Breaking language barriers with content in Mizo',
+    icon: 'M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129',
+  },
+  {
+    title: 'Community First',
+    desc: 'Built by the community, for the community',
+    icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z',
+  },
+]
+
+const stats = [
+  { num: '100%', label: 'Free Access',   sub: 'All resources completely free for everyone' },
+  { icon: 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z', label: 'Minimalistic', sub: 'Intuitive design for easy navigation' },
+  { icon: 'M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z', label: 'Inclusive', sub: 'Accessible to non-sophisticated users' },
+]
+
+// ── Scroll animations ─────────────────────────────────────
+let observer
 
 onMounted(() => {
-	const observerOptions = {
-		threshold: 0.1,
-		rootMargin: '0px 0px -50px 0px'
-	};
+  observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible')
+          observer.unobserve(e.target)
+        }
+      })
+    },
+    { threshold: 0.12, rootMargin: '0px 0px -40px 0px' }
+  )
 
-	observer = new IntersectionObserver((entries) => {
-		entries.forEach((entry) => {
-			if (entry.isIntersecting) {
-				entry.target.classList.add('visible');
-			}
-		});
-	}, observerOptions);
+  document.querySelectorAll('[data-animate]').forEach((el) => observer.observe(el))
+})
 
-	document.querySelectorAll('[data-animate]').forEach((el) => {
-		observer.observe(el);
-	});
-});
-
-onBeforeUnmount(() => {
-	observer?.disconnect();
-});
+onBeforeUnmount(() => observer?.disconnect())
 </script>
 
 <style module>
-.aboutPage {
-	scroll-behavior: smooth;
+/* ─── CSS tokens via :global on <html> ─────────────────── */
+:global(:root) {
+  --bg:       #dcdcdc;
+  --bg-alt:   #eceae6;
+  --fg:       #0a0a0a;
+  --fg-muted: #555551;
+  --fg-soft:  rgba(10,10,10,0.50);
+  --border:   rgba(10,10,10,0.14);
+  --card-bg:  rgba(10,10,10,0.04);
+  --grid-c:   rgba(10,10,10,0.06);
+}
+:global(html.dark) {
+  --bg:       #0a0a0a;
+  --bg-alt:   #0f0f0f;
+  --fg:       #f0ede8;
+  --fg-muted: rgba(240,237,232,0.72);
+  --fg-soft:  rgba(240,237,232,0.50);
+  --border:   rgba(240,237,232,0.18);
+  --card-bg:  rgba(255,255,255,0.06);
+  --grid-c:   rgba(255, 255, 255, 0.078);
 }
 
-.fadeInUp {
-	opacity: 0;
-	transform: translateY(30px);
-	transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+/* ─── Smooth theme transitions ──────────────────────────── */
+:global(*) {
+  transition:
+    background-color 0.4s ease,
+    border-color     0.4s ease,
+    color            0.4s ease,
+    box-shadow       0.4s ease;
 }
 
-.slideInLeft {
-	opacity: 0;
-	transform: translateX(-50px);
-	transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+/* ─── Scroll animations ─────────────────────────────────── */
+.fadeInUp  { opacity: 0; transform: translateY(32px);  transition: opacity 0.85s ease-out, transform 0.85s ease-out !important; }
+.slideLeft { opacity: 0; transform: translateX(-48px); transition: opacity 0.85s ease-out, transform 0.85s ease-out !important; }
+.slideRight{ opacity: 0; transform: translateX(48px);  transition: opacity 0.85s ease-out, transform 0.85s ease-out !important; }
+.slideUp   { opacity: 0; transform: translateY(40px);  transition: opacity 0.85s ease-out, transform 0.85s ease-out !important; }
+.statCard  { opacity: 0; transform: scale(0.88);       transition: opacity 0.7s ease-out, transform 0.7s ease-out, background-color 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease !important; }
+:global(.visible) { opacity: 1 !important; transform: none !important; }
+
+/* ─── Layout ─────────────────────────────────────────────── */
+.aboutPage { scroll-behavior: smooth; }
+
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+@media(min-width:768px) { .container { padding: 0 3rem; } }
+
+/* ─── Sections ───────────────────────────────────────────── */
+.section {
+  background: var(--bg);
+  color: var(--fg);
+  padding: 6rem 0 7rem;
+  border-bottom: 1px solid var(--border);
+}
+.alt { background: var(--bg-alt); }
+
+/* ─── Hero ───────────────────────────────────────────────── */
+.hero {
+  position: relative;
+  padding: 7rem 0 8rem;
+  overflow: hidden;
+}
+.heroInner { max-width: 52rem; margin: 0 auto; text-align: center; position: relative; z-index: 2; }
+
+.h1 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(3.5rem, 9vw, 6.5rem);
+  line-height: 0.95;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  color: var(--fg);
+}
+.muted { color: var(--fg-muted); }
+
+.lead {
+  font-size: 1rem;
+  font-family: 'Roboto Mono', 'JetBrains Mono', 'Consolas', monospace;
+  color: var(--fg-muted);
+  line-height: 1.625;
+  font-weight: 400;
+}
+.mb   { margin-bottom: 1.25rem; }
+.centered { text-align: center; }
+
+.divider { width: 5rem; height: 3px; background: var(--fg); margin: 1.75rem auto; opacity: 0.7; }
+.dividerLeft { margin: 1.5rem 0; }
+
+.scrollArrow {
+  position: absolute;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  color: var(--fg-soft);
+}
+.scrollArrow svg { width: 1.5rem; height: 1.5rem; }
+
+/* ─── Floating circles ───────────────────────────────────── */
+.floatingCircles { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.circle {
+  position: absolute;
+  border-radius: 50%;
+  background: var(--card-bg);
+  animation: float 22s infinite ease-in-out;
+}
+.c1 { width: 320px; height: 320px; top: 8%;   left: 8%;   animation-delay: 0s; }
+.c2 { width: 210px; height: 210px; top: 58%;  right: 8%;  animation-delay: 6s; }
+.c3 { width: 260px; height: 260px; bottom: 8%; left: 48%; animation-delay: 12s; }
+@media(max-width:768px) { .circle { width: 150px !important; height: 150px !important; } }
+
+/* ─── Mission ────────────────────────────────────────────── */
+.missionGrid { display: grid; gap: 2rem; max-width: 72rem; margin: 0 auto; }
+@media(min-width:768px) { .missionGrid { grid-template-columns: 1fr 1fr; align-items: start; } }
+
+.glassCard {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  padding: 2.5rem;
 }
 
-.slideInRight {
-	opacity: 0;
-	transform: translateX(50px);
-	transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+.sectionTitle {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(2rem, 5vw, 3rem);
+  line-height: 1;
+  letter-spacing: 0.01em;
+  text-transform: uppercase;
+  color: var(--fg);
+  margin-bottom: 1.5rem;
 }
 
-.slideInUp {
-	opacity: 0;
-	transform: translateY(40px);
-	transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+.featureItem {
+  display: flex;
+  gap: 1.25rem;
+  align-items: flex-start;
+  padding: 1.25rem;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  margin-bottom: 1rem;
+  cursor: default;
 }
+.featureItem:last-child { margin-bottom: 0; }
+.featureItem:hover { transform: translateY(-4px); box-shadow: 0 12px 28px rgba(0,0,0,0.12); }
+:global(html.dark) .featureItem:hover { box-shadow: 0 12px 28px rgba(0,0,0,0.45); }
 
-.featureCard {
-	opacity: 0;
-	transform: translateY(20px);
-	transition: all 0.6s ease-out;
-	padding: 1.5rem;
-	background: rgba(39, 39, 42, 0.55);
-	border: 1px solid rgba(161, 161, 170, 0.25);
-	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+.iconBox {
+  flex-shrink: 0;
+  width: 2.75rem;
+  height: 2.75rem;
+  background: var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
+.iconBox svg { width: 1.25rem; height: 1.25rem; color: var(--fg); }
+.featureItem:hover .iconBox { transform: scale(1.1); }
 
-.featureCard:hover {
-	box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
-	transform: translateY(-5px);
+.featureTitle { font-size: 1rem; font-weight: 600; color: var(--fg); margin-bottom: 0.25rem; }
+.featureDesc  { font-size: 1rem; font-family: 'Roboto Mono', 'JetBrains Mono', 'Consolas', monospace; color: var(--fg-muted); line-height: 1.625; font-weight: 400; }
+
+/* ─── Stats ──────────────────────────────────────────────── */
+.statsWrap { max-width: 60rem; margin: 0 auto; }
+
+.displayStacked { text-align: center; }
+.displayText {
+  display: block;
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(3rem, 8vw, 6rem);
+  line-height: 0.95;
+  text-transform: uppercase;
+  color: var(--fg);
 }
+.displayGhost { color: var(--fg-soft); }
+
+.statsGrid { display: grid; gap: 1.5rem; margin-top: 3.5rem; max-width: 60rem; margin-left: auto; margin-right: auto; }
+@media(min-width:768px) { .statsGrid { grid-template-columns: repeat(3, 1fr); } }
 
 .statCard {
-	opacity: 0;
-	transform: scale(0.9);
-	transition: all 0.6s ease-out;
-	padding: 2rem;
-	border-radius: 0;
-	background: rgba(219, 219, 219, 0.67);
-	border: 1px solid rgba(161, 161, 170, 0.2);
-	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  padding: 2rem;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  text-align: center;
 }
+.statCard:hover { transform: translateY(-8px) scale(1.02); box-shadow: 0 16px 40px rgba(0,0,0,0.14); }
+:global(html.dark) .statCard:hover { box-shadow: 0 16px 40px rgba(0,0,0,0.5); }
 
-.statCard:hover {
-	box-shadow: 0 15px 35px rgba(0, 0, 0, 0.35);
-	transform: translateY(-10px) scale(1.02);
-}
+.statNum  { font-family: 'Bebas Neue', sans-serif; font-size: clamp(3rem, 7vw, 4.5rem); color: var(--fg); margin-bottom: 0.5rem; }
+.statIcon { width: 3.5rem; height: 3.5rem; margin: 0 auto 0.5rem; color: var(--fg); }
+.statLabel{ font-size: 1rem; font-weight: 600; color: var(--fg); margin-bottom: 0.4rem; }
+.statSub  { font-size: 1rem; font-family: 'Roboto Mono', 'JetBrains Mono', 'Consolas', monospace; color: var(--fg-muted); line-height: 1.625; font-weight: 400; }
 
-.floatingCircles {
-	position: absolute;
-	width: 100%;
-	height: 100%;
-	overflow: hidden;
-}
+/* ─── Vision ─────────────────────────────────────────────── */
+.visionSection { position: relative; overflow: hidden; }
+.visionInner   { max-width: 52rem; margin: 0 auto; position: relative; z-index: 2; }
 
-.circle {
-	position: absolute;
-	border-radius: 50%;
-	background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(161, 161, 170, 0.1));
-	animation: float 20s infinite ease-in-out;
-}
-
-.circle1 {
-	width: 300px;
-	height: 300px;
-	top: 10%;
-	left: 10%;
-	animation-delay: 0s;
-}
-
-.circle2 {
-	width: 200px;
-	height: 200px;
-	top: 60%;
-	right: 10%;
-	animation-delay: 5s;
-}
-
-.circle3 {
-	width: 250px;
-	height: 250px;
-	bottom: 10%;
-	left: 50%;
-	animation-delay: 10s;
+.visionTitle {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(3rem, 8vw, 6rem);
+  line-height: 0.95;
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--fg);
+  margin-bottom: 1.5rem;
 }
 
 .gridPattern {
-	width: 100%;
-	height: 100%;
-	background-image:
-		linear-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px),
-		linear-gradient(90deg, rgba(255, 255, 255, 0.08) 1px, transparent 1px);
-	background-size: 50px 50px;
-	animation: gridMove 20s linear infinite;
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--grid-c) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-c) 1px, transparent 1px);
+  background-size: 50px 50px;
+  animation: gridMove 22s linear infinite;
+  pointer-events: none;
 }
 
-.ctaButton {
-	position: relative;
-	overflow: hidden;
+.location {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  font-family: 'Roboto Mono', 'JetBrains Mono', 'Consolas', monospace;
+  color: var(--fg-muted);
+  font-size: 1rem;
+  line-height: 1.625;
+  font-weight: 400;
+  margin-top: 3rem;
+}
+.location svg { width: 1.4rem; height: 1.4rem; color: var(--fg); flex-shrink: 0; }
+
+.tagline {
+  text-align: center;
+  margin-top: 4rem;
+  font-style: italic;
+  font-size: 1rem;
+  font-family: 'Roboto Mono', 'JetBrains Mono', 'Consolas', monospace;
+  line-height: 1.625;
+  font-weight: 400;
+  color: var(--fg-soft);
 }
 
-.ctaButton::before {
-	content: '';
-	position: absolute;
-	top: 50%;
-	left: 50%;
-	width: 0;
-	height: 0;
-	border-radius: 50%;
-	background: rgba(255, 255, 255, 0.2);
-	transform: translate(-50%, -50%);
-	transition: width 0.6s, height 0.6s;
-}
-
-.ctaButton:hover::before {
-	width: 300px;
-	height: 300px;
-}
-
+/* ─── Theme toggle button ────────────────────────────────── */
+/* ─── Keyframes ──────────────────────────────────────────── */
 @keyframes float {
-	0%,
-	100% {
-		transform: translate(0, 0) rotate(0deg);
-	}
-
-	33% {
-		transform: translate(30px, -30px) rotate(120deg);
-	}
-
-	66% {
-		transform: translate(-30px, 30px) rotate(240deg);
-	}
+  0%,100% { transform: translate(0,0) rotate(0deg); }
+  33%     { transform: translate(28px,-28px) rotate(120deg); }
+  66%     { transform: translate(-28px,28px) rotate(240deg); }
 }
-
+@keyframes bounce {
+  0%,100% { transform: translateX(-50%) translateY(0); }
+  50%     { transform: translateX(-50%) translateY(-8px); }
+}
 @keyframes gridMove {
-	0% {
-		transform: translate(0, 0);
-	}
-
-	100% {
-		transform: translate(50px, 50px);
-	}
+  0%   { transform: translate(0,0); }
+  100% { transform: translate(50px,50px); }
 }
-
-:global(.visible) {
-	opacity: 1;
-	transform: translateX(0) translateY(0) scale(1);
-}
-
-@media (max-width: 768px) {
-	.circle {
-		width: 150px !important;
-		height: 150px !important;
-	}
-}
+.bounce { animation: bounce 2s infinite; }
 </style>
