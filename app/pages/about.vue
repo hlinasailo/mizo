@@ -1,7 +1,7 @@
 <template>
 	<div :class="$style.aboutPage">
 		<!-- Section 1: Hero/Introduction - Dark -->
-		<section class="relative bg-zinc-900 text-white py-20 md:py-32 overflow-hidden">
+		<section class="relative bg-black text-white py-20 md:py-32 overflow-hidden">
 			<!-- Animated background elements -->
 			<div class="absolute inset-0 overflow-hidden">
 				<div :class="$style.floatingCircles">
@@ -32,26 +32,26 @@
 		</section>
 
 		<!-- Section 2: Mission & Purpose - Light -->
-		<section class="bg-zinc-700 text-white py-20 md:py-32">
+		<section class="bg-zinc-900 text-white py-20 md:py-32">
 			<div class="container mx-auto px-6 md:px-12">
 				<div class="max-w-6xl mx-auto">
 					<div class="grid md:grid-cols-2 gap-6 items-stretch">
 						<!-- Left: Content -->
-						<div class="bg-white/70 backdrop-blur-md p-8 md:p-10" :class="$style.slideInLeft" data-animate>
-						<h2 class="font-black tracking-tighter leading-[1] uppercase text-3xl sm:text-4xl md:text-5xl lg:text-4xl mb-6 text-zinc-900">
+						<div class=" backdrop-blur-md p-8 md:p-10" :class="$style.slideInLeft" data-animate>
+						<h2 class="font-black tracking-tighter leading-[1] uppercase text-3xl sm:text-4xl md:text-5xl lg:text-4xl mb-6 text-white">
 								Our Mission
 							</h2>
-							<div class="w-20 h-1 bg-zinc-700 mb-6" />
-							<p class="text-lg text-zinc-900 leading-relaxed mb-6">
+							<div class="w-20 h-1  mb-6" />
+							<p class="text-lg text-white leading-relaxed mb-6">
 								The goal is to share one's knowledge and experiences through our web blog community. We believe in the power of collective wisdom and community-driven content.
 							</p>
-							<p class="text-lg text-zinc-900 leading-relaxed">
+							<p class="text-lg text-white leading-relaxed">
 								As only a small portion of the Mizo community is technologically literate and almost 60% of the Mizo population does not know how to use a website, the resources available to the people are very limited, resulting in unequal resource availability.
 							</p>
 						</div>
 
 						<!-- Right: Feature Cards -->
-						<div class="bg-zinc-900 p-8 md:p-10" :class="$style.slideInRight" data-animate>
+						<div class=" p-8 md:p-10" :class="$style.slideInRight" data-animate>
 							<h3 class="font-black tracking-tighter leading-[1] uppercase text-3xl sm:text-4xl md:text-5xl lg:text-4xl mb-6 text-zinc-100">What We Focus On</h3>
 							<div class="space-y-6">
 								<div :class="[$style.featureCard, 'group']" data-animate>

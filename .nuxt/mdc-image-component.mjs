@@ -1,0 +1,1 @@
+export { default } from "D:/mizomade frontend/mizomade_frontend_v2/frontend/node_modules/@nuxt/image/dist/runtime/components/NuxtImg.vue"
