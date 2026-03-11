@@ -33,9 +33,9 @@ const getGradient = (category: string) =>
 </script>
 
 <template>
-  <main class="pt-24 min-h-screen bg-zinc-800 text-white px-6 lg:px-12 pb-16">
+  <main class="pt-24 min-h-screen text-white px-6 lg:px-12 pb-16 blog-grid-bg">
     <section class="max-w-4xl mx-auto">
-
+      <div class="blog-post-card rounded-sm p-8 md:p-12">
       <!-- ─── Not Found ─── -->
       <div v-if="!post" class="text-center py-24 border border-zinc-800 bg-zinc-950">
         <p class="text-zinc-500 text-sm uppercase tracking-widest font-bold mb-6">Post not found</p>
@@ -49,6 +49,7 @@ const getGradient = (category: string) =>
           Go Back
         </button>
       </div>
+      
 
       <!-- ─── Post ─── -->
       <template v-else>
@@ -127,11 +128,29 @@ const getGradient = (category: string) =>
         </div>
 
       </template>
+      </div>
     </section>
   </main>
 </template>
 
 <style scoped>
+/* Grid background */
+.blog-grid-bg {
+  background-color: #0f0f11;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+  background-size: 120px 120px;
+}
+
+/* White transparent post card */
+.blog-post-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
 .prose-content :deep(h2) {
   font-size: 1.375rem;
   font-weight: 900;
