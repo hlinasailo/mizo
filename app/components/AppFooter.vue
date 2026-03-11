@@ -5,7 +5,7 @@
   <div class="max-w-7xl mx-auto px-6 lg:px-12">
 
     <!-- Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-5 gap-12 mb-16">
+    <div class="grid grid-cols-1 md:grid-cols-6 gap-12 mb-16">
 
       <!-- Brand -->
        
@@ -27,6 +27,34 @@
       Pe rawh u, tichuan pekin in awm ang.<br>
       Give, and it will be given to you.
     </p>
+    <br>
+    <div class="flex gap-4 mt-3 md:mt-0 text-zinc-400 text-xl">
+
+  <a href="#" class="hover:text-[#0A66C2] transition">
+    <Icon name="mdi:linkedin" />
+  </a>
+
+  <a href="#" class="hover:text-[#E4405F] transition">
+    <Icon name="mdi:instagram" />
+  </a>
+
+  <a href="#" class="hover:text-[#FF0000] transition">
+    <Icon name="mdi:youtube" />
+  </a>
+
+  <a href="#" class="hover:text-[#1DA1F2] transition">
+    <Icon name="mdi:twitter" />
+  </a>
+
+  <a href="#" class="hover:text-[#1877F2] transition">
+    <Icon name="mdi:facebook" />
+  </a>
+
+  <a href="https://wa.me/1234567890" class="hover:text-[#25D366] transition">
+    <Icon name="mdi:whatsapp" />
+  </a>
+
+</div>
 
   </div>
 
