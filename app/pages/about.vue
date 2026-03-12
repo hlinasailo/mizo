@@ -201,8 +201,8 @@ onBeforeUnmount(() => observer?.disconnect())
   --fg-muted: #555551;
   --fg-soft:  rgba(10,10,10,0.50);
   --border:   rgba(10,10,10,0.14);
-  --card-bg:  rgba(10,10,10,0.04);
-  --grid-c:   rgba(10,10,10,0.06);
+  --card-bg:  rgba(10, 10, 10, 0.259);
+  --grid-c:   rgba(10, 10, 10, 0.107);
 }
 :global(html.dark) {
   --bg:       #0a0a0a;
@@ -212,7 +212,7 @@ onBeforeUnmount(() => observer?.disconnect())
   --fg-soft:  rgba(240,237,232,0.50);
   --border:   rgba(240,237,232,0.18);
   --card-bg:  rgba(255,255,255,0.06);
-  --grid-c:   rgba(255, 255, 255, 0.078);
+  --grid-c:   rgba(237, 237, 237, 0.088);
 }
 
 /* ─── Smooth theme transitions ──────────────────────────── */
