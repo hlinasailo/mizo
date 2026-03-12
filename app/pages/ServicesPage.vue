@@ -1,22 +1,16 @@
 <template>
-  <div class="bg-black min-h-screen text-white font-mono overflow-x-hidden">
+  <div :class="$style.page">
 
     <!-- Hero Header -->
-    <header class="relative min-h-[60vh] flex flex-col justify-end px-6 md:px-16 lg:px-28 pt-24 pb-16 border-b border-white/10">
-      <div
-        class="absolute inset-0 opacity-[0.04]"
-        style="background-image: linear-gradient(white 1px, transparent 1px), linear-gradient(90deg, white 1px, transparent 1px); background-size: 60px 60px;"
-      />
-      <div
-        class="absolute top-0 right-0 w-[600px] h-[600px] rounded-full opacity-[0.04] blur-3xl"
-        style="background: radial-gradient(circle, white, transparent 70%);"
-      />
-      <div class="relative z-10 max-w-5xl">
-        <p class="text-white/30 text-xs tracking-[0.4em] uppercase mb-6">MizoMade · What We Do</p>
-        <h1 class="text-[clamp(3rem,10vw,8rem)] font-black leading-none tracking-tighter text-white mb-6">
-          Ser<span class="text-white/20">vices</span>
+    <header :class="$style.hero">
+      <div :class="$style.gridBg" />
+      <div :class="$style.glareOrb" />
+      <div :class="$style.heroInner">
+        <p :class="$style.eyebrow">MizoMade · What We Do</p>
+        <h1 :class="$style.h1">
+          Ser<span :class="$style.h1Ghost">vices</span>
         </h1>
-        <p class="text-white/50 text-lg md:text-xl leading-relaxed max-w-2xl">
+        <p :class="$style.heroText">
           Technology and tools for creators working in low-resource languages.
           MizoMade combines cultural understanding with modern AI to help
           communities publish, build, and innovate.
@@ -25,85 +19,59 @@
     </header>
 
     <!-- Services — Vertical Stack -->
-    <section ref="stackRef" class="max-w-5xl mx-auto px-6 md:px-16 lg:px-28 py-20 space-y-2">
-
+    <section :class="$style.stack">
       <div
         v-for="(service, i) in services"
         :key="service.id"
         :ref="el => cardRefs[i] = el"
-        class="service-card border border-white/10 rounded-sm overflow-hidden transition-all duration-700"
-        :class="visibleCards[i] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'"
-        :style="{ transitionDelay: visibleCards[i] ? '0ms' : '0ms' }"
+        :class="[$style.card, visibleCards[i] ? $style.cardVisible : $style.cardHidden]"
         @mouseenter="hovered = i"
         @mouseleave="hovered = null"
       >
         <!-- Card Header -->
-        <div class="px-8 py-6 flex items-center justify-between gap-6 border-b border-white/10">
-          <div class="flex items-center gap-5">
-            <div
-              class="w-12 h-12 border rounded-sm flex items-center justify-center transition-all duration-300 overflow-hidden"
-              :class="hovered === i ? 'border-white/40 bg-white/[0.06] scale-110' : 'border-white/10 bg-white/[0.02]'"
-            >
+        <div :class="$style.cardHeader">
+          <div :class="$style.cardHeaderLeft">
+            <div :class="[$style.iconBox, hovered === i ? $style.iconBoxActive : '']">
               <img
                 v-if="service.icon.startsWith('/')"
                 :src="service.icon"
                 :alt="`${service.title} icon`"
-                class="w-8 h-8 object-contain"
-              >
-              <span v-else class="text-xl">{{ service.icon }}</span>
+                :class="$style.iconImg"
+              />
+              <span v-else :class="$style.iconEmoji">{{ service.icon }}</span>
             </div>
-            <h3 class="text-lg md:text-2xl font-bold tracking-tight text-white">
-              {{ service.title }}
-            </h3>
+            <h3 :class="$style.cardTitle">{{ service.title }}</h3>
           </div>
-          <div class="flex items-center gap-3">
-            <span
-              class="text-[10px] uppercase tracking-widest border px-3 py-1 rounded-sm transition-all duration-300"
-              :class="hovered === i ? 'border-white/50 text-white/60' : 'border-white/10 text-white/25'"
-            >{{ service.tag }}</span>
-            <!-- Animated arrow -->
-            <span
-              class="text-white/30 transition-all duration-300 text-lg"
-              :class="hovered === i ? 'text-white translate-x-1' : ''"
-            >→</span>
+          <div :class="$style.cardHeaderRight">
+            <span :class="[$style.cardBadge, hovered === i ? $style.cardBadgeActive : '']">{{ service.tag }}</span>
+            <span :class="[$style.cardArrow, hovered === i ? $style.cardArrowActive : '']">→</span>
           </div>
         </div>
 
         <!-- Card Body -->
-        <div class="px-8 py-6 flex flex-col md:flex-row md:items-start gap-6 md:gap-12">
-          <!-- Text -->
-          <div class="flex-1">
-            <p class="text-white/50 text-sm leading-relaxed mb-4 max-w-2xl">{{ service.desc }}</p>
-            <!-- Feature tags -->
-            <div class="flex flex-wrap gap-2">
+        <div :class="$style.cardBody">
+          <div :class="$style.cardBodyText">
+            <p :class="$style.cardDesc">{{ service.desc }}</p>
+            <div :class="$style.featWrap">
               <span
                 v-for="feat in service.features"
                 :key="feat"
-                class="text-[11px] uppercase tracking-wider border border-white/10 text-white/35 px-3 py-1 rounded-sm transition-all duration-200"
-                :class="hovered === i ? 'border-white/20 text-white/55' : ''"
+                :class="[$style.featTag, hovered === i ? $style.featTagActive : '']"
               >{{ feat }}</span>
             </div>
           </div>
-          <!-- Right: decorative line -->
-          <div class="hidden md:flex flex-col items-end justify-between self-stretch shrink-0 w-24">
-            <div
-              class="w-full h-[1px] bg-white/10 transition-all duration-500"
-              :class="hovered === i ? 'bg-white/30' : ''"
-            />
-            <span class="text-white/10 text-[10px] uppercase tracking-widest mt-2 text-right">mizomade</span>
+          <div :class="$style.cardDeco">
+            <div :class="[$style.decoLine, hovered === i ? $style.decoLineActive : '']" />
+            <span :class="$style.decoLabel">mizomade</span>
           </div>
         </div>
 
-        <!-- Hover bottom accent line -->
-        <div
-          class="h-[1px] w-0 bg-white transition-all duration-500"
-          :class="hovered === i ? 'w-full' : ''"
-        />
+        <!-- Bottom accent line -->
+        <div :class="[$style.accentLine, hovered === i ? $style.accentLineActive : '']" />
       </div>
-
     </section>
-    <!-- Footer -->
-     <AppFooter/>
+
+    <AppFooter/>
     <ButtomFooter/>
 
   </div>
@@ -183,21 +151,282 @@ onMounted(() => {
       entries.forEach((entry) => {
         const idx = cardRefs.value.indexOf(entry.target)
         if (idx !== -1 && entry.isIntersecting) {
-          setTimeout(() => {
-            visibleCards[idx] = true
-          }, idx * 80)
+          setTimeout(() => { visibleCards[idx] = true }, idx * 80)
         }
       })
     },
     { threshold: 0.12 }
   )
 
-  cardRefs.value.forEach((el) => {
-    if (el) observer.observe(el)
-  })
+  cardRefs.value.forEach((el) => { if (el) observer.observe(el) })
 })
 
 onUnmounted(() => {
   window.removeEventListener('scroll', onScroll)
 })
 </script>
+
+<style module>
+/* ─── CSS tokens — mirrors About page exactly ───────────── */
+:global(:root) {
+  --bg:       #dcdcdc;
+  --bg-alt:   #eceae6;
+  --fg:       #0a0a0a;
+  --fg-muted: #555551;
+  --fg-soft:  rgba(10,10,10,0.50);
+  --border:   rgba(10,10,10,0.14);
+  --card-bg:  rgba(10,10,10,0.259);
+  --grid-c:   rgba(10,10,10,0.107);
+}
+:global(html.dark) {
+  --bg:       #0a0a0a;
+  --bg-alt:   #0f0f0f;
+  --fg:       #f0ede8;
+  --fg-muted: rgba(240,237,232,0.72);
+  --fg-soft:  rgba(240,237,232,0.50);
+  --border:   rgba(240,237,232,0.18);
+  --card-bg:  rgba(255,255,255,0.06);
+  --grid-c:   rgba(237,237,237,0.088);
+}
+
+:global(*) {
+  transition:
+    background-color 0.4s ease,
+    border-color     0.4s ease,
+    color            0.4s ease,
+    box-shadow       0.4s ease;
+}
+
+/* ─── Page ───────────────────────────────────────────────── */
+.page {
+  background: var(--bg);
+  color: var(--fg);
+  min-height: 100vh;
+  font-family: 'Roboto Mono', 'JetBrains Mono', 'Consolas', monospace;
+  overflow-x: hidden;
+}
+
+/* ─── Hero ───────────────────────────────────────────────── */
+.hero {
+  position: relative;
+  min-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 6rem 1.5rem 4rem;
+  border-bottom: 1px solid var(--border);
+  overflow: hidden;
+}
+@media (min-width: 768px)  { .hero { padding: 6rem 4rem 4rem; } }
+@media (min-width: 1024px) { .hero { padding: 6rem 7rem 4rem; } }
+
+.gridBg {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(var(--grid-c) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-c) 1px, transparent 1px);
+  background-size: 60px 60px;
+  pointer-events: none;
+}
+
+.glareOrb {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 600px;
+  height: 600px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--fg-soft), transparent 70%);
+  opacity: 0.04;
+  filter: blur(3rem);
+  pointer-events: none;
+}
+
+.heroInner { position: relative; z-index: 2; max-width: 80rem; }
+
+.eyebrow {
+  color: var(--fg-soft);
+  font-size: 0.75rem;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  margin-bottom: 1.5rem;
+}
+
+.h1 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(3rem, 10vw, 8rem);
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--fg);
+  margin-bottom: 1.5rem;
+}
+.h1Ghost { color: var(--fg-soft); }
+
+.heroText {
+  color: var(--fg-muted);
+  font-size: 1.125rem;
+  line-height: 1.75;
+  max-width: 42rem;
+}
+
+/* ─── Stack section ──────────────────────────────────────── */
+.stack {
+  max-width: 80rem;
+  margin: 0 auto;
+  padding: 5rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+@media (min-width: 768px)  { .stack { padding: 5rem 4rem; } }
+@media (min-width: 1024px) { .stack { padding: 5rem 7rem; } }
+
+/* ─── Service card ───────────────────────────────────────── */
+.card {
+  border: 1px solid var(--border);
+  overflow: hidden;
+  transition: opacity 0.7s ease, transform 0.7s ease !important;
+}
+.cardVisible { opacity: 1; transform: translateY(0); }
+.cardHidden  { opacity: 0; transform: translateY(2.5rem); }
+
+/* Card header */
+.cardHeader {
+  padding: 1.5rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.cardHeaderLeft  { display: flex; align-items: center; gap: 1.25rem; }
+.cardHeaderRight { display: flex; align-items: center; gap: 0.75rem; }
+
+.iconBox {
+  width: 3rem;
+  height: 3rem;
+  border: 1px solid var(--border);
+  background: var(--card-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+  transition: border-color 0.3s ease, background 0.3s ease, transform 0.3s ease !important;
+}
+.iconBoxActive {
+  border-color: var(--fg-muted);
+  background: var(--card-bg);
+  transform: scale(1.1);
+}
+
+.iconImg   { width: 2rem; height: 2rem; object-fit: contain; }
+.iconEmoji { font-size: 1.25rem; }
+
+.cardTitle {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--fg);
+}
+
+.cardBadge {
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  border: 1px solid var(--border);
+  color: var(--fg-soft);
+  padding: 0.2rem 0.6rem;
+  white-space: nowrap;
+  transition: border-color 0.3s ease, color 0.3s ease !important;
+}
+.cardBadgeActive { border-color: var(--fg-muted); color: var(--fg-muted); }
+
+.cardArrow {
+  color: var(--fg-soft);
+  font-size: 1.1rem;
+  transition: color 0.3s ease, transform 0.3s ease !important;
+}
+.cardArrowActive { color: var(--fg); transform: translateX(4px); }
+
+/* Card body */
+.cardBody {
+  padding: 1.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+@media (min-width: 768px) {
+  .cardBody {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 3rem;
+  }
+}
+
+.cardBodyText { flex: 1; }
+
+.cardDesc {
+  color: var(--fg-muted);
+  font-size: 0.9rem;
+  line-height: 1.75;
+  margin-bottom: 1rem;
+  max-width: 42rem;
+}
+
+.featWrap { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+
+.featTag {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  border: 1px solid var(--border);
+  color: var(--fg-soft);
+  padding: 0.25rem 0.6rem;
+  transition: border-color 0.2s ease, color 0.2s ease !important;
+}
+.featTagActive { border-color: var(--border); color: var(--fg-muted); }
+
+/* Decorative right column */
+.cardDeco {
+  display: none;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: space-between;
+  align-self: stretch;
+  flex-shrink: 0;
+  width: 6rem;
+}
+@media (min-width: 768px) { .cardDeco { display: flex; } }
+
+.decoLine {
+  width: 100%;
+  height: 1px;
+  background: var(--border);
+  transition: background 0.5s ease !important;
+}
+.decoLineActive { background: var(--fg-muted); }
+
+.decoLabel {
+  font-size: 0.6rem;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--fg-soft);
+  margin-top: 0.5rem;
+  text-align: right;
+}
+
+/* Bottom accent line */
+.accentLine {
+  height: 1px;
+  width: 0;
+  background: var(--fg);
+  transition: width 0.5s ease !important;
+}
+.accentLineActive { width: 100%; }
+</style>
