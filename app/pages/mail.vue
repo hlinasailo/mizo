@@ -128,12 +128,8 @@
     </main>
 
     <!-- Footer -->
-    <footer class="border-t border-white/10 px-6 md:px-16 lg:px-28 py-8 max-w-5xl mx-auto w-full">
-      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-        <p class="text-white/20 text-xs">© {{ new Date().getFullYear() }} MizoMade. All rights reserved.</p>
-        <p class="text-white/20 text-xs font-mono">Contact · mizomade.com</p>
-      </div>
-    </footer>
+    <AppFooter/>
+    <ButtomFooter/>
 
   </div>
 </template>

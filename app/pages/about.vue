@@ -194,6 +194,8 @@
 			</div>
 		</section>
 	</div>
+	<AppFooter/>
+	<ButtomFooter/>
 </template>
 
 <script setup>

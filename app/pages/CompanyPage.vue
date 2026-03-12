@@ -88,7 +88,16 @@
             style="transition: background 0.3s"
           >
             <div class="flex items-center gap-5">
-              <span class="text-2xl">{{ card.icon }}</span>
+              <span class="text-2xl">
+                <i v-if="card.icon.startsWith('fi')" :class="card.icon"></i>
+                <img
+                  v-else-if="card.icon.startsWith('/') || card.icon.match(/\.(png|jpe?g|webp|svg)$/i)"
+                  :src="card.icon"
+                  :alt="`${card.title} icon`"
+                  class="w-8 h-8 object-contain"
+                />
+                <span v-else>{{ card.icon }}</span>
+              </span>
               <h3 class="text-lg md:text-xl font-bold tracking-tight text-white">{{ card.title }}</h3>
             </div>
             <span
@@ -127,9 +136,21 @@
             style="transition: background 0.3s"
           >
             <div class="flex items-center gap-5">
-              <span class="text-2xl">{{ card.icon }}</span>
-              <h3 class="text-lg md:text-xl font-bold tracking-tight text-white">{{ card.title }}</h3>
-            </div>
+  <span class="text-2xl">
+    <i v-if="card.icon.startsWith('fi')" :class="card.icon"></i>
+    <img
+      v-else-if="card.icon.startsWith('/') || card.icon.match(/\.(png|jpe?g|webp|svg)$/i)"
+      :src="card.icon"
+      alt="{{ card.title }} icon"
+      class="w-8 h-8 object-contain"
+    />
+    <span v-else>{{ card.icon }}</span>
+  </span>
+
+  <h3 class="text-lg md:text-xl font-bold tracking-tight text-white">
+    {{ card.title }}
+  </h3>
+</div>
             <div class="flex items-center gap-3">
               <span
                 class="text-[10px] uppercase tracking-widest border px-3 py-1 rounded-sm transition-all duration-300"
@@ -244,17 +265,17 @@ const focusItems = [
 
 const missionCards = [
   {
-    icon: '💡',
+    icon: '/images/images/bulb.png',
     title: 'Accessible Innovation',
     text: 'AI and digital tools designed to work even with limited connectivity — because innovation should reach every corner, not just the well-connected ones.',
   },
   {
-    icon: '🌐',
+    icon: '/images/images/internet.png',
     title: 'Language Stewardship',
     text: 'Collaboration with linguists and communities to preserve, document, and digitize regional languages before they are lost to the digital divide.',
   },
   {
-    icon: '🏗️',
+    icon: '/images/images/tools.png',
     title: 'Community Labs',
     text: 'Workshops, creator residencies, and co-design labs that shape technology around local needs — built with communities, not just for them.',
   },
@@ -262,21 +283,21 @@ const missionCards = [
 
 const techCards = [
   {
-    icon: '🤖',
+    icon: '/images/images/robot.png',
     title: 'Responsible AI',
     tag: 'AI · NLP',
     text: 'Chatbots, translation systems, and semantic search designed for low-resource languages — with transparency and community consent at the core.',
     features: ['Chatbots', 'Translation', 'Semantic Search', 'Ethical AI'],
   },
   {
-    icon: '📡',
+    icon: '/images/images/iot.png',
     title: 'IoT & Connectivity',
     tag: 'Hardware · Networks',
     text: 'Low-power sensors, mesh networks, and offline-first applications that keep communities connected even without reliable internet infrastructure.',
     features: ['Mesh Networks', 'Low-Power Sensors', 'Offline-First', 'Smart Sync'],
   },
   {
-    icon: '🔭',
+    icon: '/images/images/zoom.png',
     title: 'Emerging Technology',
     tag: 'AR · XR · Gen AI',
     text: 'AR/VR storytelling, generative tools, and automation emerging from grassroots research — ensuring no community is left behind by the next wave of technology.',
