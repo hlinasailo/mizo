@@ -24,9 +24,10 @@
     </h2>
 
     <p class="text-zinc-400 text-base mt-3 leading-relaxed max-w-base">
-      Pe rawh u, tichuan pekin in awm ang.<br>
-      Give, and it will be given to you.
+      Pe rawh u, <br  >tichuan pekin in awm ang.<br>
+      Give,<br> and it will be given to you.
     </p>
+    <br>
     <br>
     <div class="flex gap-4 mt-3 md:mt-0 text-zinc-400 text-xl">
 
@@ -152,13 +153,14 @@
 
 
   </div>
+  
 
 </footer>
 </template>
 
 <script setup>
 const directoryLinks = [
-  { text: 'Landing', url: '/index' },
+  { text: 'Landing', url: '/' },
   { text: 'Blog', url: '/blogs' },
   { text: 'Service', url: '/ServicesPage' },
   { text: 'Company', url: '/CompanyPage' }
