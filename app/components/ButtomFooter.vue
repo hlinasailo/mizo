@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-black/60 backdrop-blur-md border-t border-white/10 text-base">
+  <div class="bg-zinc-950 text-zinc-300 border-t border-zinc-800 text-base">
     
     <div class="max-w-7xl mx-auto px-6 py-4 flex flex-col items-center justify-center text-center">
 
