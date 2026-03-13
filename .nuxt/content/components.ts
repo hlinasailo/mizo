@@ -7,6 +7,7 @@ const pickExport = (mod, exportName, componentName, path) => {
 }
 export const localComponentLoaders = {
   AppFooter: () => import("./../../app/components/AppFooter.vue").then(m => pickExport(m, "default", "AppFooter", "./../../app/components/AppFooter.vue")),
+  BlogContentEditor: () => import("./../../app/components/BlogContentEditor.vue").then(m => pickExport(m, "default", "BlogContentEditor", "./../../app/components/BlogContentEditor.vue")),
   ButtomFooter: () => import("./../../app/components/ButtomFooter.vue").then(m => pickExport(m, "default", "ButtomFooter", "./../../app/components/ButtomFooter.vue")),
   NuxtWelcome: () => import("./../../node_modules/nuxt/dist/app/components/welcome.vue").then(m => pickExport(m, "default", "NuxtWelcome", "./../../node_modules/nuxt/dist/app/components/welcome.vue")),
   NuxtLayout: () => import("./../../node_modules/nuxt/dist/app/components/nuxt-layout").then(m => pickExport(m, "default", "NuxtLayout", "./../../node_modules/nuxt/dist/app/components/nuxt-layout")),
@@ -38,4 +39,4 @@ export const localComponentLoaders = {
   NuxtIsland: () => import("./../../node_modules/nuxt/dist/app/components/nuxt-island").then(m => pickExport(m, "default", "NuxtIsland", "./../../node_modules/nuxt/dist/app/components/nuxt-island")),
 }
 export const globalComponents: string[] = ["ProseA","ProseBlockquote","ProseCode","ProseEm","ProseH1","ProseH2","ProseH3","ProseH4","ProseH5","ProseH6","ProseHr","ProseImg","ProseLi","ProseOl","ProseP","ProsePre","ProseScript","ProseStrong","ProseTable","ProseTbody","ProseTd","ProseTh","ProseThead","ProseTr","ProseUl","Icon"]
-export const localComponents: string[] = ["AppFooter","ButtomFooter","NuxtWelcome","NuxtLayout","NuxtErrorBoundary","ClientOnly","DevOnly","ServerPlaceholder","NuxtLink","NuxtLoadingIndicator","NuxtTime","NuxtRouteAnnouncer","NuxtImg","NuxtPicture","ContentRenderer","NuxtPage","NoScript","Link","Base","Title","Meta","Style","Head","Html","Body","MDC","MDCCached","MDCRenderer","MDCSlot","NuxtIsland"]
+export const localComponents: string[] = ["AppFooter","BlogContentEditor","ButtomFooter","NuxtWelcome","NuxtLayout","NuxtErrorBoundary","ClientOnly","DevOnly","ServerPlaceholder","NuxtLink","NuxtLoadingIndicator","NuxtTime","NuxtRouteAnnouncer","NuxtImg","NuxtPicture","ContentRenderer","NuxtPage","NoScript","Link","Base","Title","Meta","Style","Head","Html","Body","MDC","MDCCached","MDCRenderer","MDCSlot","NuxtIsland"]

@@ -14,6 +14,25 @@ interface LoginResponse {
   user: User
 }
 
+const toLoggableError = (error: unknown) => {
+  const e = error as {
+    message?: string
+    status?: number
+    statusCode?: number
+    statusMessage?: string
+    data?: unknown
+    name?: string
+  }
+
+  return {
+    name: e?.name ?? 'Error',
+    message: e?.message ?? String(error),
+    status: e?.statusCode ?? e?.status ?? null,
+    statusMessage: e?.statusMessage ?? null,
+    data: typeof e?.data === 'string' ? e.data : null,
+  }
+}
+
 export const useUserStore = defineStore('user', {
   state: () => ({
     user: null as User | null,
@@ -77,8 +96,8 @@ export const useUserStore = defineStore('user', {
           }
         })
         this.user = data
-      } catch (error) {
-        console.error('Failed to fetch user', error)
+      } catch (error: unknown) {
+        console.error('Failed to fetch user', toLoggableError(error))
         this.clearAuth()
       }
     },
@@ -94,8 +113,8 @@ export const useUserStore = defineStore('user', {
               Authorization: `Bearer ${this.accessToken}`
             }
           })
-        } catch (error) {
-          console.error('Logout failed on server', error)
+        } catch (error: unknown) {
+          console.error('Logout failed on server', toLoggableError(error))
         }
       }
       this.clearAuth()

@@ -3,6 +3,14 @@ export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: false },
 
+  typescript: {
+    tsConfig: {
+      compilerOptions: {
+        types: ['three']
+      }
+    }
+  },
+
   modules: [
     '@nuxt/content',
     '@nuxt/eslint',

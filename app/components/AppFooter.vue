@@ -1,6 +1,6 @@
 <!-- components/AppFooter.vue -->
 <template>
-<footer class="border-t border-zinc-900 bg-black pt-20 pb-10">
+<footer class="border-t border-zinc-900 bg-black pt-20 pb-10 font-mono">
 
   <div class="max-w-7xl mx-auto px-6 lg:px-12">
 
@@ -19,7 +19,7 @@
   <!-- Text block -->
   <div class="flex flex-col">
     
-    <h2 class="font-sans font-black tracking-tighter leading-none uppercase text-3xl text-white">
+    <h2 class="font-black tracking-tighter leading-none uppercase text-3xl text-white">
       MIZOMADE
     </h2>
 
