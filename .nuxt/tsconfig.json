@@ -157,7 +157,9 @@
     ],
     "jsx": "preserve",
     "jsxImportSource": "vue",
-    "types": [],
+    "types": [
+      "three"
+    ],
     "moduleResolution": "Bundler",
     "useDefineForClassFields": true,
     "noImplicitThis": true,
