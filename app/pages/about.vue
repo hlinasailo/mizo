@@ -1,7 +1,6 @@
 <template>
   <main>
     <div :class="$style.aboutPage">
-
       <!-- ── Hero ─────────────────────────────────────────── -->
       <section :class="[$style.section, $style.hero]">
         <div :class="$style.floatingCircles">
@@ -32,7 +31,6 @@
       <section :class="[$style.section, $style.alt]">
         <div :class="$style.container">
           <div :class="$style.missionGrid">
-
             <div :class="[$style.glassCard, $style.slideLeft]" data-animate>
               <h2 :class="$style.sectionTitle">Our Mission</h2>
               <div :class="[$style.divider, $style.dividerLeft]" />
@@ -65,7 +63,6 @@
                 </div>
               </div>
             </div>
-
           </div>
         </div>
       </section>
@@ -134,9 +131,9 @@
           </div>
         </div>
       </section>
-
     </div>
 
+    <!-- Footer components - only once -->
     <AppFooter />
     <ButtomFooter />
   </main>
@@ -434,7 +431,6 @@ onBeforeUnmount(() => observer?.disconnect())
   color: var(--fg-soft);
 }
 
-/* ─── Theme toggle button ────────────────────────────────── */
 /* ─── Keyframes ──────────────────────────────────────────── */
 @keyframes float {
   0%,100% { transform: translate(0,0) rotate(0deg); }
