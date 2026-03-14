@@ -1,9 +1,9 @@
 import { defineStore } from 'pinia'
 
 interface User {
-  pk: number
+  id?: number
   username: string
-  email: string
+  email?: string
   first_name: string
   last_name: string
 }
@@ -11,8 +11,21 @@ interface User {
 interface LoginResponse {
   access: string
   refresh: string
-  user: User
+  username?: string
+  first_name?: string
+  last_name?: string
+  email?: string
 }
+
+type GetMyProfileResponse = [
+  {
+    id?: number
+    username?: string
+    first_name?: string
+    last_name?: string
+  }?,
+  ...unknown[]
+]
 
 const toLoggableError = (error: unknown) => {
   const e = error as {
@@ -47,7 +60,7 @@ export const useUserStore = defineStore('user', {
   actions: {
     async login(username: string, password: string) {
       const config = useRuntimeConfig()
-      const data = await $fetch<LoginResponse>('/api/v1/auth/login/', {
+      const data = await $fetch<LoginResponse>('/api/v1/auth/token/', {
         method: 'POST',
         baseURL: config.public.apiBase,
         body: {
@@ -57,7 +70,12 @@ export const useUserStore = defineStore('user', {
       })
 
       this.setTokens(data.access, data.refresh)
-      this.user = data.user
+      this.user = {
+        username: data.username ?? username,
+        first_name: data.first_name ?? '',
+        last_name: data.last_name ?? '',
+        email: data.email,
+      }
     },
 
     setTokens(access: string, refresh?: string) {
@@ -89,13 +107,27 @@ export const useUserStore = defineStore('user', {
 
       try {
         const config = useRuntimeConfig()
-        const data = await $fetch<User>('/api/v1/auth/user/', {
+        const data = await $fetch<GetMyProfileResponse>('/api/v1/user/getmyprofile/', {
+          method: 'POST',
           baseURL: config.public.apiBase,
           headers: {
             Authorization: `Bearer ${this.accessToken}`
           }
         })
-        this.user = data
+
+        const userData = Array.isArray(data) ? data[0] : null
+
+        if (userData && typeof userData === 'object') {
+          this.user = {
+            id: userData.id,
+            username: userData.username ?? '',
+            first_name: userData.first_name ?? '',
+            last_name: userData.last_name ?? '',
+          }
+          return
+        }
+
+        throw new Error('Unexpected user profile response shape')
       } catch (error: unknown) {
         console.error('Failed to fetch user', toLoggableError(error))
         this.clearAuth()
