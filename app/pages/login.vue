@@ -13,6 +13,7 @@ const form = reactive({
 
 const isSubmitting = ref(false)
 const errorMessage = ref('')
+const successMessage = ref('')
 const modelStageRef = ref<HTMLElement | null>(null)
 const modelCanvasRef = ref<HTMLCanvasElement | null>(null)
 const showModelPanel = ref(false)
@@ -25,6 +26,7 @@ let mountRetryTimer: number | null = null
 
 const handleLogin = async () => {
   errorMessage.value = ''
+  successMessage.value = ''
 
   if (!form.username || !form.password) {
     errorMessage.value = 'Please enter both username and password.'
@@ -37,12 +39,16 @@ const handleLogin = async () => {
     await userStore.login(form.username, form.password)
     await userStore.fetchUser()
 
+    successMessage.value = 'Successful login. Redirecting...'
+    await new Promise(resolve => setTimeout(resolve, 700))
+
     const redirectCookie = useCookie<string | null>('redirect_after_login')
     const redirectPath   = redirectCookie.value || '/'
     redirectCookie.value = null
 
     await router.push(redirectPath)
   } catch (error: unknown) {
+    successMessage.value = ''
     const statusMessage = (error as { statusMessage?: string })?.statusMessage
     const data          = (error as { data?: { detail?: string } })?.data
     errorMessage.value  = data?.detail || statusMessage || 'Invalid credentials. Please try again.'
@@ -347,6 +353,7 @@ onBeforeUnmount(() => {
 
           <!-- Error -->
           <p v-if="errorMessage" :class="$style.error">{{ errorMessage }}</p>
+          <p v-if="successMessage" :class="$style.success">{{ successMessage }}</p>
 
           <!-- Extras row -->
           <div :class="$style.extras">
@@ -376,7 +383,7 @@ onBeforeUnmount(() => {
           <!-- Sign up link -->
           <p :class="$style.signupRow">
             <span :class="$style.signupText">Don't have an account yet?</span>
-            <NuxtLink to="/signup" :class="$style.signupLink">Sign up</NuxtLink>
+            <NuxtLink to="/register" :class="$style.signupLink">Sign up</NuxtLink>
           </p>
         </form>
 
@@ -428,6 +435,8 @@ onBeforeUnmount(() => {
   --lg-signup-muted: #888884;
   --lg-signup-link:  #111110;
   --lg-error:        #c0392b;
+  --lg-grid-line:    rgba(17,17,16,0.06);
+  --lg-grid-glow:    rgba(17,17,16,0.06);
 }
 :global(html.dark) {
   --lg-page-bg:      #0a0a0a;
@@ -450,6 +459,8 @@ onBeforeUnmount(() => {
   --lg-signup-muted: rgba(240,237,232,0.40);
   --lg-signup-link:  #f0ede8;
   --lg-error:        #e74c3c;
+  --lg-grid-line:    rgba(240,237,232,0.08);
+  --lg-grid-glow:    rgba(240,237,232,0.08);
 }
 
 /* ── Smooth transitions ─────────────────────────────────── */
@@ -469,6 +480,29 @@ onBeforeUnmount(() => {
   align-items: center;
   justify-content: center;
   padding: 6rem 1.25rem 4rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.page::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to right, var(--lg-grid-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--lg-grid-line) 1px, transparent 1px);
+  background-size: 56px 56px;
+  opacity: 0.68;
+  pointer-events: none;
+}
+
+.page::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to right, var(--lg-grid-glow) 0%, transparent 72%);
+  opacity: 0.85;
+  pointer-events: none;
 }
 
 .section {
@@ -476,6 +510,8 @@ onBeforeUnmount(() => {
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
+  z-index: 1;
 }
 
 .desktopLayout {
@@ -496,10 +532,12 @@ onBeforeUnmount(() => {
   border-radius: 16px;
   box-shadow: var(--lg-card-shadow);
   padding: 2.5rem 2rem 2rem;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1fr;
   gap: 0;
   justify-self: center;
+  position: relative;
+  overflow: hidden;
 }
 
 .modelPanel {
@@ -550,7 +588,7 @@ onBeforeUnmount(() => {
 }
 
 /* ── Fields ─────────────────────────────────────────────── */
-.fields     { display: flex; flex-direction: column; gap: 0.75rem; margin-bottom: 1rem; }
+.fields     { display: grid; grid-template-columns: 1fr; gap: 0.75rem; margin-bottom: 1rem; }
 .fieldWrap  { position: relative; }
 
 .input {
@@ -618,6 +656,13 @@ onBeforeUnmount(() => {
 .error {
   font-size: 0.8rem;
   color: var(--lg-error);
+  margin-bottom: 0.75rem;
+  text-align: center;
+}
+
+.success {
+  font-size: 0.8rem;
+  color: #1f8f47;
   margin-bottom: 0.75rem;
   text-align: center;
 }

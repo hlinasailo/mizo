@@ -3,13 +3,19 @@ import { useUserStore } from '~/stores/user'
 export default defineNuxtRouteMiddleware((to, from) => {
     const userStore = useUserStore()
 
+    const isSignupRoute =
+        to.path.startsWith('/register') ||
+        to.path.startsWith('/signup') ||
+        to.path.startsWith('/sign-up') ||
+        to.path.startsWith('/signUp')
+
     // Public routes that don't need authentication
     const isPublicRoute = to.path.startsWith('/login') ||
-        to.path.startsWith('/register') ||
+        isSignupRoute ||
         to.path === '/'
 
     // If the user is authenticated but visits login/register, redirect them to home/dashboard
-    if (userStore.isAuthenticated && (to.path.startsWith('/login') || to.path.startsWith('/register'))) {
+    if (userStore.isAuthenticated && (to.path.startsWith('/login') || isSignupRoute)) {
         return navigateTo('/') // Adjust target path like '/dashboard' based on the app
     }
 
