@@ -101,104 +101,355 @@ const handleResendOtp = async () => {
 </script>
 
 <template>
-  <main class="otp-page">
-    <section class="otp-card">
-      <h1>Verify OTP</h1>
-      <p class="subtitle">Enter the code sent to your phone.</p>
+  <main :class="$style.page">
+    <section :class="$style.section">
+      <div :class="$style.desktopLayout">
+        <form :class="$style.card" @submit.prevent="handleVerifyOtp">
+          <header :class="$style.cardHeader">
+            <h1 :class="$style.cardTitle">Verify OTP</h1>
+            <p :class="$style.cardSubtitle">Enter the code sent to your phone.</p>
+          </header>
 
-      <form class="otp-form" @submit.prevent="handleVerifyOtp">
-        <input
-          v-model="form.phone"
-          type="tel"
-          autocomplete="tel"
-          placeholder="Phone Number"
-        >
+          <div :class="$style.fields">
+            <div :class="$style.fieldWrap">
+              <input
+                v-model="form.phone"
+                type="tel"
+                autocomplete="tel"
+                placeholder="Phone Number"
+                :class="$style.input"
+              >
+            </div>
 
-        <input
-          v-model="form.otp"
-          type="text"
-          inputmode="numeric"
-          autocomplete="one-time-code"
-          placeholder="OTP Code"
-        >
+            <div :class="$style.fieldWrap">
+              <input
+                v-model="form.otp"
+                type="text"
+                inputmode="numeric"
+                autocomplete="one-time-code"
+                placeholder="OTP Code"
+                :class="$style.input"
+              >
+            </div>
 
-        <input
-          v-model="form.purpose"
-          type="text"
-          placeholder="Purpose (e.g. Registration)"
-        >
+            <div :class="$style.fieldWrap">
+              <input
+                v-model="form.purpose"
+                type="text"
+                placeholder="Purpose (e.g. Registration)"
+                :class="$style.input"
+              >
+            </div>
+          </div>
 
-        <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
-        <p v-if="successMessage" class="success">{{ successMessage }}</p>
+          <p v-if="errorMessage" :class="$style.error">{{ errorMessage }}</p>
+          <p v-if="successMessage" :class="$style.success">{{ successMessage }}</p>
 
-        <button type="submit" :disabled="!canVerify">
-          {{ isSubmitting ? 'Verifying…' : 'Verify OTP' }}
-        </button>
+          <button type="submit" :disabled="!canVerify" :class="$style.submitBtn">
+            {{ isSubmitting ? 'Verifying…' : 'Verify OTP' }}
+          </button>
 
-        <button type="button" class="secondary" :disabled="isResending" @click="handleResendOtp">
-          {{ isResending ? 'Resending…' : 'Resend OTP' }}
-        </button>
-      </form>
+          <button type="button" :disabled="isResending" :class="$style.secondaryBtn" @click="handleResendOtp">
+            {{ isResending ? 'Resending…' : 'Resend OTP' }}
+          </button>
+
+          <div :class="$style.divider" />
+
+          <p :class="$style.switchRow">
+            <span :class="$style.switchText">Already verified?</span>
+            <NuxtLink to="/login" :class="$style.switchLink">Sign in</NuxtLink>
+          </p>
+        </form>
+      </div>
     </section>
   </main>
 </template>
 
-<style scoped>
-.otp-page {
-  min-height: 100vh;
-  display: grid;
-  place-items: center;
-  background: #f5f5f5;
-  padding: 1rem;
+<style module>
+:global(:root) {
+  --su-page-bg:      #efefef;
+  --su-card-bg:      #ffffff;
+  --su-card-border:  rgba(0,0,0,0.08);
+  --su-card-shadow:  0 4px 32px rgba(0,0,0,0.10);
+  --su-title:        #111110;
+  --su-subtitle:     #888884;
+  --su-input-bg:     #f5f4f2;
+  --su-input-border: #e0deda;
+  --su-input-focus:  #111110;
+  --su-input-text:   #111110;
+  --su-input-ph:     #aaa9a5;
+  --su-submit-bg:    #111110;
+  --su-submit-fg:    #ffffff;
+  --su-submit-hover: #2c2c2a;
+  --su-secondary-bg: #3f3f3d;
+  --su-secondary-fg: #ffffff;
+  --su-secondary-hover: #5a5a57;
+  --su-divider:      #e8e7e4;
+  --su-switch-muted: #888884;
+  --su-switch-link:  #111110;
+  --su-error:        #c0392b;
+  --su-success:      #1e8a4f;
+  --su-grid-line:    rgba(17,17,16,0.06);
+  --su-grid-glow:    rgba(17,17,16,0.06);
 }
-.otp-card {
+
+:global(html.dark) {
+  --su-page-bg:      #0a0a0a;
+  --su-card-bg:      #161616;
+  --su-card-border:  rgba(255,255,255,0.08);
+  --su-card-shadow:  0 4px 40px rgba(0,0,0,0.55);
+  --su-title:        #f0ede8;
+  --su-subtitle:     rgba(240,237,232,0.45);
+  --su-input-bg:     #1e1e1e;
+  --su-input-border: rgba(255,255,255,0.10);
+  --su-input-focus:  rgba(240,237,232,0.80);
+  --su-input-text:   #f0ede8;
+  --su-input-ph:     rgba(240,237,232,0.28);
+  --su-submit-bg:    #f0ede8;
+  --su-submit-fg:    #0a0a0a;
+  --su-submit-hover: #d8d4ce;
+  --su-secondary-bg: #282826;
+  --su-secondary-fg: #f0ede8;
+  --su-secondary-hover: #333331;
+  --su-divider:      rgba(255,255,255,0.07);
+  --su-switch-muted: rgba(240,237,232,0.40);
+  --su-switch-link:  #f0ede8;
+  --su-error:        #e74c3c;
+  --su-success:      #4be08f;
+  --su-grid-line:    rgba(240,237,232,0.08);
+  --su-grid-glow:    rgba(240,237,232,0.08);
+}
+
+:global(*) {
+  transition:
+    color 0.35s ease,
+    background-color 0.35s ease,
+    border-color 0.35s ease,
+    box-shadow 0.35s ease;
+}
+
+.page {
+  min-height: 100vh;
+  background: var(--su-page-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6rem 1.25rem 4rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.page::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to right, var(--su-grid-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--su-grid-line) 1px, transparent 1px);
+  background-size: 56px 56px;
+  opacity: 0.68;
+  pointer-events: none;
+}
+
+.page::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to right, var(--su-grid-glow) 0%, transparent 72%);
+  opacity: 0.85;
+  pointer-events: none;
+}
+
+.section {
+  width: 100%;
+  max-width: 1200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+}
+
+.desktopLayout {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+  align-items: stretch;
+}
+
+.card {
   width: 100%;
   max-width: 420px;
-  background: white;
-  border: 1px solid #e5e5e5;
-  border-radius: 12px;
-  padding: 1.5rem;
-}
-h1 {
-  margin: 0 0 0.25rem;
-}
-.subtitle {
-  margin: 0 0 1rem;
-  color: #666;
-  font-size: 0.9rem;
-}
-.otp-form {
+  background: var(--su-card-bg);
+  border: 1px solid var(--su-card-border);
+  border-radius: 16px;
+  box-shadow: var(--su-card-shadow);
+  padding: 2.5rem 2rem 2rem;
   display: grid;
+  grid-template-columns: 1fr;
+  gap: 0;
+  justify-self: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.cardHeader {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.cardTitle {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--su-title);
+  letter-spacing: -0.02em;
+  margin-bottom: 0.35rem;
+}
+
+.cardSubtitle {
+  font-size: 0.875rem;
+  color: var(--su-subtitle);
+  font-weight: 400;
+}
+
+.fields {
+  display: grid;
+  grid-template-columns: 1fr;
   gap: 0.75rem;
+  margin-bottom: 1rem;
 }
-input {
+
+.fieldWrap {
+  position: relative;
+}
+
+.input {
   width: 100%;
-  padding: 0.8rem 0.9rem;
-  border: 1px solid #d9d9d9;
+  padding: 0.875rem 1rem;
+  background: var(--su-input-bg);
+  border: 1.5px solid var(--su-input-border);
   border-radius: 8px;
-  font-size: 0.95rem;
+  color: var(--su-input-text);
+  outline: none;
+  font-size: 0.925rem;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background-color 0.35s ease,
+    color 0.35s ease !important;
 }
-button {
-  padding: 0.8rem 0.9rem;
+
+.input::placeholder {
+  color: var(--su-input-ph);
+}
+
+.input:focus {
+  border-color: var(--su-input-focus);
+  box-shadow: 0 0 0 3px rgba(17,17,16,0.08);
+}
+
+:global(html.dark) .input:focus {
+  box-shadow: 0 0 0 3px rgba(240,237,232,0.08);
+}
+
+.error,
+.success {
+  font-size: 0.8rem;
+  margin-bottom: 0.75rem;
+  text-align: center;
+}
+
+.error {
+  color: var(--su-error);
+}
+
+.success {
+  color: var(--su-success);
+}
+
+.submitBtn,
+.secondaryBtn {
+  width: 100%;
+  padding: 0.9rem 1rem;
+  font-size: 0.95rem;
+  font-weight: 600;
   border: none;
   border-radius: 8px;
-  background: #111;
-  color: #fff;
   cursor: pointer;
+  letter-spacing: 0.01em;
+  transition: background-color 0.2s ease, opacity 0.2s ease !important;
 }
-button:disabled {
-  opacity: 0.6;
+
+.submitBtn {
+  background: var(--su-submit-bg);
+  color: var(--su-submit-fg);
+}
+
+.submitBtn:hover:not(:disabled) {
+  background: var(--su-submit-hover);
+}
+
+.secondaryBtn {
+  margin-top: 0.65rem;
+  background: var(--su-secondary-bg);
+  color: var(--su-secondary-fg);
+}
+
+.secondaryBtn:hover:not(:disabled) {
+  background: var(--su-secondary-hover);
+}
+
+.submitBtn:disabled,
+.secondaryBtn:disabled {
+  opacity: 0.5;
   cursor: not-allowed;
 }
-button.secondary {
-  background: #444;
+
+.divider {
+  height: 1px;
+  background: var(--su-divider);
+  margin: 1.75rem 0 1.5rem;
 }
-.error {
-  color: #c0392b;
-  font-size: 0.85rem;
+
+.switchRow {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
 }
-.success {
-  color: #1e8a4f;
-  font-size: 0.85rem;
+
+.switchText {
+  font-size: 0.875rem;
+  color: var(--su-switch-muted);
+}
+
+.switchLink {
+  font-size: 0.925rem;
+  font-weight: 700;
+  color: var(--su-switch-link);
+  text-decoration: none;
+}
+
+.switchLink:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+@media (min-width: 1024px) {
+  .desktopLayout {
+    grid-template-columns: minmax(360px, 420px);
+    justify-content: center;
+  }
+
+  .card {
+    max-width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .input {
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
 }
 </style>
