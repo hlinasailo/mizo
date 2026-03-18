@@ -38,6 +38,11 @@ export default <RouterConfig>{
         name: 'blog-post',
         path: '/blog/:slug',
         component: () => import('./blog/blogPost.vue')
+      },
+      {
+        name: 'user-profile',
+        path: '/user-profile',
+        component: () => import('./blog/userProfile.vue')
       }
     ]
   }

@@ -13,7 +13,6 @@ const form = reactive({
 
 const isSubmitting = ref(false)
 const errorMessage = ref('')
-const successMessage = ref('')
 const modelStageRef = ref<HTMLElement | null>(null)
 const modelCanvasRef = ref<HTMLCanvasElement | null>(null)
 const showModelPanel = ref(false)
@@ -26,7 +25,6 @@ let mountRetryTimer: number | null = null
 
 const handleLogin = async () => {
   errorMessage.value = ''
-  successMessage.value = ''
 
   if (!form.username || !form.password) {
     errorMessage.value = 'Please enter both username and password.'
@@ -39,16 +37,12 @@ const handleLogin = async () => {
     await userStore.login(form.username, form.password)
     await userStore.fetchUser()
 
-    successMessage.value = 'Successful login. Redirecting...'
-    await new Promise(resolve => setTimeout(resolve, 700))
-
     const redirectCookie = useCookie<string | null>('redirect_after_login')
     const redirectPath   = redirectCookie.value || '/'
     redirectCookie.value = null
 
     await router.push(redirectPath)
   } catch (error: unknown) {
-    successMessage.value = ''
     const statusMessage = (error as { statusMessage?: string })?.statusMessage
     const data          = (error as { data?: { detail?: string } })?.data
     errorMessage.value  = data?.detail || statusMessage || 'Invalid credentials. Please try again.'
@@ -353,7 +347,6 @@ onBeforeUnmount(() => {
 
           <!-- Error -->
           <p v-if="errorMessage" :class="$style.error">{{ errorMessage }}</p>
-          <p v-if="successMessage" :class="$style.success">{{ successMessage }}</p>
 
           <!-- Extras row -->
           <div :class="$style.extras">
@@ -656,13 +649,6 @@ onBeforeUnmount(() => {
 .error {
   font-size: 0.8rem;
   color: var(--lg-error);
-  margin-bottom: 0.75rem;
-  text-align: center;
-}
-
-.success {
-  font-size: 0.8rem;
-  color: #1f8f47;
   margin-bottom: 0.75rem;
   text-align: center;
 }

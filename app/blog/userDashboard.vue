@@ -4,16 +4,27 @@
     <header :class="$style.header">
       <h1 :class="[$style.pageTitle, 'font-black tracking-tighter leading-[1] uppercase text-3xl sm:text-4xl md:text-5xl lg:text-4xl mb-6']">Blog Dashboard</h1>
       <div :class="$style.header__user">
-        <div :class="$style.avatar">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-            <circle cx="12" cy="8" r="4"/>
-            <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+        <NuxtLink to="/user-profile" :class="$style.header__identityLink">
+          <div :class="$style.avatar">
+            <img v-if="userStore.user?.profilePhoto" :src="userStore.user.profilePhoto" alt="Profile photo" :class="$style.avatarImage">
+            <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <circle cx="12" cy="8" r="4"/>
+              <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+            </svg>
+          </div>
+          <div :class="$style.header__user_info">
+            <span :class="$style.header__user_name">{{ userStore.user?.first_name || userStore.user?.username || 'User' }}</span>
+            <span :class="$style.header__user_handle">@{{ userStore.user?.username || 'user' }}</span>
+          </div>
+        </NuxtLink>
+        <button :class="$style.logoutBtn" @click="userStore.logout">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="15" height="15" aria-hidden="true">
+            <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
+            <polyline points="16 17 21 12 16 7"/>
+            <line x1="21" y1="12" x2="9" y2="12"/>
           </svg>
-        </div>
-        <div :class="$style.header__user_info">
-          <span :class="$style.header__user_name">Sarah Johnson</span>
-          <span :class="$style.header__user_handle">@sarahwrites</span>
-        </div>
+          Logout
+        </button>
       </div>
     </header>
 
@@ -138,7 +149,37 @@
 </template>
 
 <script setup>
-import { ref, computed, h } from 'vue'
+
+import { useBlogApi } from '~/composables/useBlogApi'
+
+const userStore = useUserStore()
+const blogApi = useBlogApi()
+
+const drafts = ref([])
+const loadingDrafts = ref(false)
+
+onMounted(async () => {
+  if (userStore.isAuthenticated && !userStore.user) {
+    await userStore.fetchUser()
+  }
+  // Fetch user drafts from backend
+  loadingDrafts.value = true
+  try {
+    const fetchedDrafts = await blogApi.fetchUserDrafts()
+    drafts.value = fetchedDrafts.map(draft => ({
+      id: draft.id,
+      title: draft.title || 'Untitled',
+      lastEdited: draft.created_at ? new Date(draft.created_at).toLocaleDateString('en-US', {
+        year: 'numeric', month: 'short', day: 'numeric'
+      }) : 'Unknown',
+      progress: draft.content ? Math.min(Math.round((draft.content.length / 1000) * 100), 100) : 0,
+    }))
+  } catch {
+    drafts.value = []
+  } finally {
+    loadingDrafts.value = false
+  }
+})
 
 /* ─── Icon components ────────────────────────────────────────── */
 const IconDoc = {
@@ -211,10 +252,7 @@ const bookmarks = ref([
   { id: 3, title: 'Next.js 15: What\'s New',        author: 'Jordan Kim',  date: 'Feb 14, 2026' },
 ])
 
-const drafts = ref([
-  { id: 1, title: 'CSS Grid vs Flexbox: When to Use Which', lastEdited: 'Mar 9, 2026',  progress: 70 },
-  { id: 2, title: 'Intro to Web Assembly',                   lastEdited: 'Mar 2, 2026',  progress: 35 },
-])
+// drafts are now loaded from backend
 
 const publishedPosts = computed(() => allPosts.value.filter(p => p.status === 'PUBLISHED'))
 
@@ -328,16 +366,57 @@ function deleteDraft(draftId) {
   border-radius: 14px;
   box-shadow: var(--dash-shadow);
 }
+.header__identityLink {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  color: inherit;
+  border-radius: 10px;
+  padding: 2px;
+  transition: background-color 0.2s ease;
+}
+.header__identityLink:hover {
+  background: var(--dash-hover-bg);
+}
 .avatar {
   width: 36px; height: 36px;
   background: var(--dash-surface-soft);
   border-radius: 50%;
+  overflow: hidden;
   display: flex; align-items: center; justify-content: center;
+}
+.avatarImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 .avatar svg { width: 18px; height: 18px; color: var(--dash-text-muted); }
 .header__user-info { display: flex; flex-direction: column; }
 .header__user-name { font-size: 0.85rem; font-weight: 600; line-height: 1.2; color: var(--dash-text); }
 .header__user-handle { font-size: 0.72rem; color: var(--dash-text-muted); font-family: 'DM Mono', monospace; }
+
+.logoutBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 12px;
+  padding: 6px 12px;
+  background: transparent;
+  border: 1px solid var(--dash-danger);
+  color: var(--dash-danger);
+  font-size: 0.78rem;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  letter-spacing: 0.03em;
+  transition: background-color 0.18s ease, color 0.18s ease;
+  font-family: 'Sora', sans-serif;
+}
+.logoutBtn:hover {
+  background: var(--dash-danger);
+  color: #fff;
+}
 
 /* ── Stats ── */
 .stats {
