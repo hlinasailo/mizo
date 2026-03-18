@@ -1,14 +1,27 @@
 <script setup lang="ts">
-import { onBeforeUnmount, ref } from 'vue'
+import { onBeforeUnmount, ref, onMounted } from 'vue'
 import { Cropper } from 'vue-advanced-cropper'
 import 'vue-advanced-cropper/dist/style.css'
+import { useUserStore } from '~/stores/user'
+import { useBlogApi } from '~/composables/useBlogApi'
+import { S } from 'vue-router/dist/router-CWoNjPRp.mjs'
 
 defineOptions({ name: 'BlogCreatePage' })
 
+// Stores & Composables
+const userStore = useUserStore()
+const blogApi = useBlogApi()
+const router = useRouter()
+
+// Form data
 const title       = ref('')
 const category    = ref('Others')
 const content     = ref('')
 const thumbnail   = ref('')
+const coverImageFile = ref<File | null>(null)
+const draftId     = ref<number | null>(null)
+
+// UI states
 const isSubmitting  = ref(false)
 const isSavingDraft = ref(false)
 const showMetaPopup = ref(false)
@@ -16,16 +29,44 @@ const showCropPopup = ref(false)
 const cropImageSrc  = ref('')
 const cropAspect    = ref<number | null>(16 / 9)
 const cropperRef    = ref<{ getResult?: () => { canvas?: HTMLCanvasElement | null; image?: HTMLImageElement | null } } | null>(null)
+const errorMessage  = ref('')
+
+// Notification
+const showNotification = ref(false)
+const notificationMessage = ref('')
+const notificationType = ref<'success' | 'error'>('success')
+let notificationTimer: NodeJS.Timeout | null = null
 
 let cropResolve:   ((result: string | null) => void) | null = null
 let cropObjectUrl: string | null = null
 
+// ── Initialization ──
+onMounted(async () => {
+  if (!userStore.isAuthenticated) {
+    router.push('/login')
+    return
+  }
+
+  // Create a draft on page load
+  try {
+    const draft = await blogApi.createDraft({ content: '' })
+    draftId.value = draft.id
+  } catch (err) {
+    console.error('Failed to initialize draft:', err)
+    errorMessage.value = 'Failed to initialize editor'
+  }
+})
+
+// ── Image handling ──
 const addThumbnailByFile = async (event: Event) => {
   const input = event.target as HTMLInputElement
   const file  = input.files?.[0]
   if (!file) return
   const cropped = await openCropModal(file)
-  if (cropped) thumbnail.value = cropped
+  if (cropped) {
+    thumbnail.value = cropped
+    coverImageFile.value = file
+  }
   input.value = ''
 }
 
@@ -70,25 +111,97 @@ const applyCrop = () => {
 }
 
 const closeCrop     = () => finalizeCrop(null)
-const openMetaPopup = () => { showMetaPopup.value = true }
+const openMetaPopup = () => { showMetaPopup.value = true; errorMessage.value = '' }
 
+// ── Notifications ──
+const _displayNotification = (message: string, type: 'success' | 'error' = 'success', duration: number = 2000) => {
+  // Clear any existing timer
+  if (notificationTimer) clearTimeout(notificationTimer)
+  
+  // Set the message and type
+  notificationMessage.value = message
+  notificationType.value = type
+  showNotification.value = true
+  
+  // Auto-hide after duration
+  notificationTimer = setTimeout(() => {
+    showNotification.value = false
+  }, duration)
+}
+
+// ── API calls ──
 const submitPost = async () => {
+  if (!draftId.value) {
+    errorMessage.value = 'Error: Draft not initialized'
+    return
+  }
+
+  if (!title.value.trim()) {
+    errorMessage.value = 'Please enter a blog title'
+    return
+  }
+
   isSubmitting.value = true
+  errorMessage.value = ''
+
   try {
-    const payload = { title: title.value, category: category.value, thumbnail: thumbnail.value || null, content: content.value }
-    console.log('Blog payload:', payload)
-    await new Promise(r => setTimeout(r, 500))
-    showMetaPopup.value = false
-  } finally { isSubmitting.value = false }
+    // Convert thumbnail to File if it's a data URL
+    let coverImageFileToPublish: File | undefined
+    if (thumbnail.value && !coverImageFile.value) {
+      // thumbnail is a data URL from crop, convert it back to File
+      const blob = await fetch(thumbnail.value).then(r => r.blob())
+      coverImageFileToPublish = new File([blob], 'thumbnail.jpg', { type: 'image/jpeg' })
+    } else if (coverImageFile.value) {
+      coverImageFileToPublish = coverImageFile.value
+    }
+
+    const publishPayload = {
+      id: draftId.value,
+      title: title.value.trim(),
+      category: category.value,
+      tags: [], // Add tag parsing if you implement tags UI
+      content: content.value,
+      coverimage: coverImageFileToPublish,
+    }
+
+    const result = await blogApi.publishPost(publishPayload)
+
+    if (result.save === 1) {
+      showMetaPopup.value = false
+      // Show success message and redirect
+      await new Promise(resolve => setTimeout(resolve, 500))
+      router.push(`/blog/${result.slug}`)
+    } else {
+      errorMessage.value = 'Failed to publish post'
+    }
+  } catch (error) {
+    errorMessage.value = error instanceof Error ? error.message : 'An error occurred'
+    console.error('Publish error:', error)
+  } finally {
+    isSubmitting.value = false
+  }
 }
 
 const saveDraft = async () => {
+  if (!draftId.value) {
+    errorMessage.value = 'Error: Draft not initialized'
+    return
+  }
+
   isSavingDraft.value = true
+  errorMessage.value = ''
+
   try {
-    const draftPayload = { title: title.value, category: category.value, thumbnail: thumbnail.value || null, content: content.value, isDraft: true }
-    console.log('Draft payload:', draftPayload)
-    await new Promise(r => setTimeout(r, 500))
-  } finally { isSavingDraft.value = false }
+    await blogApi.updateDraft(draftId.value, content.value)
+    console.log('Draft saved successfully')
+    _displayNotification('Draft saved successfully', 'success')
+  } catch (error) {
+    errorMessage.value = error instanceof Error ? error.message : 'Failed to save draft'
+    console.error('Draft save error:', error)
+    console.log('Draft save failed:', error)
+  } finally {
+    isSavingDraft.value = false
+  }
 }
 
 onBeforeUnmount(() => { if (cropObjectUrl) URL.revokeObjectURL(cropObjectUrl) })
@@ -112,6 +225,11 @@ onBeforeUnmount(() => { if (cropObjectUrl) URL.revokeObjectURL(cropObjectUrl) })
         </div>
         <div :class="$style.headerBar" />
         <p :class="$style.headerSub">Write and publish with the same Mizomade style.</p>
+      </div>
+
+      <!-- ── Error Message ─────────────────────────────── -->
+      <div v-if="errorMessage" :class="$style.errorBanner">
+        {{ errorMessage }}
       </div>
 
       <!-- ── Form ───────────────────────────────────────── -->
@@ -141,6 +259,10 @@ onBeforeUnmount(() => { if (cropObjectUrl) URL.revokeObjectURL(cropObjectUrl) })
           </div>
 
           <p :class="$style.metaSub">Add title, category, and thumbnail before publishing.</p>
+
+          <div v-if="errorMessage" :class="$style.errorBanner">
+            {{ errorMessage }}
+          </div>
 
           <div :class="$style.metaFields">
             <label :class="$style.fieldGroup">
@@ -377,7 +499,32 @@ v-for="cat in ['Zirna','Gospel','Hriselna','Thiamna','Beauty & Fashion','Story',
   transition: color 0.2s ease !important;
 }
 .backBtn:hover { color: var(--cp-fg); }
+/* ── Error Banner ───────────────────────────────────────── */
+.errorBanner {
+  padding: 0.875rem 1rem;
+  margin-bottom: 1.5rem;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  animation: slideDown 0.3s ease;
+}
 
+:root .errorBanner {
+  background: #fee;
+  border: 1px solid #f99;
+  color: #c33;
+}
+
+:global(html.dark) .errorBanner {
+  background: rgba(220, 38, 38, 0.15);
+  border: 1px solid rgba(220, 38, 38, 0.4);
+  color: #fca5a5;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 /* ── Form ───────────────────────────────────────────────── */
 .form    { display: flex; flex-direction: column; gap: 1.5rem; }
 .actions { display: flex; justify-content: flex-end; gap: 0.75rem; padding-top: 0.5rem; }

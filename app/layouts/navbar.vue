@@ -55,6 +55,10 @@ onMounted(() => {
   }
 
   applyTheme(isDarkMode.value)
+
+  if (userStore.isAuthenticated && (!userStore.user || !userStore.user.profilePhoto)) {
+    void userStore.fetchUser()
+  }
 })
 
 watch(isDarkMode, (dark) => {
@@ -163,15 +167,22 @@ const isLoginPage = computed(() => route.path === '/login')
 
     <!-- Auth -->
     <template v-if="userStore.isAuthenticated">
-      <NuxtLink to="/dashboard" class="text-sm font-medium text-zinc-400 hover:text-white transition-colors duration-200 uppercase tracking-wide">
-        Dashboard
-      </NuxtLink>
-      <button
-        class="px-5 py-2 text-sm font-bold text-black bg-white hover:bg-zinc-200 uppercase tracking-wide transition-all duration-300 shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:shadow-[0_0_20px_rgba(255,255,255,0.2)]"
-        @click="userStore.logout"
+      <NuxtLink
+        to="/dashboard"
+        :title="userStore.user?.username || 'Profile'"
+        class="w-9 h-9 rounded-full border border-white/30 hover:border-white/70 transition-all duration-200 flex items-center justify-center bg-zinc-800 text-white text-sm font-semibold uppercase overflow-hidden flex-shrink-0"
       >
-        Logout
-      </button>
+        <img
+          v-if="userStore.user?.profilePhoto"
+          :src="userStore.user.profilePhoto"
+          alt="Profile photo"
+          class="w-full h-full object-cover"
+        >
+        <span v-else-if="userStore.user?.username">{{ userStore.user.username.charAt(0) }}</span>
+        <svg v-else class="w-5 h-5 text-zinc-400" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 12c2.761 0 5-2.239 5-5s-2.239-5-5-5-5 2.239-5 5 2.239 5 5 5zm0 2c-3.337 0-10 1.676-10 5v1h20v-1c0-3.324-6.663-5-10-5z"/>
+        </svg>
+      </NuxtLink>
     </template>
     <template v-else-if="!isLoginPage">
       <NuxtLink
@@ -264,15 +275,25 @@ const isLoginPage = computed(() => route.path === '/login')
       <!-- Mobile Auth -->
       <div class="pt-2 border-t border-white/10">
         <template v-if="userStore.isAuthenticated">
-          <NuxtLink to="/dashboard" class="block text-zinc-400 hover:text-white transition-colors uppercase tracking-wide mb-3" @click="toggleMobileMenu">
-            Dashboard
-          </NuxtLink>
-          <button
-            class="w-full px-5 py-2 text-sm font-bold text-black bg-white hover:bg-zinc-200 uppercase tracking-wide transition-all duration-300"
-            @click="userStore.logout(); toggleMobileMenu()"
+          <NuxtLink
+            to="/dashboard"
+            class="flex items-center gap-3 text-zinc-400 hover:text-white transition-colors"
+            @click="toggleMobileMenu"
           >
-            Logout
-          </button>
+            <span class="w-8 h-8 rounded-full border border-white/30 flex items-center justify-center bg-zinc-800 text-white text-xs font-semibold uppercase flex-shrink-0">
+              <img
+                v-if="userStore.user?.profilePhoto"
+                :src="userStore.user.profilePhoto"
+                alt="Profile photo"
+                class="w-full h-full object-cover"
+              >
+              <span v-else-if="userStore.user?.username">{{ userStore.user.username.charAt(0) }}</span>
+              <svg v-else class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M12 12c2.761 0 5-2.239 5-5s-2.239-5-5-5-5 2.239-5 5 2.239 5 5 5zm0 2c-3.337 0-10 1.676-10 5v1h20v-1c0-3.324-6.663-5-10-5z"/>
+              </svg>
+            </span>
+            <span class="uppercase tracking-wide text-sm">{{ userStore.user?.username || 'Profile' }}</span>
+          </NuxtLink>
         </template>
         <template v-else-if="!isLoginPage">
           <NuxtLink

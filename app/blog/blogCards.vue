@@ -1,41 +1,58 @@
 <script setup lang="ts">
-import { fakePosts } from './useFakePosts'
-
 defineOptions({ name: 'BlogCardsPage' })
 
 const router = useRouter()
 const route  = useRoute()
-
-// ── Theme (reads from <html class="dark"> set by your navbar toggle) ──
-const isDark = computed(() => {
-  if (import.meta.client) {
-    return document.documentElement.classList.contains('dark')
-  }
-  return true
-})
+const config = useRuntimeConfig()
 
 // ── Categories ────────────────────────────────────────────────
 const activeCategory = computed(() => (route.query.category as string) || 'All')
 
-// ── Pagination ────────────────────────────────────────────────
-const currentPage = ref(1)
-const PAGE_SIZE   = 12   // 3-column grid fits multiples of 3
+// ── Pagination (server-driven, backend page_size = 9) ─────────
+const currentPage = ref(Number(route.query.page) || 1)
+const PAGE_SIZE   = 9
 
-const filteredPosts = computed(() =>
-  activeCategory.value === 'All'
-    ? fakePosts
-    : fakePosts.filter(p => p.category === activeCategory.value)
+// ── API types ─────────────────────────────────────────────────
+interface Post {
+  id: number
+  title: string
+  slug: string
+  author: string
+  authorphoto: string
+  coverimage: string | null
+  date: string
+  published: boolean
+}
+interface PaginatedResponse {
+  count: number
+  next: string | null
+  previous: string | null
+  results: Post[]
+}
+
+// ── Fetch — switches endpoint based on active category ────────
+const apiUrl = computed(() =>
+  activeCategory.value !== 'All'
+    ? `${config.public.apiBase}/api/v1/posts/api/categoryposts/${encodeURIComponent(activeCategory.value)}`
+    : `${config.public.apiBase}/api/v1/posts/`
 )
 
-const totalPages = computed(() => Math.ceil(filteredPosts.value.length / PAGE_SIZE))
-
-const paginatedPosts = computed(() => {
-  const start = (currentPage.value - 1) * PAGE_SIZE
-  return filteredPosts.value.slice(start, start + PAGE_SIZE)
+const { data } = await useFetch<PaginatedResponse>(apiUrl, {
+  query: computed(() => ({ page: currentPage.value })),
 })
 
+const posts      = computed(() => data.value?.results ?? [])
+const totalCount = computed(() => data.value?.count ?? 0)
+const totalPages = computed(() => Math.ceil(totalCount.value / PAGE_SIZE))
+
+// Reset to page 1 when category changes
 watch(activeCategory, () => { currentPage.value = 1 })
 
+// authorphoto comes back as a relative path e.g. "profilephoto/user.jpg"
+const avatarUrl = (path: string) =>
+  path ? `${config.public.apiBase}/media/${path}` : null
+
+// ── Pagination controls ───────────────────────────────────────
 const visiblePages = computed((): (number | '...')[] => {
   const total = totalPages.value
   if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1)
@@ -103,14 +120,14 @@ const getGradient = (category: string) =>
 
       <!-- ── Post Count ─────────────────────────────────────── -->
       <p :class="$style.postCount">
-        {{ filteredPosts.length }} post{{ filteredPosts.length !== 1 ? 's' : '' }}
+        {{ totalCount }} post{{ totalCount !== 1 ? 's' : '' }}
         <span v-if="activeCategory !== 'All'">· {{ activeCategory }}</span>
       </p>
 
       <!-- ── Cards Grid ─────────────────────────────────────── -->
-      <div v-if="paginatedPosts.length > 0" :class="$style.grid">
+      <div v-if="posts.length > 0" :class="$style.grid">
         <article
-          v-for="post in paginatedPosts"
+          v-for="post in posts"
           :key="post.id"
           :class="$style.card"
           @click="router.push(`/blog/${post.slug}`)"
@@ -118,20 +135,20 @@ const getGradient = (category: string) =>
           <!-- Thumbnail -->
           <div :class="$style.thumb">
             <img
-              v-if="post.thumbnail"
-              :src="post.thumbnail"
+              v-if="post.coverimage"
+              :src="post.coverimage"
               :alt="post.title"
               :class="$style.thumbImg"
             >
             <div
               v-else
-              :class="[$style.thumbFallback, `bg-gradient-to-br`, getGradient(post.category)]"
+              :class="[$style.thumbFallback, `bg-gradient-to-br`, getGradient(activeCategory)]"
             >
-              <span :class="$style.thumbFallbackLabel">{{ post.category }}</span>
+              <span :class="$style.thumbFallbackLabel">{{ activeCategory !== 'All' ? activeCategory : '' }}</span>
             </div>
 
-            <!-- Category pill overlaid on thumbnail -->
-            <span :class="$style.categoryBadge">{{ post.category }}</span>
+            <!-- Category badge — only shown when filtering by category -->
+            <span v-if="activeCategory !== 'All'" :class="$style.categoryBadge">{{ activeCategory }}</span>
           </div>
 
           <!-- Card Body -->
@@ -144,8 +161,8 @@ const getGradient = (category: string) =>
               <!-- Avatar -->
               <div :class="$style.avatar">
                 <img
-                  v-if="post.authorAvatar"
-                  :src="post.authorAvatar"
+                  v-if="post.authorphoto"
+                  :src="avatarUrl(post.authorphoto)!"
                   :alt="post.author"
                   :class="$style.avatarImg"
                 >
