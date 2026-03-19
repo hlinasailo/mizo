@@ -63,7 +63,9 @@
       <!-- Posts Tab -->
       <div v-if="activeTab === 'posts'">
         <h2 :class="$style.content__heading">My Posts</h2>
-        <div :class="$style.post_list">
+        <div v-if="postsLoading" :class="$style.post_card">Loading your posts…</div>
+        <div v-else-if="postsError || !publishedPosts.length" :class="$style.post_card">No post</div>
+        <div v-else :class="$style.post_list">
           <div v-for="post in publishedPosts" :key="post.id" :class="$style.post_card">
             <div :class="$style.post_card__main">
               <div :class="$style.post_card__meta">
@@ -99,7 +101,9 @@
       <!-- Bookmarks Tab -->
       <div v-if="activeTab === 'bookmarks'">
         <h2 :class="$style.content__heading">Bookmarks</h2>
-        <div :class="$style.post_list">
+        <div v-if="bookmarksLoading" :class="$style.post_card">Loading your bookmarks…</div>
+        <div v-else-if="bookmarksError || !bookmarks.length" :class="$style.post_card">No bookmark</div>
+        <div v-else :class="$style.post_list">
           <div v-for="bm in bookmarks" :key="bm.id" :class="$style.post_card">
             <div :class="$style.post_card__main">
               <div :class="$style.post_card__meta">
@@ -118,6 +122,7 @@
       <!-- Drafts Tab -->
       <div v-if="activeTab === 'drafts'">
         <h2 :class="$style.content__heading">Drafts</h2>
+        <div v-if="!drafts.length" :class="$style.post_card">No drafts yet. </div>
         <div :class="$style.post_list">
           <div v-for="draft in drafts" :key="draft.id" :class="$style.post_card">
             <div :class="$style.post_card__main">
@@ -149,35 +154,108 @@
 </template>
 
 <script setup>
-
-import { useBlogApi } from '~/composables/useBlogApi'
+import { ref, computed, h, onMounted } from 'vue'
+import { useUserStore } from '~/stores/user'
+import { useBlogService } from '~/services/blogService'
 
 const userStore = useUserStore()
-const blogApi = useBlogApi()
+const blogService = useBlogService()
 
 const drafts = ref([])
-const loadingDrafts = ref(false)
+const postsLoading = ref(false)
+const postsError = ref('')
+const bookmarksLoading = ref(false)
+const bookmarksError = ref('')
+
+const allPosts = ref([])
+const bookmarks = ref([])
+
+const loadBookmarks = async () => {
+  bookmarksLoading.value = true
+  bookmarksError.value = ''
+
+  try {
+    const results = await blogService.fetchBookmarkedPosts()
+    bookmarks.value = (results || []).map(post => ({
+      id: post.id,
+      title: post.title,
+      author: post.author,
+      date: post.date,
+    }))
+  } catch (error) {
+    bookmarksError.value = (error && typeof error === 'object' && 'message' in error)
+      ? String(error.message)
+      : 'Failed to load bookmarks.'
+    bookmarks.value = []
+  } finally {
+    bookmarksLoading.value = false
+  }
+}
+
+const loadMyPublishedPosts = async () => {
+  postsLoading.value = true
+  postsError.value = ''
+
+  try {
+    const username = userStore.user?.username
+    if (!username) {
+      allPosts.value = []
+      return
+    }
+
+    const collected = []
+    let page = 1
+
+    while (true) {
+      const response = await blogService.fetchPosts(page)
+      const results = response?.results || []
+
+      if (!results.length) {
+        break
+      }
+
+      const mine = results
+        .filter(post => post.author === username)
+        .map(post => ({
+          id: post.id,
+          title: post.title,
+          slug: post.slug,
+          author: post.author,
+          date: post.date,
+          status: 'PUBLISHED',
+          views: 0,
+          comments: 0,
+          likes: 0,
+        }))
+
+      collected.push(...mine)
+
+      if (!response.next) {
+        break
+      }
+
+      page += 1
+    }
+
+    allPosts.value = collected
+  } catch (error) {
+    postsError.value = (error && typeof error === 'object' && 'message' in error)
+      ? String(error.message)
+      : 'Failed to load your posts.'
+    allPosts.value = []
+  } finally {
+    postsLoading.value = false
+  }
+}
 
 onMounted(async () => {
   if (userStore.isAuthenticated && !userStore.user) {
     await userStore.fetchUser()
   }
-  // Fetch user drafts from backend
-  loadingDrafts.value = true
-  try {
-    const fetchedDrafts = await blogApi.fetchUserDrafts()
-    drafts.value = fetchedDrafts.map(draft => ({
-      id: draft.id,
-      title: draft.title || 'Untitled',
-      lastEdited: draft.created_at ? new Date(draft.created_at).toLocaleDateString('en-US', {
-        year: 'numeric', month: 'short', day: 'numeric'
-      }) : 'Unknown',
-      progress: draft.content ? Math.min(Math.round((draft.content.length / 1000) * 100), 100) : 0,
-    }))
-  } catch {
-    drafts.value = []
-  } finally {
-    loadingDrafts.value = false
+
+  if (userStore.isAuthenticated) {
+    await loadMyPublishedPosts()
+    await loadBookmarks()
   }
 })
 
@@ -239,18 +317,6 @@ const stats = [
   { label: 'TOTAL VIEWS', value: '12.4K', sub: '+18.2% increase', icon: IconEye },
   { label: 'COMMENTS',    value: '342',  sub: '+24 today',        icon: IconComment },
 ]
-
-const allPosts = ref([
-  { id: 1, title: 'Getting Started with React Hooks',      date: 'Mar 8, 2026',  status: 'PUBLISHED', views: 2453, comments: 34, likes: 189 },
-  { id: 2, title: 'Understanding TypeScript Generics',     date: 'Feb 22, 2026', status: 'PUBLISHED', views: 1872, comments: 21, likes: 143 },
-  { id: 3, title: 'Building REST APIs with Node.js',       date: 'Jan 30, 2026', status: 'PUBLISHED', views: 3105, comments: 47, likes: 261 },
-])
-
-const bookmarks = ref([
-  { id: 1, title: 'The Future of Web Components',  author: 'Alex Rivera', date: 'Mar 5, 2026'  },
-  { id: 2, title: 'Mastering Tailwind CSS',         author: 'Priya Nair',  date: 'Feb 28, 2026' },
-  { id: 3, title: 'Next.js 15: What\'s New',        author: 'Jordan Kim',  date: 'Feb 14, 2026' },
-])
 
 // drafts are now loaded from backend
 

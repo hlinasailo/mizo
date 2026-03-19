@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, reactive, ref } from 'vue'
+import { useAuthService } from '~/services/authService'
 
 definePageMeta({
   alias: ['/otp', '/otp-verification', '/verify-otp'],
@@ -7,7 +8,7 @@ definePageMeta({
 
 const router = useRouter()
 const route = useRoute()
-const config = useRuntimeConfig()
+const authService = useAuthService()
 
 const form = reactive({
   phone: String(route.query.phone || ''),
@@ -40,14 +41,10 @@ const handleVerifyOtp = async () => {
 
   isSubmitting.value = true
   try {
-    const res = await $fetch<{ message?: string }>('/api/v1/user/verify_otp/', {
-      method: 'POST',
-      baseURL: config.public.apiBase,
-      body: {
-        phone: normalizedPhone.value,
-        otp_value: form.otp.trim(),
-        purpose: form.purpose || 'Registration',
-      },
+    const res = await authService.verifyOtp({
+      phone: normalizedPhone.value,
+      otp_value: form.otp.trim(),
+      purpose: form.purpose || 'Registration',
     })
 
     successMessage.value = res?.message || 'OTP verified successfully.'
@@ -77,13 +74,9 @@ const handleResendOtp = async () => {
 
   isResending.value = true
   try {
-    const res = await $fetch<{ message?: string }>('/api/v1/user/resendotp/', {
-      method: 'POST',
-      baseURL: config.public.apiBase,
-      body: {
-        phone: normalizedPhone.value,
-        purpose: form.purpose || 'Registration',
-      },
+    const res = await authService.resendOtp({
+      phone: normalizedPhone.value,
+      purpose: form.purpose || 'Registration',
     })
 
     successMessage.value = res?.message || 'A new OTP has been sent.'

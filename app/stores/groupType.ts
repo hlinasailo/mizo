@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { useBlogService } from '~/services/blogService'
 
 interface GroupType {
     id?: number
@@ -43,11 +44,8 @@ export const useGroupTypeStore = defineStore('groupType', {
             this.error = null
 
             try {
-                const config = useRuntimeConfig()
-                // Replace with the actual group types / categories endpoint if needed
-                const data = await $fetch<GroupType[]>('/api/v1/posts/api/categories/', {
-                    baseURL: config.public.apiBase,
-                })
+                const blogService = useBlogService()
+                const data = await blogService.fetchCategories()
                 this.groups = data || []
             } catch (err: unknown) {
                 console.error('Failed to fetch group types', toLoggableError(err))

@@ -1,9 +1,12 @@
 <script setup lang="ts">
+import { useBlogService } from '~/services/blogService'
+
 defineOptions({ name: 'BlogCardsPage' })
 
 const router = useRouter()
 const route  = useRoute()
 const config = useRuntimeConfig()
+const blogService = useBlogService()
 
 // ── Categories ────────────────────────────────────────────────
 const activeCategory = computed(() => (route.query.category as string) || 'All')
@@ -13,32 +16,15 @@ const currentPage = ref(Number(route.query.page) || 1)
 const PAGE_SIZE   = 9
 
 // ── API types ─────────────────────────────────────────────────
-interface Post {
-  id: number
-  title: string
-  slug: string
-  author: string
-  authorphoto: string
-  coverimage: string | null
-  date: string
-  published: boolean
-}
-interface PaginatedResponse {
-  count: number
-  next: string | null
-  previous: string | null
-  results: Post[]
+const data = ref<Awaited<ReturnType<typeof blogService.fetchPosts>> | null>(null)
+
+const loadPosts = async () => {
+  data.value = await blogService.fetchPosts(currentPage.value, activeCategory.value)
 }
 
-// ── Fetch — switches endpoint based on active category ────────
-const apiUrl = computed(() =>
-  activeCategory.value !== 'All'
-    ? `${config.public.apiBase}/api/v1/posts/api/categoryposts/${encodeURIComponent(activeCategory.value)}`
-    : `${config.public.apiBase}/api/v1/posts/`
-)
-
-const { data } = await useFetch<PaginatedResponse>(apiUrl, {
-  query: computed(() => ({ page: currentPage.value })),
+await loadPosts()
+watch([activeCategory, currentPage], () => {
+  void loadPosts()
 })
 
 const posts      = computed(() => data.value?.results ?? [])
