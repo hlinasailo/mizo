@@ -4,7 +4,6 @@ import { Cropper } from 'vue-advanced-cropper'
 import 'vue-advanced-cropper/dist/style.css'
 import { useUserStore } from '~/stores/user'
 import { useBlogApi } from '~/composables/useBlogApi'
-import { S } from 'vue-router/dist/router-CWoNjPRp.mjs'
 
 defineOptions({ name: 'BlogCreatePage' })
 

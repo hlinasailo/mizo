@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useUserStore } from '~/stores/user'
+import { useUserService } from '../services/userService'
 
 type ProfileDraft = {
 	username: string
@@ -11,7 +12,7 @@ type ProfileDraft = {
 }
 const userStore = useUserStore()
 const router = useRouter()
-const config = useRuntimeConfig()
+const userService = useUserService()
 
 const isSaving = ref(false)
 const errorMessage = ref('')
@@ -128,22 +129,13 @@ const handleSave = async () => {
 			throw new Error('You need to be logged in to update your profile.')
 		}
 
-		const authHeaders = {
-			Authorization: `Bearer ${userStore.accessToken}`,
-		}
-
-		await $fetch(`/api/v1/user/profile/update/${userStore.user.id}`, {
-			method: 'PUT',
-			baseURL: config.public.apiBase,
-			headers: authHeaders,
-			body: {
-				username: form.username.trim(),
-				first_name: form.firstName.trim(),
-				last_name: userStore.user.last_name || '',
-				phonenumber: form.phoneNumber.trim(),
-				bio: form.bio.trim(),
-			},
-		})
+		await userService.updateProfile(userStore.user.id, {
+			username: form.username.trim(),
+			first_name: form.firstName.trim(),
+			last_name: userStore.user.last_name || '',
+			phonenumber: form.phoneNumber.trim(),
+			bio: form.bio.trim(),
+		}, userStore.accessToken)
 
 		if (selectedPhotoFile.value || removePhotoOnSave.value) {
 			const photoForm = new FormData()
@@ -155,12 +147,7 @@ const handleSave = async () => {
 				photoForm.append('remove', '1')
 			}
 
-			await $fetch(`/api/v1/user/profile/update/profilephoto/${userStore.user.id}`, {
-				method: 'PUT',
-				baseURL: config.public.apiBase,
-				headers: authHeaders,
-				body: photoForm,
-			})
+			await userService.updateProfilePhoto(userStore.user.id, photoForm, userStore.accessToken)
 		}
 
 		await userStore.fetchUser()

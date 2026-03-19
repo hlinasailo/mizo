@@ -1,21 +1,10 @@
 import { useUserStore } from '~/stores/user'
-
-interface FetchError {
-  data?: {
-    detail?: string
-  }
-  message?: string
-}
+import { toApiErrorMessage } from '~/services/apiClient'
+import { useBlogService } from '~/services/blogService'
 
 interface Category {
   id: number
   name: string
-}
-
-interface CategoryResponse {
-  results?: Category[]
-  data?: Category[]
-  [key: string]: unknown
 }
 
 interface CreateDraftPayload {
@@ -44,54 +33,25 @@ interface PublishResponse {
 }
 
 export const useBlogApi = () => {
-  const config = useRuntimeConfig()
   const userStore = useUserStore()
-  let categoriesCache: Category[] | null = null
+  const blogService = useBlogService()
 
-  const getAuthHeaders = () => {
-    const token = userStore.accessToken
-    if (!token) {
+  const getToken = () => {
+    if (!userStore.accessToken) {
       throw new Error('No authentication token available')
     }
-    return {
-      Authorization: `Bearer ${token}`,
-    }
+
+    return userStore.accessToken
   }
 
   /**
    * Fetch all categories
    */
   const fetchCategories = async (): Promise<Category[]> => {
-    if (categoriesCache) {
-      return categoriesCache
-    }
-
     try {
-      const response = await $fetch<CategoryResponse | Category[]>('/api/v1/posts/api/categories/', {
-        method: 'GET',
-        baseURL: config.public.apiBase,
-      })
-      console.log('Raw categories response:', response)
-      console.log('Response type:', typeof response)
-      console.log('Response keys:', Object.keys(response as Record<string, unknown>))
-      
-      // Handle different response structures
-      let categories: Category[] = []
-      if (Array.isArray(response)) {
-        categories = response
-      } else if (response?.results && Array.isArray(response.results)) {
-        categories = response.results
-      } else if (response?.data && Array.isArray(response.data)) {
-        categories = response.data
-      }
-      
-      console.log('Parsed categories:', categories)
-      categoriesCache = categories
-      return categories
+      return await blogService.fetchCategories()
     } catch (error) {
-      const err = error as FetchError
-      console.error('Failed to fetch categories:', err)
-      throw new Error(err?.data?.detail || 'Failed to fetch categories')
+      throw new Error(toApiErrorMessage(error, 'Failed to fetch categories'))
     }
   }
 
@@ -100,9 +60,7 @@ export const useBlogApi = () => {
    */
   const getCategoryId = async (categoryName: string): Promise<number> => {
     const categories = await fetchCategories()
-    console.log(`Looking for category: "${categoryName}"`)
-    console.log('Available categories:', categories.map(c => c.name))
-    
+
     const category = categories.find(cat => cat.name === categoryName)
     if (!category) {
       const availableNames = categories.map(c => c.name).join(', ')
@@ -116,19 +74,9 @@ export const useBlogApi = () => {
    */
   const createDraft = async (payload: CreateDraftPayload): Promise<DraftResponse> => {
     try {
-      const response = await $fetch<DraftResponse>('/api/v1/posts/createdraft/', {
-        method: 'POST',
-        baseURL: config.public.apiBase,
-        headers: getAuthHeaders(),
-        body: {
-          content: payload.content,
-        },
-      })
-      return response
+      return await blogService.createDraft(payload.content, getToken())
     } catch (error) {
-      const err = error as FetchError
-      console.error('Failed to create draft:', err)
-      throw new Error(err?.data?.detail || 'Failed to create draft')
+      throw new Error(toApiErrorMessage(error, 'Failed to create draft'))
     }
   }
 
@@ -137,32 +85,18 @@ export const useBlogApi = () => {
    */
   const publishPost = async (payload: PublishPostPayload): Promise<PublishResponse> => {
     try {
-      // Convert category name to ID
       const categoryId = await getCategoryId(payload.category)
 
-      const formData = new FormData()
-      formData.append('id', String(payload.id))
-      formData.append('title', payload.title)
-      formData.append('category', String(categoryId)) // Send ID, not name
-      formData.append('tags', JSON.stringify(payload.tags))
-      formData.append('content', payload.content)
-      formData.append('published', 'true')
-
-      if (payload.coverimage) {
-        formData.append('coverimage', payload.coverimage)
-      }
-
-      const response = await $fetch<PublishResponse>('/api/v1/posts/create/', {
-        method: 'PATCH',
-        baseURL: config.public.apiBase,
-        headers: getAuthHeaders(),
-        body: formData,
-      })
-      return response
+      return await blogService.publishPost({
+        id: payload.id,
+        title: payload.title,
+        category: categoryId,
+        tags: payload.tags,
+        content: payload.content,
+        coverimage: payload.coverimage,
+      }, getToken())
     } catch (error) {
-      const err = error as FetchError
-      console.error('Failed to publish post:', err)
-      throw new Error(err?.data?.detail || 'Failed to publish post')
+      throw new Error(toApiErrorMessage(error, 'Failed to publish post'))
     }
   }
 
@@ -171,23 +105,11 @@ export const useBlogApi = () => {
    */
   const updateDraft = async (draftId: number, content: string): Promise<DraftResponse> => {
     try {
-      const response = await $fetch<DraftResponse>('/api/v1/posts/createdraft/', {
-        method: 'PATCH',
-        baseURL: config.public.apiBase,
-        headers: getAuthHeaders(),
-        body: {
-          id: draftId,
-          content: content,
-        },
-      })
-      return response
+      return await blogService.updateDraft(draftId, content, getToken())
     } catch (error) {
-      const err = error as FetchError
-      console.error('Failed to update draft:', err)
-      throw new Error(err?.data?.detail || 'Failed to update draft')
+      throw new Error(toApiErrorMessage(error, 'Failed to update draft'))
     }
   }
-
 
   return {
     createDraft,

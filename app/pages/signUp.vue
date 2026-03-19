@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { nextTick, onBeforeUnmount, onMounted, computed, reactive, ref } from 'vue'
+import { useAuthService } from '~/services/authService'
 
 definePageMeta({
 	alias: ['/signup', '/sign-up', '/register'],
 })
 
 const router = useRouter()
+const authService = useAuthService()
 
 const form = reactive({
 	username: '',
@@ -246,17 +248,11 @@ const handleSignUp = async () => {
 	isSubmitting.value = true
 
 	try {
-		const config = useRuntimeConfig()
-
-		await $fetch('/api/v1/user/register/', {
-			method: 'POST',
-			baseURL: config.public.apiBase,
-			body: {
-				username: form.username,
-				password1: form.password,
-				phone: normalizedPhone.value,
-				email: form.email,
-			},
+		await authService.register({
+			username: form.username,
+			password1: form.password,
+			phone: normalizedPhone.value,
+			email: form.email,
 		})
 
 		successMessage.value = 'Account created successfully. Redirecting to OTP verification...'

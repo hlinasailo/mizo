@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { useAuthService, type GetMyProfileResponse, type LoginResponse } from '~/services/authService'
 
 interface User {
   id?: number
@@ -10,38 +11,6 @@ interface User {
   bio?: string
   profilePhoto?: string | null
 }
-
-interface LoginResponse {
-  access: string
-  refresh: string
-  username?: string
-  first_name?: string
-  last_name?: string
-  email?: string
-  profile?: {
-    bio?: string | null
-    profilephoto?: string | null
-  } | null
-}
-
-type GetMyProfileResponse = [
-  {
-    id?: number
-    username?: string
-    first_name?: string
-    last_name?: string
-  }?,
-  {
-    bio?: string | null
-    profilephoto?: string | null
-  }?,
-  unknown?,
-  {
-    phonenumber?: string | null
-    validated?: boolean
-  }?,
-  ...unknown[]
-]
 
 const toLoggableError = (error: unknown) => {
   const e = error as {
@@ -118,15 +87,8 @@ export const useUserStore = defineStore('user', {
     },
 
     async login(username: string, password: string) {
-      const config = useRuntimeConfig()
-      const data = await $fetch<LoginResponse>('/api/v1/auth/token/', {
-        method: 'POST',
-        baseURL: config.public.apiBase,
-        body: {
-          username,
-          password,
-        }
-      })
+      const authService = useAuthService()
+      const data = await authService.login(username, password)
 
       this.setTokens(data.access, data.refresh)
       this.setUser({
@@ -168,14 +130,8 @@ export const useUserStore = defineStore('user', {
       if (!this.accessToken) return
 
       try {
-        const config = useRuntimeConfig()
-        const data = await $fetch<GetMyProfileResponse>('/api/v1/user/getmyprofile/', {
-          method: 'POST',
-          baseURL: config.public.apiBase,
-          headers: {
-            Authorization: `Bearer ${this.accessToken}`
-          }
-        })
+        const authService = useAuthService()
+        const data = await authService.fetchMyProfile(this.accessToken)
 
         const userData = Array.isArray(data) ? data[0] : null
         const profileData = Array.isArray(data) ? data[1] : null
@@ -215,14 +171,8 @@ export const useUserStore = defineStore('user', {
     async logout() {
       if (this.accessToken) {
         try {
-          const config = useRuntimeConfig()
-          await $fetch('/api/v1/auth/logout/', {
-            method: 'POST',
-            baseURL: config.public.apiBase,
-            headers: {
-              Authorization: `Bearer ${this.accessToken}`
-            }
-          })
+          const authService = useAuthService()
+          await authService.logout(this.accessToken)
         } catch (error: unknown) {
           console.error('Logout failed on server', toLoggableError(error))
         }
