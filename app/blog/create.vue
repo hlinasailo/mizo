@@ -3,13 +3,13 @@ import { onBeforeUnmount, ref, onMounted } from 'vue'
 import { Cropper } from 'vue-advanced-cropper'
 import 'vue-advanced-cropper/dist/style.css'
 import { useUserStore } from '~/stores/user'
-import { useBlogApi } from '~/composables/useBlogApi'
+import { useBlogService } from '~/services/blogService'
 
 defineOptions({ name: 'BlogCreatePage' })
 
 // Stores & Composables
 const userStore = useUserStore()
-const blogApi = useBlogApi()
+const blogService = useBlogService()
 const router = useRouter()
 
 // Form data
@@ -48,7 +48,7 @@ onMounted(async () => {
 
   // Create a draft on page load
   try {
-    const draft = await blogApi.createDraft({ content: '' })
+    const draft = await blogService.createDraft('')
     draftId.value = draft.id
   } catch (err) {
     console.error('Failed to initialize draft:', err)
@@ -163,7 +163,7 @@ const submitPost = async () => {
       coverimage: coverImageFileToPublish,
     }
 
-    const result = await blogApi.publishPost(publishPayload)
+    const result = await blogService.publishPostWithCategoryName(publishPayload)
 
     if (result.save === 1) {
       showMetaPopup.value = false
@@ -191,7 +191,7 @@ const saveDraft = async () => {
   errorMessage.value = ''
 
   try {
-    await blogApi.updateDraft(draftId.value, content.value)
+    await blogService.updateDraft(draftId.value, content.value)
     console.log('Draft saved successfully')
     _displayNotification('Draft saved successfully', 'success')
   } catch (error) {

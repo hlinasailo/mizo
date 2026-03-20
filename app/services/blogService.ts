@@ -1,4 +1,6 @@
-import { useApiClient } from '~/services/apiClient'
+import { useApiClient, toApiErrorMessage  } from '~/services/apiClient'
+
+import { useUserStore } from '~/stores/user'
 
 export interface Category {
   id: number
@@ -14,6 +16,15 @@ export interface PublishPostPayload {
   id: number
   title: string
   category: number
+  tags: string[]
+  coverimage?: File
+  content: string
+}
+
+export interface PublishPostPayloadWithCategoryName {
+  id: number
+  title: string
+  category: string // Category name (will be converted to ID)
   tags: string[]
   coverimage?: File
   content: string
@@ -69,6 +80,14 @@ const normalizeCategories = (response: CategoryResponse | Category[]) => {
 
 export const useBlogService = () => {
   const { request } = useApiClient()
+  const userStore = useUserStore()
+
+  const getToken = () => {
+    if (!userStore.accessToken) {
+      throw new Error('No authentication token available')
+    }
+    return userStore.accessToken
+  }
 
   const fetchCategories = async (forceRefresh = false): Promise<Category[]> => {
     if (!forceRefresh && categoriesCache) {
@@ -83,43 +102,96 @@ export const useBlogService = () => {
     return categoriesCache
   }
 
+  /**
+   * Convert category name to category ID
+   */
+  const getCategoryId = async (categoryName: string): Promise<number> => {
+    try {
+      const categories = await fetchCategories()
+      const category = categories.find(cat => cat.name === categoryName)
+
+      if (!category) {
+        const availableNames = categories.map(c => c.name).join(', ')
+        throw new Error(`Category "${categoryName}" not found. Available: ${availableNames}`)
+      }
+
+      return category.id
+    } catch (error) {
+      throw new Error(toApiErrorMessage(error, `Failed to convert category name "${categoryName}" to ID`))
+    }
+  }
+
   const createDraft = async (content: string, token?: string) => {
-    return await request<DraftResponse, { content: string }>('/api/v1/posts/createdraft/', {
-      method: 'POST',
-      requiresAuth: true,
-      token,
-      body: { content },
-    })
+    try {
+      const resolvedToken = token ?? getToken()
+      return await request<DraftResponse, { content: string }>('/api/v1/posts/createdraft/', {
+        method: 'POST',
+        requiresAuth: true,
+        token: resolvedToken,
+        body: { content },
+      })
+    } catch (error) {
+      throw new Error(toApiErrorMessage(error, 'Failed to create draft'))
+    }
   }
 
   const updateDraft = async (id: number, content: string, token?: string) => {
-    return await request<DraftResponse, { id: number; content: string }>('/api/v1/posts/createdraft/', {
-      method: 'PATCH',
-      requiresAuth: true,
-      token,
-      body: { id, content },
-    })
+    try {
+      const resolvedToken = token ?? getToken()
+      return await request<DraftResponse, { id: number; content: string }>('/api/v1/posts/createdraft/', {
+        method: 'PATCH',
+        requiresAuth: true,
+        token: resolvedToken,
+        body: { id, content },
+      })
+    } catch (error) {
+      throw new Error(toApiErrorMessage(error, 'Failed to update draft'))
+    }
   }
 
   const publishPost = async (payload: PublishPostPayload, token?: string) => {
-    const formData = new FormData()
-    formData.append('id', String(payload.id))
-    formData.append('title', payload.title)
-    formData.append('category', String(payload.category))
-    formData.append('tags', JSON.stringify(payload.tags))
-    formData.append('content', payload.content)
-    formData.append('published', 'true')
+    try {
+      const resolvedToken = token ?? getToken()
+      const formData = new FormData()
+      formData.append('id', String(payload.id))
+      formData.append('title', payload.title)
+      formData.append('category', String(payload.category))
+      formData.append('tags', JSON.stringify(payload.tags))
+      formData.append('content', payload.content)
+      formData.append('published', 'true')
 
-    if (payload.coverimage) {
-      formData.append('coverimage', payload.coverimage)
+      if (payload.coverimage) {
+        formData.append('coverimage', payload.coverimage)
+      }
+
+      return await request<PublishResponse, FormData>('/api/v1/posts/create/', {
+        method: 'PATCH',
+        requiresAuth: true,
+        token: resolvedToken,
+        body: formData,
+      })
+    } catch (error) {
+      throw new Error(toApiErrorMessage(error, 'Failed to publish post'))
     }
+  }
 
-    return await request<PublishResponse, FormData>('/api/v1/posts/create/', {
-      method: 'PATCH',
-      requiresAuth: true,
-      token,
-      body: formData,
-    })
+  /**
+   * Publish post with category as name (converts to ID internally)
+   */
+  const publishPostWithCategoryName = async (payload: PublishPostPayloadWithCategoryName, token?: string): Promise<PublishResponse> => {
+    try {
+      const categoryId = await getCategoryId(payload.category)
+      return await publishPost({
+        id: payload.id,
+        title: payload.title,
+        category: categoryId,
+        tags: payload.tags,
+        content: payload.content,
+        coverimage: payload.coverimage,
+      }, token)
+    } catch (error) {
+      throw new Error(toApiErrorMessage(error, 'Failed to publish post'))
+    }
   }
 
   const fetchPosts = async (page: number, category?: string) => {
@@ -145,9 +217,11 @@ export const useBlogService = () => {
 
   return {
     fetchCategories,
+    getCategoryId,
     createDraft,
     updateDraft,
     publishPost,
+    publishPostWithCategoryName,
     fetchPosts,
     fetchBookmarkedPosts,
   }
