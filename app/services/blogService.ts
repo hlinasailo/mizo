@@ -5,6 +5,7 @@ import { useUserStore } from '~/stores/user'
 export interface Category {
   id: number
   name: string
+  color?: string
 }
 
 interface CategoryResponse {
@@ -108,7 +109,8 @@ export const useBlogService = () => {
   const getCategoryId = async (categoryName: string): Promise<number> => {
     try {
       const categories = await fetchCategories()
-      const category = categories.find(cat => cat.name === categoryName)
+      const normalizedCategoryName = categoryName.trim().toLowerCase()
+      const category = categories.find(cat => cat.name?.trim().toLowerCase() === normalizedCategoryName)
 
       if (!category) {
         const availableNames = categories.map(c => c.name).join(', ')
@@ -196,7 +198,7 @@ export const useBlogService = () => {
 
   const fetchPosts = async (page: number, category?: string) => {
     const endpoint = category && category !== 'All'
-      ? `/api/v1/posts/api/categoryposts/${encodeURIComponent(category)}`
+      ? `/api/v1/posts/api/categoryposts/${encodeURIComponent(category.toLowerCase())}`
       : '/api/v1/posts/'
 
     return await request<PaginatedPostsResponse>(endpoint, {

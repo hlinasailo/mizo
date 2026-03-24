@@ -2,8 +2,10 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute } from '#imports'
 import { useUserStore } from '~/stores/user'
+import { useGroupTypeStore } from '~/stores/groupType'
 
 const userStore = useUserStore()
+const groupTypeStore = useGroupTypeStore()
 const route = useRoute()
 const isMobileMenuOpen = ref(false)
 const isMobileCategoryOpen = ref(false)
@@ -45,6 +47,13 @@ const toggleTheme = () => {
   isDarkMode.value = !isDarkMode.value
 }
 
+const categories = computed(() => groupTypeStore.groups)
+
+const formatCategoryName = (name: string) => {
+  if (name.toLowerCase() === 'beauty and fashion') return 'Beauty & Fashion'
+  return name.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
+}
+
 onMounted(() => {
   const savedTheme = localStorage.getItem('theme')
 
@@ -58,6 +67,10 @@ onMounted(() => {
 
   if (userStore.isAuthenticated && (!userStore.user || !userStore.user.profilePhoto)) {
     void userStore.fetchUser()
+  }
+
+  if (!groupTypeStore.groups.length && !groupTypeStore.isLoading) {
+    void groupTypeStore.fetchGroupTypes()
   }
 })
 
@@ -104,16 +117,25 @@ const isLoginPage = computed(() => route.path === '/login')
       <div class="absolute top-full left-0 mt-2 w-48 bg-black/90 border border-white/10 backdrop-blur-md opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
         <NuxtLink to="/blogs" class="block px-4 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-colors">All Posts</NuxtLink>
         <hr class="border-white/10 my-1">
-        <NuxtLink :to="{ path: '/blogs', query: { category: 'Zirna' } }" class="block px-4 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-colors">Zirna</NuxtLink>
-        <NuxtLink :to="{ path: '/blogs', query: { category: 'Gospel' } }" class="block px-4 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-colors">Gospel</NuxtLink>
-        <NuxtLink :to="{ path: '/blogs', query: { category: 'Hriselna' } }" class="block px-4 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-colors">Hriselna</NuxtLink>
-        <NuxtLink :to="{ path: '/blogs', query: { category: 'Thiamna' } }" class="block px-4 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-colors">Thiamna</NuxtLink>
-        <NuxtLink :to="{ path: '/blogs', query: { category: 'Beauty & Fashion' } }" class="block px-4 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-colors">Beauty &amp; Fashion</NuxtLink>
-        <NuxtLink :to="{ path: '/blogs', query: { category: 'Story' } }" class="block px-4 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-colors">Story</NuxtLink>
-        <NuxtLink :to="{ path: '/blogs', query: { category: 'Politics' } }" class="block px-4 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-colors">Politics</NuxtLink>
-        <NuxtLink :to="{ path: '/blogs', query: { category: 'Infiamna' } }" class="block px-4 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-colors">Infiamna</NuxtLink>
-        <hr class="border-white/10 my-1">
-        <NuxtLink :to="{ path: '/blogs', query: { category: 'Others' } }" class="block px-4 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-colors">Others</NuxtLink>
+        <template v-if="groupTypeStore.isLoading">
+          <span class="block px-4 py-2 text-sm text-zinc-500">Loading categories...</span>
+        </template>
+        <template v-else-if="groupTypeStore.error && !categories.length">
+          <span class="block px-4 py-2 text-sm text-zinc-500">Unable to load categories</span>
+        </template>
+        <template v-else-if="!categories.length">
+          <span class="block px-4 py-2 text-sm text-zinc-500">No categories</span>
+        </template>
+        <template v-else>
+          <NuxtLink
+            v-for="group in categories"
+            :key="`desktop-cat-${group.id ?? group.name}`"
+            :to="{ path: '/blogs', query: { category: group.name } }"
+            class="block px-4 py-2 text-sm text-zinc-400 hover:text-white hover:bg-white/5 transition-colors"
+          >
+            {{ formatCategoryName(group.name) }}
+          </NuxtLink>
+        </template>
       </div>
     </div>
   </nav>
@@ -224,15 +246,25 @@ const isLoginPage = computed(() => route.path === '/login')
 
         <div class="pl-3 pt-3 space-y-2 overflow-hidden transition-all duration-300" :class="isMobileCategoryOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'">
           <NuxtLink to="/blogs" class="block text-sm text-zinc-400 hover:text-white transition-colors" @click="toggleMobileMenu">All Posts</NuxtLink>
-          <NuxtLink :to="{ path: '/blogs', query: { category: 'Zirna' } }" class="block text-sm text-zinc-400 hover:text-white transition-colors" @click="toggleMobileMenu">Zirna</NuxtLink>
-          <NuxtLink :to="{ path: '/blogs', query: { category: 'Gospel' } }" class="block text-sm text-zinc-400 hover:text-white transition-colors" @click="toggleMobileMenu">Gospel</NuxtLink>
-          <NuxtLink :to="{ path: '/blogs', query: { category: 'Hriselna' } }" class="block text-sm text-zinc-400 hover:text-white transition-colors" @click="toggleMobileMenu">Hriselna</NuxtLink>
-          <NuxtLink :to="{ path: '/blogs', query: { category: 'Thiamna' } }" class="block text-sm text-zinc-400 hover:text-white transition-colors" @click="toggleMobileMenu">Thiamna</NuxtLink>
-          <NuxtLink :to="{ path: '/blogs', query: { category: 'Beauty & Fashion' } }" class="block text-sm text-zinc-400 hover:text-white transition-colors" @click="toggleMobileMenu">Beauty &amp; Fashion</NuxtLink>
-          <NuxtLink :to="{ path: '/blogs', query: { category: 'Story' } }" class="block text-sm text-zinc-400 hover:text-white transition-colors" @click="toggleMobileMenu">Story</NuxtLink>
-          <NuxtLink :to="{ path: '/blogs', query: { category: 'Politics' } }" class="block text-sm text-zinc-400 hover:text-white transition-colors" @click="toggleMobileMenu">Politics</NuxtLink>
-          <NuxtLink :to="{ path: '/blogs', query: { category: 'Infiamna' } }" class="block text-sm text-zinc-400 hover:text-white transition-colors" @click="toggleMobileMenu">Infiamna</NuxtLink>
-          <NuxtLink :to="{ path: '/blogs', query: { category: 'Others' } }" class="block text-sm text-zinc-400 hover:text-white transition-colors" @click="toggleMobileMenu">Others</NuxtLink>
+          <template v-if="groupTypeStore.isLoading">
+            <span class="block text-sm text-zinc-500">Loading categories...</span>
+          </template>
+          <template v-else-if="groupTypeStore.error && !categories.length">
+            <span class="block text-sm text-zinc-500">Unable to load categories</span>
+          </template>
+          <template v-else-if="!categories.length">
+            <span class="block text-sm text-zinc-500">No categories</span>
+          </template>
+          <NuxtLink
+            v-for="group in categories"
+            v-else
+            :key="`mobile-cat-${group.id ?? group.name}`"
+            :to="{ path: '/blogs', query: { category: group.name } }"
+            class="block text-sm text-zinc-400 hover:text-white transition-colors"
+            @click="toggleMobileMenu"
+          >
+            {{ formatCategoryName(group.name) }}
+          </NuxtLink>
         </div>
       </div>
       

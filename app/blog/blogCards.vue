@@ -61,16 +61,21 @@ const goToPage = (page: number) => {
 const formatDate = (dateStr: string) =>
   new Date(dateStr).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
 
+const capitalizeCategory = (category: string) => {
+  if (category === 'beauty and fashion') return 'Beauty & Fashion'
+  return category.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
+}
+
 const categoryGradient: Record<string, string> = {
-  'Zirna':            'from-zinc-500  to-zinc-700',
-  'Gospel':           'from-slate-500 to-slate-700',
-  'Hriselna':         'from-zinc-600  to-zinc-800',
-  'Thiamna':          'from-stone-500 to-stone-700',
-  'Beauty & Fashion': 'from-zinc-400  to-zinc-600',
-  'Story':            'from-neutral-500 to-neutral-700',
-  'Politics':         'from-zinc-600  to-zinc-900',
-  'Infiamna':         'from-slate-400 to-slate-700',
-  'Others':           'from-zinc-500  to-zinc-800',
+  'zirna':            'from-zinc-500  to-zinc-700',
+  'gospel':           'from-slate-500 to-slate-700',
+  'hriselna':         'from-zinc-600  to-zinc-800',
+  'thiamna':          'from-stone-500 to-stone-700',
+  'beauty and fashion': 'from-zinc-400  to-zinc-600',
+  'story':            'from-neutral-500 to-neutral-700',
+  'politics':         'from-zinc-600  to-zinc-900',
+  'infiamna':         'from-slate-400 to-slate-700',
+  'others':           'from-zinc-500  to-zinc-800',
 }
 
 const getGradient = (category: string) =>
@@ -85,7 +90,7 @@ const getGradient = (category: string) =>
       <div :class="$style.header">
         <h1 :class="$style.heading">
           <template v-if="activeCategory !== 'All'">
-            {{ activeCategory }}
+              {{ capitalizeCategory(activeCategory) }}
           </template>
           <template v-else>
             Blog <span :class="$style.headingMuted">Posts</span>
@@ -95,7 +100,7 @@ const getGradient = (category: string) =>
         <p :class="$style.headingMeta">
           <template v-if="activeCategory !== 'All'">
             Showing posts in
-            <span :class="$style.headingMetaStrong">{{ activeCategory }}</span> —
+              <span :class="$style.headingMetaStrong">{{ capitalizeCategory(activeCategory) }}</span> —
             <NuxtLink to="/blogs" :class="$style.headingMetaLink">view all</NuxtLink>
           </template>
           <template v-else>
@@ -107,7 +112,7 @@ const getGradient = (category: string) =>
       <!-- ── Post Count ─────────────────────────────────────── -->
       <p :class="$style.postCount">
         {{ totalCount }} post{{ totalCount !== 1 ? 's' : '' }}
-        <span v-if="activeCategory !== 'All'">· {{ activeCategory }}</span>
+        <span v-if="activeCategory !== 'All'">· {{ capitalizeCategory(activeCategory) }}</span>
       </p>
 
       <!-- ── Cards Grid ─────────────────────────────────────── -->
@@ -130,11 +135,11 @@ const getGradient = (category: string) =>
               v-else
               :class="[$style.thumbFallback, `bg-gradient-to-br`, getGradient(activeCategory)]"
             >
-              <span :class="$style.thumbFallbackLabel">{{ activeCategory !== 'All' ? activeCategory : '' }}</span>
+              <span :class="$style.thumbFallbackLabel">{{ activeCategory !== 'All' ? capitalizeCategory(activeCategory) : '' }}</span>
             </div>
 
             <!-- Category badge — only shown when filtering by category -->
-            <span v-if="activeCategory !== 'All'" :class="$style.categoryBadge">{{ activeCategory }}</span>
+              <span v-if="activeCategory !== 'All'" :class="$style.categoryBadge">{{ capitalizeCategory(activeCategory) }}</span>
           </div>
 
           <!-- Card Body -->
