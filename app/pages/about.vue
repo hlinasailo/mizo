@@ -198,7 +198,7 @@ onBeforeUnmount(() => observer?.disconnect())
   --fg-muted: #555551;
   --fg-soft:  rgba(10,10,10,0.50);
   --border:   rgba(10,10,10,0.14);
-  --card-bg:  rgba(10, 10, 10, 0.259);
+  --card-bg:   #ffffff;
   --grid-c:   rgba(10, 10, 10, 0.107);
 }
 :global(html.dark) {
@@ -206,7 +206,7 @@ onBeforeUnmount(() => observer?.disconnect())
   --bg-alt:   #0f0f0f;
   --fg:       #f0ede8;
   --fg-muted: rgba(240,237,232,0.72);
-  --fg-soft:  rgba(240,237,232,0.50);
+  --fg-soft:  rgba(181, 169, 149, 0.5);
   --border:   rgba(240,237,232,0.18);
   --card-bg:  rgba(255,255,255,0.06);
   --grid-c:   rgba(237, 237, 237, 0.088);
@@ -230,7 +230,11 @@ onBeforeUnmount(() => observer?.disconnect())
 :global(.visible) { opacity: 1 !important; transform: none !important; }
 
 /* ─── Layout ─────────────────────────────────────────────── */
-.aboutPage { scroll-behavior: smooth; }
+.aboutPage {
+  scroll-behavior: smooth;
+  --card-bg: #e4e3e3;
+}
+:global(html.dark) .aboutPage { --card-bg: rgba(255,255,255,0.06); }
 
 .container {
   max-width: 1280px;

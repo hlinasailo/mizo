@@ -326,7 +326,7 @@ const sharingEntities = [
   --fg-muted: #555551;
   --fg-soft:  rgba(10,10,10,0.50);
   --border:   rgba(10,10,10,0.14);
-  --card-bg:  rgba(10,10,10,0.259);
+  --card-bg:  #d4d3d3;
   --grid-c:   rgba(10,10,10,0.107);
 }
 :global(html.dark) {
@@ -353,10 +353,12 @@ const sharingEntities = [
 .page {
   background: var(--bg);
   color: var(--fg);
+  --card-bg: #ffffff;
   min-height: 100vh;
   font-family: 'Roboto Mono', 'JetBrains Mono', 'Consolas', monospace;
   overflow-x: hidden;
 }
+:global(html.dark) .page { --card-bg: rgba(255,255,255,0.06); }
 
 /* ─── Side nav ───────────────────────────────────────────── */
 .sideNav {
