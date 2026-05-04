@@ -7,7 +7,7 @@
     <div class="relative min-h-screen overflow-hidden">
 
       <!-- Grid Background -->
-      <div class="grid-bg"></div>
+      <div class="grid-bg"/>
 
       <!-- Glow -->
       <div class="pointer-events-none absolute -top-[10%] -left-[10%] w-[50%] h-[50%] rounded-full blur-[150px] mix-blend-screen animate-pulse" style="background: var(--glow-1); animation-duration: 8s;"/>
@@ -38,7 +38,7 @@
           </p>
           <br>
           <div class="discover-btn-wrap">
-            <NuxtLink to="/ServicesPage" class="discover-btn">
+            <NuxtLink to="/blogs" class="discover-btn">
               <span>Explore</span>
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
             </NuxtLink>
@@ -52,8 +52,8 @@
     <!-- SECTION 2 · PUBLISH (Social Publishing Hero)           -->
     <!-- ═══════════════════════════════════════════════════════ -->
     <div class="relative min-h-screen overflow-hidden" style="background: var(--bg);">
-      <div class="pointer-events-none absolute -top-[10%] -left-[10%] w-[50%] h-[50%] rounded-full blur-[150px] mix-blend-screen animate-pulse" style="background: var(--glow-1); animation-duration: 8s;"></div>
-      <div class="pointer-events-none absolute top-[40%] -right-[10%] w-[40%] h-[40%] rounded-full blur-[150px] mix-blend-screen animate-pulse" style="background: var(--glow-2); animation-duration: 10s;"></div>
+      <div class="pointer-events-none absolute -top-[10%] -left-[10%] w-[50%] h-[50%] rounded-full blur-[150px] mix-blend-screen animate-pulse" style="background: var(--glow-1); animation-duration: 8s;"/>
+      <div class="pointer-events-none absolute top-[40%] -right-[10%] w-[40%] h-[40%] rounded-full blur-[150px] mix-blend-screen animate-pulse" style="background: var(--glow-2); animation-duration: 10s;"/>
 
       <section class="relative pt-12 sm:pt-16 md:pt-20 pb-12 sm:pb-16 md:pb-20 lg:pt-28 lg:pb-32 px-4 sm:px-6 lg:px-12 max-w-7xl mx-auto flex flex-col-reverse lg:flex-row-reverse items-center gap-6 sm:gap-8 lg:gap-20">
 
@@ -73,12 +73,12 @@
               <p class="text-2xl sm:text-3xl md:text-4xl font-black tracking-tight" style="color: var(--fg);">1,200+</p>
               <p class="text-xs sm:text-sm uppercase tracking-widest mt-1 sm:mt-2 font-semibold" style="color: var(--fg-soft);">Registered creators</p>
             </div>
-            <div class="hidden sm:block w-px h-12" style="background: var(--border);"></div>
+            <div class="hidden sm:block w-px h-12" style="background: var(--border);"/>
             <div>
               <p class="text-2xl sm:text-3xl md:text-4xl font-black tracking-tight" style="color: var(--fg);">4,800+</p>
               <p class="text-xs sm:text-sm uppercase tracking-widest mt-1 sm:mt-2 font-semibold" style="color: var(--fg-soft);">Stories published</p>
             </div>
-            <div class="hidden sm:block w-px h-12" style="background: var(--border);"></div>
+            <div class="hidden sm:block w-px h-12" style="background: var(--border);"/>
             <div>
               <p class="text-2xl sm:text-3xl md:text-4xl font-black tracking-tight" style="color: var(--fg);">12</p>
               <p class="text-xs sm:text-sm uppercase tracking-widest mt-1 sm:mt-2 font-semibold" style="color: var(--fg-soft);">Districts sharing</p>
@@ -86,18 +86,18 @@
           </div>
           <br>
           <div class="discover-btn-wrap">
-            <NuxtLink to="/blogs" class="discover-btn">
-              <span>Start Creating</span>
+            <button class="discover-btn create-btn" @click="handleCreateClick">
+              <span>Create</span>
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-            </NuxtLink>
+            </button>
           </div>
         </div>
 
         <!-- Animated Cards -->
-        <div class="flex-1 w-full flex justify-center" ref="heroRef">
+        <div ref="heroRef" class="flex-1 w-full flex justify-center">
           <div class="pub-cards">
-            <div class="pub-card" v-for="(card, i) in pubCards" :key="i">
-              <div class="pub-icon" v-html="card.icon"></div>
+            <div v-for="(card, i) in pubCards" :key="i" class="pub-card">
+              <div class="pub-icon" v-html="card.icon"/>
               {{ card.label }}
             </div>
           </div>
@@ -110,13 +110,13 @@
     <!-- SECTION 3 · PUBLISH2 (Features Grid)                   -->
     <!-- ═══════════════════════════════════════════════════════ -->
     <section class="relative py-12 sm:py-16 md:py-24 lg:py-28 px-4 sm:px-6 lg:px-12 overflow-hidden" style="background: var(--bg);">
-      <div class="pointer-events-none absolute top-[20%] left-[10%] w-[40%] h-[40%] rounded-full blur-[120px]" style="background: var(--glow-1);"></div>
+      <div class="pointer-events-none absolute top-[20%] left-[10%] w-[40%] h-[40%] rounded-full blur-[120px]" style="background: var(--glow-1);"/>
       <div class="max-w-7xl mx-auto">
         <p class="text-xs sm:text-sm font-bold uppercase tracking-widest mb-3 sm:mb-4" style="color: var(--fg-soft);">Why Mizomade</p>
         <h2 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black tracking-tight mb-10 sm:mb-12 md:mb-16 max-w-3xl leading-tight" style="color: var(--fg);">
           Designed for low-resource communities
         </h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 overflow-hidden rounded-9xl" style="gap: 1px; background: var(--border); border: 1px solid var(--border);" ref="featuresRef">
+        <div ref="featuresRef" class="grid grid-cols-1 md:grid-cols-3 overflow-hidden rounded-9xl" style="gap: 1px; background: var(--border); border: 1px solid var(--border);">
           <div class="feature-card p-10 flex flex-col gap-6 group transition-colors duration-300" style="background: var(--bg);">
             <div class="icon-wrap">
               <svg viewBox="0 0 24 24" fill="none" width="24" height="24">
@@ -151,6 +151,13 @@
               <p class="text-base leading-relaxed" style="color: var(--fg-soft);">Layouts, galleries, and translation helpers all in one place.</p>
             </div>
           </div>
+          
+        </div>
+        <div class="discover-btn-wrap mt-8 sm:mt-10 create-cta-wrap">
+          <NuxtLink to="/CompanyPage" class="discover-btn">
+            <span>More</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 12L10 8L6 4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          </NuxtLink>
         </div>
       </div>
     </section>
@@ -159,7 +166,7 @@
     <!-- ═══════════════════════════════════════════════════════ -->
     <!-- SECTION 4 · PRODUCT (Horizontal Scroll Gallery)        -->
     <!-- ═══════════════════════════════════════════════════════ -->
-    <section class="relative py-12 sm:py-16 md:py-20 lg:py-20 px-4 sm:px-6 lg:px-12 overflow-hidden" style="background: var(--bg);">
+    <section class="relative py-8 sm:py-10 md:py-12 lg:py-14 px-3 sm:px-4 lg:px-8 overflow-hidden" style="background: var(--bg);">
       <div class="max-w-7xl mx-auto">
         <p class="text-xs sm:text-sm font-bold uppercase tracking-widest mb-3 sm:mb-4" style="color: var(--fg-soft);">What We Build</p>
         <h2 class="text-3xl sm:text-4xl md:text-5xl lg:text-7xl font-black tracking-tight leading-none" style="color: var(--fg);">
@@ -168,12 +175,12 @@
       </div>
     </section>
 
-    <section class="portfolio-section" ref="portfolio">
-      <div class="gallery-container" ref="gallery">
-        <div class="gallery-card" v-for="(card, index) in productCards" :key="index" :class="{ 'featured': card.featured }">
+    <section ref="portfolio" class="portfolio-section">
+      <div ref="gallery" class="gallery-container">
+        <div v-for="(card, index) in productCards" :key="index" class="gallery-card" :class="{ 'featured': card.featured }">
           <div class="card-image-wrapper">
-            <img :src="card.img" :alt="card.title" loading="lazy" />
-            <div class="card-overlay"></div>
+            <img :src="card.img" :alt="card.title" loading="lazy" >
+            <div class="card-overlay"/>
           </div>
           <div class="card-content">
             <span class="card-category">{{ card.category }}</span>
@@ -199,50 +206,107 @@
     <!-- SECTION 5 · BLOGGER (Blog Posts)                       -->
     <!-- ═══════════════════════════════════════════════════════ -->
     <section class="relative py-12 sm:py-16 md:py-24 lg:py-28 px-4 sm:px-6 lg:px-12 overflow-hidden" style="background: var(--bg);">
-      <div class="pointer-events-none absolute inset-0" style="
+      <div
+class="pointer-events-none absolute inset-0" style="
         background-image: linear-gradient(var(--grid-c) 1px, transparent 1px),
                           linear-gradient(90deg, var(--grid-c) 1px, transparent 1px);
-        background-size: 40px 40px;">
-      </div>
+        background-size: 40px 40px;"/>
       <div class="max-w-7xl mx-auto">
         <div class="mb-8 sm:mb-12">
-          <h2 class="text-4xl sm:text-5xl md:text-7xl lg:text-9xl font-black tracking-tight leading-none mb-4 sm:mb-6">
-            <span style="color: var(--fg);">BLOG </span>
-            <span style="color: var(--fg-soft);">POSTS</span>
+          <h2 class="text-4xl sm:text-5xl md:text-7xl lg:text-5xl font-black tracking-tight leading-none mb-4 sm:mb-6">
+            <span style="color: var(--fg);">Latest voice from  </span>
+            <span style="color: var(--fg-soft);">low-resources languages</span>
           </h2>
-          <div class="w-10 sm:w-12 h-1 mb-4 sm:mb-8" style="background: var(--fg);"></div>
+          <div class="w-10 sm:w-12 h-1 mb-4 sm:mb-8" style="background: var(--fg);"/>
           <p class="text-base sm:text-lg md:text-xl font-medium max-w-xl leading-relaxed" style="color: var(--fg-muted);">
-            Discover stories, ideas and perspectives from the Mizomade community.
+            Community pulse
           </p>
         </div>
-        <p class="text-xs sm:text-sm font-bold uppercase tracking-widest mb-8 sm:mb-10" style="color: var(--fg-soft);">14 Posts</p>
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6" ref="blogRef">
-          <div class="blog-card group cursor-pointer" v-for="(post, i) in blogPosts" :key="i">
-            <div class="relative w-full aspect-[4/3] rounded-2xl overflow-hidden mb-6" style="background: var(--card-bg); border: 1px solid var(--border);">
-              <div class="absolute top-4 left-4 z-10 px-3 py-1.5 rounded-md" style="background: var(--bg-alt); border: 1px solid var(--border);">
-                <span class="text-xs font-bold uppercase tracking-widest" style="color: var(--fg);">{{ post.tag }}</span>
+        
+        <div v-if="blogLoading || blogError" ref="blogRef" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
+          <article
+            v-for="n in 3"
+            :key="`blog-skeleton-${n}`"
+            class="blog-card rounded-2xl overflow-hidden animate-pulse"
+            style="background: var(--card-bg); border: 1px solid var(--border);"
+          >
+            <div class="w-full aspect-[16/10]" style="background: var(--bg-alt);"/>
+            <div class="p-4 flex flex-col gap-3 min-h-[150px]">
+              <div class="h-4 rounded" style="width: 85%; background: var(--border);"/>
+              <div class="h-4 rounded" style="width: 60%; background: var(--border);"/>
+              <div class="flex items-center gap-3 mt-auto">
+                <div class="w-8 h-8 rounded-full" style="background: var(--border);"/>
+                <div class="w-full">
+                  <div class="h-3 rounded mb-2" style="width: 45%; background: var(--border);"/>
+                  <div class="h-3 rounded" style="width: 35%; background: var(--border);"/>
+                </div>
               </div>
-              <div class="absolute inset-0 flex items-center justify-center">
-                <span class="text-base font-bold uppercase tracking-widest" style="color: var(--fg-soft);">{{ post.tag }}</span>
-              </div>
-              <div class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300" style="background: var(--card-bg);"></div>
             </div>
-            <div class="px-1">
-              <h3 class="font-bold text-xl leading-snug tracking-tight mb-4 transition-colors duration-200" style="color: var(--fg);">{{ post.title }}</h3>
-              <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0" style="background: var(--card-bg); border: 1px solid var(--border);">
-                  <svg viewBox="0 0 24 24" fill="none" width="16" height="16">
+          </article>
+        </div>
+
+        <div v-else-if="blogPosts.length" ref="blogRef" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
+          <article
+            v-for="post in blogPosts"
+            :key="post.id"
+            class="blog-card group cursor-pointer rounded-2xl overflow-hidden"
+            style="background: var(--card-bg); border: 1px solid var(--border);"
+            @click="post.slug && router.push(`/blog/${post.slug}`)"
+          >
+            <div class="relative w-full aspect-[16/10] overflow-hidden" style="background: var(--bg-alt);">
+              <img
+                v-if="post.coverimage"
+                :src="resolveMediaUrl(post.coverimage) || ''"
+                :alt="post.title"
+                class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+              >
+              <div
+                v-else
+                class="w-full h-full flex items-center justify-center bg-gradient-to-br"
+                :class="getGradient(post.category)"
+              >
+                <span class="text-xs font-bold uppercase tracking-[0.2em] px-2 text-center text-white/35">
+                  {{ post.category || 'Blog' }}
+                </span>
+              </div>
+
+            </div>
+
+            <div class="p-4 flex flex-col gap-3 min-h-[150px]">
+              <h3 class="font-bold text-base leading-snug transition-colors duration-200 line-clamp-2" style="color: var(--fg);">
+                {{ post.title }}
+              </h3>
+
+              <div class="flex items-center gap-3 mt-auto">
+                <div class="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center flex-shrink-0" style="background: var(--bg-alt); border: 1px solid var(--border);">
+                  <img
+                    v-if="canRenderBlogAvatar(post)"
+                    :src="getBlogAvatarSrc(post)"
+                    :alt="post.author"
+                    class="w-full h-full object-cover"
+                    @error="handleBlogAvatarError(post, $event)"
+                  >
+                  <svg v-else viewBox="0 0 24 24" fill="none" width="16" height="16">
                     <circle cx="12" cy="8" r="4" stroke-width="1.5" class="avatar-stroke"/>
                     <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" stroke-width="1.5" stroke-linecap="round" class="avatar-stroke"/>
                   </svg>
                 </div>
                 <div>
-                  <p class="text-sm font-semibold" style="color: var(--fg-muted);">{{ post.author }}</p>
-                  <p class="text-sm" style="color: var(--fg-soft);">{{ post.date }}</p>
+                  <p class="text-sm font-semibold" style="color: var(--fg-muted);">@{{ post.author }}</p>
+                  <p class="text-xs" style="color: var(--fg-soft);">{{ formatBlogDate(post.date) }}</p>
                 </div>
               </div>
             </div>
-          </div>
+          </article>
+        </div>
+
+        <div
+          v-else
+          class="rounded-2xl p-6 sm:p-8 text-center"
+          style="background: var(--card-bg); border: 1px solid var(--border);"
+        >
+          <p class="text-base sm:text-lg font-semibold mb-2" style="color: var(--fg);">No blog posts yet</p>
+          <p class="text-sm sm:text-base" style="color: var(--fg-muted);">New community stories will appear here soon.</p>
         </div>
       </div>
       <div class="flex justify-center mt-12 sm:mt-16">
@@ -285,12 +349,20 @@
                 Give,<br> and it will be given to you.
               </p>
               <div class="flex gap-3 sm:gap-4 mt-2 sm:mt-3 text-lg sm:text-xl text-zinc-400">
-                <a href="#" class="transition-colors hover:text-[#0A66C2]" title="LinkedIn"><Icon name="mdi:linkedin" /></a>
-                <a href="#" class="transition-colors hover:text-[#E4405F]" title="Instagram"><Icon name="mdi:instagram" /></a>
-                <a href="#" class="transition-colors hover:text-[#FF0000]" title="YouTube"><Icon name="mdi:youtube" /></a>
-                <a href="#" class="transition-colors hover:text-[#1DA1F2]" title="Twitter"><Icon name="mdi:twitter" /></a>
-                <a href="#" class="transition-colors hover:text-[#1877F2]" title="Facebook"><Icon name="mdi:facebook" /></a>
-                <a href="https://wa.me/1234567890" class="transition-colors hover:text-[#25D366]" title="WhatsApp"><Icon name="mdi:whatsapp" /></a>
+                <a href="https://www.linkedin.com/company/mizomade/posts/?feedView=all" target="_blank" rel="noopener noreferrer" class="transition-colors hover:text-[#0A66C2]" title="LinkedIn"><Icon name="mdi:linkedin" /></a>
+                <a href="https://www.instagram.com/mizomade/" target="_blank" rel="noopener noreferrer" class="transition-colors hover:text-[#E4405F]" title="Instagram"><Icon name="mdi:instagram" /></a>
+                <a href="https://www.youtube.com/channel/UCQ0g4WL4IhPOzsKa7l0Jisg" target="_blank" rel="noopener noreferrer" class="transition-colors hover:text-[#FF0000]" title="YouTube"><Icon name="mdi:youtube" /></a>
+                <a href="https://x.com/mizo_made" target="_blank" rel="noopener noreferrer" class="transition-colors hover:text-[#1DA1F2]" title="Twitter"><Icon name="mdi:twitter" /></a>
+                <a href="https://www.facebook.com/profile.php?id=100064397650728#" target="_blank" rel="noopener noreferrer" class="transition-colors hover:text-[#1877F2]" title="Facebook"><Icon name="mdi:facebook" /></a>
+                <a 
+  href="https://api.whatsapp.com/send/?phone=916009229392&text=Mizomade+chungchang+hriat+chian+ka+duh+e.&type=phone_number&app_absent=0" 
+  target="_blank" 
+  rel="noopener noreferrer" 
+  class="transition-colors hover:text-[#25D366]" 
+  title="WhatsApp"
+>
+  <Icon name="mdi:whatsapp" />
+</a>
               </div>
             </div>
           </div>
@@ -359,6 +431,26 @@ import { ref, onMounted, onBeforeUnmount } from 'vue'
 import * as THREE from 'three'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
+import { useBlogService } from '~/services/blogService'
+import { useAuthService } from '~/services/authService'
+import { resolveMediaUrl } from '~/utils/mediaUrl'
+
+const router = useRouter()
+
+// ── Auth & Navigation ──────────────────────────────────────
+function isUserLoggedIn() {
+  return !!useCookie('access_token').value
+}
+
+function handleCreateClick() {
+  if (isUserLoggedIn()) {
+    router.push('/create')
+  } else {
+    const redirectCookie = useCookie('redirect_after_login')
+    redirectCookie.value = '/create'
+    router.push({ path: '/login', query: { redirect: '/create' } })
+  }
+}
 
 // ── 3D Model refs ──────────────────────────────────────────
 const canvas         = ref(null)
@@ -367,13 +459,39 @@ const loading        = ref(true)
 let renderer, scene, camera, controls, animationId, model
 const MODEL_PATH = '/models/m4.glb'
 const MODEL_BASE_Y = 0.40
+const MOBILE_3D_BREAKPOINT = 768
 const scroll3d   = { current: 0, target: 0 }
 const LERP       = 0.05
 
 function onScroll3d() { scroll3d.target = window.scrollY }
 
+function isMobile3d() {
+  return import.meta.client && window.innerWidth < MOBILE_3D_BREAKPOINT
+}
+
 function getModelColor() {
-  return document.documentElement.classList.contains('dark') ? 0xaaaaaa : 0x444444
+  return document.documentElement.classList.contains('dark') ? 0xaaaaaa : 0xf0f0f0
+}
+
+function getMobileModelStyle() {
+  return isMobile3d()
+    ? { color: 0xf4f4f4, metalness: 0.08, roughness: 0.88, opacity: 0.28 }
+    : { color: getModelColor(), metalness: 0.7, roughness: 0.3, opacity: 0.80 }
+}
+
+function applyModelMaterialStyle() {
+  if (!model) return
+  const materialStyle = getMobileModelStyle()
+  model.traverse((child) => {
+    if (!child.isMesh) return
+    child.material = new THREE.MeshStandardMaterial({
+      color: materialStyle.color,
+      metalness: materialStyle.metalness,
+      roughness: materialStyle.roughness,
+      opacity: materialStyle.opacity,
+      transparent: true,
+    })
+  })
 }
 
 function init3d() {
@@ -427,18 +545,12 @@ function init3d() {
     const scale  = 2.2 / maxDim
     model.scale.setScalar(scale)
     model.position.sub(center.multiplyScalar(scale))
-    model.position.x = 1.5
+    model.position.x = isMobile3d() ? 0.45 : 1.5
     model.position.y = MODEL_BASE_Y
     model.position.z = 2
-    model.rotation.x = -0.7
+    model.rotation.x = isMobile3d() ? -0.55 : -0.7
     model.rotation.y = 0.15
-    model.traverse((child) => {
-      if (child.isMesh) {
-        child.material = new THREE.MeshStandardMaterial({
-          color: getModelColor(), metalness: 0.7, roughness: 0.3, opacity: 0.80, transparent: true,
-        })
-      }
-    })
+    applyModelMaterialStyle()
     scene.add(model)
     loading.value = false
   }, undefined, (err) => { console.error('GLB load error:', err); loading.value = false })
@@ -446,9 +558,7 @@ function init3d() {
 
 const themeObserver = typeof MutationObserver !== 'undefined'
   ? new MutationObserver(() => {
-      if (!model) return
-      const color = getModelColor()
-      model.traverse((child) => { if (child.isMesh) child.material.color.setHex(color) })
+      applyModelMaterialStyle()
     })
   : null
 
@@ -459,13 +569,15 @@ function animate3d() {
     scroll3d.current += (scroll3d.target - scroll3d.current) * LERP
     const maxScroll = document.body.scrollHeight - window.innerHeight
     const progress  = Math.min(scroll3d.current / maxScroll, 1)
-    model.rotation.y = 0.5 + scroll3d.current * 0.002
+    const mobile = isMobile3d()
+    model.rotation.y = (mobile ? 0.25 : 0.5) + scroll3d.current * 0.002
     model.position.y = MODEL_BASE_Y + Math.sin(scroll3d.current * 0.002) * 0.25
-    model.position.x = 1.2 + Math.sin(scroll3d.current * 0.0015) * 0.3
-    const Z_START = 4.5; const Z_END = 2
+    model.position.x = (mobile ? 0.35 : 1.2) + Math.sin(scroll3d.current * 0.0015) * (mobile ? 0.12 : 0.3)
+    const Z_START = mobile ? 5.6 : 4.5; const Z_END = mobile ? 3.3 : 2
     camera.position.z = Z_START - (Z_START - Z_END) * progress
-    camera.position.y = 1.2 + progress * 0.4
-    camera.lookAt(0, 0, 0)
+    camera.position.y = mobile ? 1.45 + progress * 0.25 : 1.2 + progress * 0.4
+    camera.position.x = mobile ? 0.15 : 0
+    camera.lookAt(mobile ? 0.2 : 0, mobile ? 0.15 : 0, 0)
   }
   renderer?.render(scene, camera)
 }
@@ -477,6 +589,16 @@ function onResize3d() {
   camera.aspect = w / h
   camera.updateProjectionMatrix()
   renderer.setSize(w, h)
+  if (model) {
+    const mobile = w < MOBILE_3D_BREAKPOINT
+    model.position.x = mobile ? 0.45 : 1.5
+    model.rotation.x = mobile ? -0.55 : -0.7
+    applyModelMaterialStyle()
+    camera.position.x = mobile ? 0.15 : 0
+    camera.position.y = mobile ? 1.45 : 1.2
+    camera.position.z = mobile ? 5.6 : 4.5
+    camera.lookAt(mobile ? 0.2 : 0, mobile ? 0.15 : 0, 0)
+  }
 }
 
 // ── Publish cards ──────────────────────────────────────────
@@ -496,16 +618,161 @@ const productCards = [
   { img: "images/images/api.jpeg",     title: "AI Tools & APIs",       text: "APIs for automated editing, voice-over, and recommendation systems.", category: "Tooling", featured: true },
   { img: "images/images/web.jpeg",     title: "Software Development",  text: "Web, mobile, and backend experiences for creators and partners.", category: "Engineering", featured: false },
   { img: "images/images/emerge.jpeg",  title: "Emerging Tech Lab",     text: "Prototyping with AR, XR, and distributed systems.", category: "Innovation", featured: false },
-  { img: "images/images/ebook.jpeg",   title: "E-book",                text: "Real-time analytics, dashboards, and AI-powered insights.", category: "Analytics", featured: true },
+  { img: "images/images/ebook.jpeg",   title: "E-book",                text: "e-book app allows users to conveniently read digital books anytime.", category: "E-Book", featured: true },
 ]
-
 // ── Blog posts ─────────────────────────────────────────────
 const blogRef  = ref(null)
-const blogPosts = [
-  { tag: "Zirna", title: "The Spirit of Zirna in Modern Mizo Society",    author: "@lalnghak",    date: "Mar 1, 2026" },
-  { tag: "Zirna", title: "Preserving Zirna Through Community Events",     author: "@malsawmi",    date: "Feb 20, 2026" },
-  { tag: "Zirna", title: "What Zirna Means to Our Generation",            author: "@vanlalruata", date: "Jan 15, 2026" },
-]
+const blogPosts = ref([
+ 
+ 
+])
+const blogLoading = ref(true)
+const blogError = ref(false)
+
+const blogService = useBlogService()
+const authService = useAuthService()
+const authorPhotoCache = ref({})
+const brokenBlogAvatars = ref({})
+
+const normalizeUsername = (value) => String(value || '').trim().replace(/^@+/, '').toLowerCase()
+
+const getAuthorPhotoFromCache = (username) => {
+  const key = normalizeUsername(username)
+  return key ? authorPhotoCache.value[key] || '' : ''
+}
+
+const setAuthorPhotoCache = (username, photoUrl) => {
+  const key = normalizeUsername(username)
+  if (!key || !photoUrl) return
+  authorPhotoCache.value = {
+    ...authorPhotoCache.value,
+    [key]: photoUrl,
+  }
+}
+
+const getBlogAvatarSrc = (post) => {
+  const cached = getAuthorPhotoFromCache(post?.author)
+  if (cached) return cached
+
+  return resolveMediaUrl(post?.authorphoto || '') || ''
+}
+
+const getAvatarKey = (post, src = '') => `${String(post?.id || '')}::${src}`
+
+const canRenderBlogAvatar = (post) => {
+  const src = getBlogAvatarSrc(post)
+  if (!src) return false
+  return !brokenBlogAvatars.value[getAvatarKey(post, src)]
+}
+
+const markBlogAvatarBroken = (post) => {
+  const src = getBlogAvatarSrc(post)
+  if (!src) return
+
+  brokenBlogAvatars.value = {
+    ...brokenBlogAvatars.value,
+    [getAvatarKey(post, src)]: true,
+  }
+}
+
+const handleBlogAvatarError = (post, event) => {
+  markBlogAvatarBroken(post)
+
+  const target = event?.target
+  if (target) {
+    target.style.display = 'none'
+  }
+}
+
+const loadLatestBlogAuthorPhotos = async (posts) => {
+  const authorEntries = Array.from(
+    new Map(
+      posts
+        .map((post) => {
+          const rawUsername = String(post?.author || '').trim()
+          const normalized = normalizeUsername(rawUsername)
+          if (!rawUsername || !normalized) return null
+          return [normalized, rawUsername]
+        })
+        .filter(Boolean),
+    ).entries(),
+  )
+
+  await Promise.allSettled(
+    authorEntries.map(async ([normalizedUsername, rawUsername]) => {
+      if (!normalizedUsername || !rawUsername || authorPhotoCache.value[normalizedUsername]) return
+
+      try {
+        const response = await authService.fetchProfilePhotoByUsername(rawUsername)
+        const resolved = resolveMediaUrl(response?.profilephoto || '') || ''
+
+        if (!resolved) return
+
+        setAuthorPhotoCache(rawUsername, resolved)
+      } catch {
+        // Best-effort fetch: keep existing/fallback rendering.
+      }
+    }),
+  )
+}
+
+const categoryGradient = {
+  zirna: 'from-zinc-500 to-zinc-700',
+  gospel: 'from-slate-500 to-slate-700',
+  hriselna: 'from-zinc-600 to-zinc-800',
+  thiamna: 'from-stone-500 to-stone-700',
+  'beauty and fashion': 'from-zinc-400 to-zinc-600',
+  story: 'from-neutral-500 to-neutral-700',
+  politics: 'from-zinc-600 to-zinc-900',
+  infiamna: 'from-slate-400 to-slate-700',
+  others: 'from-zinc-500 to-zinc-800',
+}
+
+const getGradient = (category) => categoryGradient[String(category || '').toLowerCase()] || 'from-zinc-500 to-zinc-700'
+
+const formatBlogDate = (dateStr) => {
+  if (!dateStr) return ''
+  return new Date(dateStr).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  })
+}
+
+const loadLatestBlogPosts = async () => {
+  blogLoading.value = true
+  blogError.value = false
+
+  try {
+    const response = await blogService.fetchPosts(1)
+    const latest = Array.isArray(response?.results) ? response.results.slice(0, 3) : []
+
+    if (!latest.length) {
+      blogPosts.value = []
+      return
+    }
+
+    const mappedPosts = latest.map((post) => ({
+      id: post?.id,
+      category: post?.category || 'Blog',
+      title: post?.title || 'Untitled post',
+      author: post?.author || 'unknown',
+      date: post?.date || '',
+      slug: post?.slug || '',
+      coverimage: post?.coverimage || null,
+      authorphoto: post?.authorphoto || '',
+    }))
+
+    blogPosts.value = mappedPosts
+    await loadLatestBlogAuthorPhotos(mappedPosts)
+  } catch (error) {
+    blogError.value = true
+    blogPosts.value = []
+    console.error('Failed to load latest blog posts', error)
+  } finally {
+    blogLoading.value = false
+  }
+}
 
 const featuresRef = ref(null)
 
@@ -518,12 +785,44 @@ const LERP_VAL = 0.06, MAX_SPEED = 4, IDLE_SPEED = 0.9, MIN_SPEED = 1.5
 function lerpFn(a, b, t) { return a + (b - a) * t }
 function measureMarquee() { if (marqueeContent.value) halfW = marqueeContent.value.scrollWidth / 2 }
 function tickMarquee() {
+  // If we haven't measured the content width yet, try to measure and wait
+  if (!halfW || halfW <= 0) {
+    measureMarquee()
+    if (!halfW || halfW <= 0) {
+      // nothing to animate yet, keep trying
+      marqueeRaf = requestAnimationFrame(tickMarquee)
+      return
+    }
+  }
+
   currentSpeed = lerpFn(currentSpeed, targetSpeed, LERP_VAL)
   marqueeX -= currentSpeed
   if (marqueeX <= -halfW) marqueeX += halfW
   if (marqueeX > 0) marqueeX -= halfW
   if (marqueeContent.value) marqueeContent.value.style.transform = `translateX(${marqueeX}px)`
   marqueeRaf = requestAnimationFrame(tickMarquee)
+}
+
+async function waitForPortfolioImages() {
+  if (!gallery.value) return
+  const images = Array.from(gallery.value.querySelectorAll('img'))
+
+  await Promise.all(
+    images.map((img) => {
+      if (img.complete) return Promise.resolve()
+
+      return new Promise((resolve) => {
+        const done = () => {
+          img.removeEventListener('load', done)
+          img.removeEventListener('error', done)
+          resolve()
+        }
+
+        img.addEventListener('load', done, { once: true })
+        img.addEventListener('error', done, { once: true })
+      })
+    })
+  )
 }
 
 // ── Footer data ────────────────────────────────────────────
@@ -547,6 +846,8 @@ const contactLinks = [
 let scrollTriggerInst = null
 
 onMounted(async () => {
+  await loadLatestBlogPosts()
+
   init3d()
   animate3d()
   window.addEventListener('resize', onResize3d)
@@ -556,6 +857,14 @@ onMounted(async () => {
   lastScrollY = window.scrollY
   measureMarquee()
   tickMarquee()
+
+  // Re-measure marquee when the viewport changes (important for mobile rotations)
+  window.addEventListener('resize', measureMarquee)
+
+  // Re-measure after fonts load (clamped font sizes can change scrollWidth)
+  if (document?.fonts && document.fonts.ready) {
+    document.fonts.ready.then(() => measureMarquee()).catch(() => {})
+  }
 
   const handleMarqueeScroll = () => {
     const currentScroll = window.scrollY
@@ -573,13 +882,6 @@ onMounted(async () => {
   const { gsap } = await import('gsap')
   const { ScrollTrigger } = await import('gsap/ScrollTrigger')
   gsap.registerPlugin(ScrollTrigger)
-
-  await Promise.all(
-    Array.from(document.images).map(img => {
-      if (img.complete) return Promise.resolve()
-      return new Promise(resolve => { img.onload = resolve })
-    })
-  )
 
   if (heroRef.value) {
     gsap.context(() => {
@@ -600,6 +902,8 @@ onMounted(async () => {
   }
 
   if (gallery.value && portfolio.value) {
+    await waitForPortfolioImages()
+
     const galleryWidth  = gallery.value.scrollWidth
     const viewportWidth = window.innerWidth
     const scrollLength  = galleryWidth - viewportWidth
@@ -644,22 +948,25 @@ onBeforeUnmount(() => {
 
 <style scoped>
 /* ── CSS Variables for both modes ──────────────────────────────────── */
-:root {
+:global(:root) {
   /* Light mode defaults - will be overridden by dark mode */
   --bg: #ffffff;
   --fg: #111111;
-  --fg-muted: #d3d1d1;
-  --fg-soft: #d5d1d1;
+  --fg-muted: #4f4f4f;
+  --fg-soft: #666666;
   --border: #e5e5e5;
-  --card-bg: #f5f5f5;
-  --bg-alt: #fafafa;
+  --card-bg: #ffffff;
+  --bg-alt: #ffffff;
   --grid-c: #e5e5e5;
   --glow-1: rgba(0, 0, 0, 0.05);
   --glow-2: rgba(0, 0, 0, 0.03);
+  --gallery-card-bg: #ffffff;
+  --gallery-overlay-end: rgba(17, 17, 17, 0.08);
 }
 
 /* Dark mode - applied when dark class is present */
-:root.dark {
+:global(html.dark),
+:global(body.dark) {
   --bg: #000000;
   --fg: #ffffff;
   --fg-muted: #cccccc;
@@ -670,6 +977,8 @@ onBeforeUnmount(() => {
   --grid-c: #1a1a1a;
   --glow-1: rgba(255, 255, 255, 0.05);
   --glow-2: rgba(255, 255, 255, 0.03);
+  --gallery-card-bg: rgba(255, 255, 255, 0.05);
+  --gallery-overlay-end: rgba(0, 0, 0, 0.45);
 }
 
 /* ── Grid background ──────────────────────────────────── */
@@ -700,6 +1009,19 @@ onBeforeUnmount(() => {
 }
 .discover-btn:hover { background: var(--bg); color: var(--fg); }
 
+.create-btn {
+  background: transparent;
+  color: var(--fg);
+  border: 2px solid var(--fg);
+}
+
+.create-btn:hover {
+  background: var(--fg);
+  color: var(--bg);
+  border-color: var(--fg);
+  box-shadow: inset 0 0 0 1px var(--fg);
+}
+
 /* ── Publish cards ────────────────────────────────────── */
 .pub-cards {
   display: flex; flex-direction: column;
@@ -708,22 +1030,61 @@ onBeforeUnmount(() => {
 .pub-card {
   display: inline-flex; align-items: center; gap: 16px;
   padding: 16px 28px; border-radius: 1px;
-  background: #858585; border: 1px solid var(--border);
+  background: var(--bg); border: 3px solid var(--border);
   backdrop-filter: blur(12px); width: fit-content;
   font-weight: 800; font-size: clamp(1.2rem, 2.5vw, 1.7rem);
   color: var(--fg); letter-spacing: -0.02em; line-height: 1.2;
   margin-bottom: 14px;
   transition: transform 0.3s ease, background 0.3s ease;
 }
-.pub-card:hover { transform: translateX(8px); background: #ffffff; }
-:global(html.dark) .pub-card { background: #f2f2f2; }
-:global(html.dark) .pub-card:hover { background: #c33434; }
+.pub-card:hover { transform: translateX(8px); background: color-mix(in srgb, var(--bg) 92%, var(--fg) 8%); }
+:global(html:not(.dark)) .pub-card {
+  background: #ffffff;
+  border-color: #ececec;
+}
+:global(html:not(.dark)) .pub-card:hover {
+  background: #ffffff;
+}
+:global(html.dark) .pub-card {
+  background: #000000;
+  border-color: #2a2a2a;
+  color: #ffffff;
+}
+:global(body.dark) .pub-card,
+:global(html.dark) .pub-card {
+  background: #000000;
+  border-color: #2a2a2a;
+  color: #ffffff;
+}
+:global(html.dark) .pub-card:hover {
+  background: #0d0d0d;
+}
+:global(body.dark) .pub-card:hover,
+:global(html.dark) .pub-card:hover {
+  background: #0d0d0d;
+}
+:global(html.dark) .pub-icon {
+  background: #0f0f0f;
+  border-color: #2a2a2a;
+}
+:global(body.dark) .pub-icon,
+:global(html.dark) .pub-icon {
+  background: #0f0f0f;
+  border-color: #2a2a2a;
+}
+:global(html.dark) .pub-icon :deep(.icon-shape) {
+  fill: #ffffff;
+}
+:global(body.dark) .pub-icon :deep(.icon-shape),
+:global(html.dark) .pub-icon :deep(.icon-shape) {
+  fill: #ffffff;
+}
 .pub-card:nth-child(1) { margin-left: 0; }
 .pub-card:nth-child(2) { margin-left: 56px; }
 .pub-card:nth-child(3) { margin-left: 28px; }
 .pub-icon {
   width: 36px; height: 36px; border-radius: 8px;
-  background: var(--card-bg); border: 1px solid var(--border);
+  background: var(--bg-alt); border: 1px solid var(--border);
   display: flex; align-items: center; justify-content: center; flex-shrink: 0;
 }
 .pub-icon :deep(.icon-shape) { fill: var(--fg); }
@@ -731,7 +1092,7 @@ onBeforeUnmount(() => {
 /* ── Features grid ────────────────────────────────────── */
 .icon-wrap {
   width: 52px; height: 52px; border-radius: 12px;
-  background: var(--card-bg); border: 1px solid var(--border);
+  background: var(--card-bg); border: 3px solid var(--border);
   display: flex; align-items: center; justify-content: center; flex-shrink: 0;
   transition: background 0.3s ease, border-color 0.4s ease;
 }
@@ -748,48 +1109,67 @@ onBeforeUnmount(() => {
   gap: 2rem; padding: 0 10vw; will-change: transform;
 }
 .gallery-card {
-  min-width: 280px; max-width: 280px;
-  background: color-mix(in srgb, var(--bg) 92%, transparent);
-  backdrop-filter: blur(12px);
-  border-radius: 1px; overflow: hidden; border: 1px solid var(--border);
+  flex: 0 0 auto;
+  width: 280px; max-width: 280px;
+  background: var(--gallery-card-bg);
+  border-radius: 17px; overflow: hidden; border: 2px solid var(--border);
   transition: all 0.3s ease; position: relative;
 }
+/* Ensure consistent card height by using column flex layout */
+.gallery-card {
+  display: flex;
+  flex-direction: column;
+}
+:root .gallery-card { box-sizing: border-box; }
+/* Fixed total card height to keep all cards vertically equal */
+.gallery-card { height: 420px; }
+:global(html.dark) .gallery-card {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
 .gallery-card.featured {
-  border-radius: 1px;
+  border-radius: 17px;
 }
 @media (max-width: 768px) {
   .gallery-card {
-    min-width: 240px; max-width: 240px;
-    border-radius: 1px;
+    width: 240px; max-width: 240px;
+    border-radius: 17px;
   }
+  .gallery-card { height: 380px; }
   .gallery-card.featured {
-    border-radius: 1px;
+    border-radius: 17px;
   }
 }
 @media (max-width: 480px) {
   .gallery-card {
-    min-width: 200px; max-width: 200px;
-    border-radius: 1px;
+    width: 200px; max-width: 200px;
+    border-radius: 17px;
   }
+  .gallery-card { height: 360px; }
   .gallery-card.featured {
-    border-radius: 1px;
+    border-radius: 17px;
   }
 }
 .gallery-card:hover { transform: translateY(-8px); border-color: var(--fg-muted); box-shadow: none; }
-.card-image-wrapper { height: 220px; overflow: hidden; position: relative; }
+.card-image-wrapper { height: 220px; overflow: hidden; position: relative; flex: 0 0 auto; }
 .card-image-wrapper img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
 .gallery-card:hover .card-image-wrapper img { transform: scale(1.05); }
 .card-overlay {
   position: absolute; inset: 0;
-  background: linear-gradient(180deg, transparent 0%, color-mix(in srgb, var(--bg) 60%, transparent) 100%);
+  background: linear-gradient(180deg, transparent 0%, var(--gallery-overlay-end) 100%);
   pointer-events: none;
 }
-.card-content { padding: 1.5rem; position: relative; }
+.card-content { padding: 1.5rem; position: relative; display: flex; flex-direction: column; flex: 1 1 auto; }
 .card-category {
   display: inline-block; font-size: 0.8rem; font-weight: 700;
   text-transform: uppercase; letter-spacing: 1.5px; color: var(--fg);
   margin-bottom: 1rem; background: var(--card-bg);
   padding: 0.3rem 1rem; border-radius: 100px; border: 1px solid var(--border);
+}
+:global(html:not(.dark)) .card-category {
+  background: #ffffff;
+  border-color: #e8e8e8;
+  color: #111111;
 }
 .card-title { font-size: 1.25rem; font-weight: 700; margin-bottom: 0.6rem; line-height: 1.3; color: var(--fg); }
 .card-description { font-size: 0.95rem; line-height: 1.65; margin-bottom: 1.25rem; color: var(--fg-muted); }
@@ -844,13 +1224,19 @@ onBeforeUnmount(() => {
   .pub-card:nth-child(3) { margin-left: 0; }
   .pub-icon { width: 28px; height: 28px; }
   .card-image-wrapper { height: 160px; }
+  .card-content { min-height: 110px; }
+  /* Center publish cards column on mobile */
+  .pub-cards { align-items: center; margin: 0 auto; max-width: none; width: auto; }
+  .pub-card { margin-left: 0 !important; }
   .marquee-wrapper::before, .marquee-wrapper::after { width: 40px; }
+  .create-cta-wrap { justify-content: center; }
 }
 
 @media (max-width: 480px) {
   .pub-card { padding: 10px 16px; font-size: 0.9rem; margin-bottom: 8px; margin-left: 0 !important; }
   .pub-icon { width: 24px; height: 24px; }
   .card-image-wrapper { height: 140px; }
+  .card-content { min-height: 100px; }
   .marquee-text { font-size: clamp(2rem, 6vw, 4rem); }
   .marquee-wrapper::before, .marquee-wrapper::after { width: 30px; }
   .feature-card { padding: 1.5rem !important; }

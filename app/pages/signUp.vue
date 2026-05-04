@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { nextTick, onBeforeUnmount, onMounted, computed, reactive, ref } from 'vue'
+import { nextTick, onBeforeUnmount, onMounted, computed, reactive, ref, watch } from 'vue'
 import { useAuthService } from '~/services/authService'
 
 definePageMeta({
@@ -20,6 +20,8 @@ const form = reactive({
 const isSubmitting = ref(false)
 const errorMessage = ref('')
 const successMessage = ref('')
+const usernameCheckState = ref<'idle' | 'checking' | 'available' | 'unavailable' | 'error'>('idle')
+const usernameCheckMessage = ref('')
 const modelStageRef = ref<HTMLElement | null>(null)
 const modelCanvasRef = ref<HTMLCanvasElement | null>(null)
 const showModelPanel = ref(false)
@@ -29,13 +31,90 @@ let disposeThreeScene: null | (() => void) = null
 let mediaQueryList: MediaQueryList | null = null
 let removeMediaQueryListener: null | (() => void) = null
 let mountRetryTimer: number | null = null
+let usernameCheckTimer: ReturnType<typeof globalThis.setTimeout> | null = null
+let usernameCheckRequestId = 0
 
 const canSubmit = computed(() => {
-	return Boolean(form.username && form.phoneNumber && form.email && form.password && form.confirmPassword) && !isSubmitting.value
+	return Boolean(form.username && form.phoneNumber && form.email && form.password && form.confirmPassword) && !isSubmitting.value && usernameCheckState.value === 'available'
 })
 
 const normalizedPhone = computed(() => form.phoneNumber.replace(/[^\d+]/g, ''))
 const isPhoneValid = computed(() => /^\+?\d{10,15}$/.test(normalizedPhone.value))
+
+const clearUsernameCheckTimer = () => {
+	if (usernameCheckTimer !== null) {
+		globalThis.clearTimeout(usernameCheckTimer)
+		usernameCheckTimer = null
+	}
+}
+
+const resetUsernameCheck = () => {
+	clearUsernameCheckTimer()
+	usernameCheckState.value = 'idle'
+	usernameCheckMessage.value = ''
+}
+
+const validateUsername = (username: string) => {
+	const trimmed = username.trim()
+	clearUsernameCheckTimer()
+
+	if (!trimmed) {
+		resetUsernameCheck()
+		return
+	}
+
+	if (trimmed.length < 3) {
+		usernameCheckState.value = 'error'
+		usernameCheckMessage.value = 'Username must be at least 3 characters.'
+		return
+	}
+
+	usernameCheckState.value = 'checking'
+	usernameCheckMessage.value = 'Checking username...'
+
+	const requestId = ++usernameCheckRequestId
+	usernameCheckTimer = globalThis.setTimeout(async () => {
+		usernameCheckTimer = null
+
+		try {
+			const result = await authService.checkUsernameAvailability(trimmed)
+			if (requestId !== usernameCheckRequestId) {
+				return
+			}
+
+			const [code, message] = result || []
+			if (code === 0) {
+				usernameCheckState.value = 'unavailable'
+				usernameCheckMessage.value = message || 'Username not available.'
+				return
+			}
+
+			usernameCheckState.value = 'available'
+			usernameCheckMessage.value = message || 'Username available.'
+		} catch (error) {
+			if (requestId !== usernameCheckRequestId) {
+				return
+			}
+
+			usernameCheckState.value = 'error'
+			const statusMessage = (error as { statusMessage?: string })?.statusMessage
+			const data = (error as { data?: { detail?: string } | string })?.data
+			usernameCheckMessage.value = typeof data === 'string'
+				? data
+				: data?.detail || statusMessage || 'Could not validate username.'
+		}
+	}, 500)
+}
+
+if (import.meta.client) {
+	watch(
+		() => form.username,
+		(username) => {
+			validateUsername(username)
+		},
+		{ immediate: true },
+	)
+}
 
 const mountThreeScene = async () => {
 	if (!import.meta.client) {
@@ -302,6 +381,11 @@ onBeforeUnmount(() => {
 		mountRetryTimer = null
 	}
 
+	if (usernameCheckTimer !== null) {
+		window.clearTimeout(usernameCheckTimer)
+		usernameCheckTimer = null
+	}
+
 	removeMediaQueryListener?.()
 	removeMediaQueryListener = null
 	mediaQueryList = null
@@ -350,6 +434,17 @@ onBeforeUnmount(() => {
 								:class="$style.input"
 							>
 						</div>
+						<p
+							v-if="form.username.trim()"
+							:class="[
+								$style.usernameStatus,
+								usernameCheckState === 'available' ? $style.usernameStatusAvailable : '',
+								usernameCheckState === 'unavailable' || usernameCheckState === 'error' ? $style.usernameStatusError : '',
+								usernameCheckState === 'checking' ? $style.usernameStatusChecking : '',
+							]"
+						>
+							{{ usernameCheckMessage || ' ' }}
+						</p>
 
 						<div :class="$style.fieldWrap">
 							<input
@@ -607,6 +702,27 @@ onBeforeUnmount(() => {
 
 .fieldWrap {
 	position: relative;
+}
+
+.usernameStatus {
+	font-size: 0.8rem;
+	margin: -0.35rem 0 0.15rem;
+	padding-left: 0.1rem;
+	min-height: 1rem;
+	color: var(--su-switch-muted);
+	transition: color 0.2s ease;
+}
+
+.usernameStatusChecking {
+	color: var(--su-subtitle);
+}
+
+.usernameStatusAvailable {
+	color: var(--su-success);
+}
+
+.usernameStatusError {
+	color: var(--su-error);
 }
 
 .input {

@@ -2,8 +2,11 @@
 import { onBeforeUnmount, ref, watch } from 'vue'
 import { EditorContent, useEditor, Node, mergeAttributes } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
+import TextAlign from '@tiptap/extension-text-align'
 import { Cropper } from 'vue-advanced-cropper'
 import 'vue-advanced-cropper/dist/style.css'
+import { useBlogService } from '~/services/blogService'
+import { resolveMediaUrl } from '~/utils/mediaUrl'
 
 defineOptions({ name: 'BlogContentEditor' })
 
@@ -14,6 +17,12 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'update:modelValue', value: string): void
 }>()
+
+const getRenderableImageSrc = (rawSrc?: string | null) => {
+  const normalized = String(rawSrc || '').trim()
+  if (!normalized) return ''
+  return resolveMediaUrl(normalized) || normalized
+}
 
 const ResizableImage = Node.create({
   name: 'resizableImage',
@@ -47,7 +56,7 @@ const ResizableImage = Node.create({
       wrapper.contentEditable = 'false'
 
       const img = document.createElement('img')
-      img.src = node.attrs.src ?? ''
+      img.src = getRenderableImageSrc(node.attrs.src)
       img.alt = node.attrs.alt ?? ''
       img.style.width = node.attrs.width ? `${node.attrs.width}px` : 'auto'
       img.style.height = (node.attrs.height && node.attrs.height !== 'auto') ? `${node.attrs.height}px` : 'auto'
@@ -152,7 +161,7 @@ const ResizableImage = Node.create({
         dom: wrapper,
         update(updated) {
           if (updated.type.name !== 'resizableImage') return false
-          img.src = updated.attrs.src ?? ''
+          img.src = getRenderableImageSrc(updated.attrs.src)
           img.alt = updated.attrs.alt ?? ''
           if (updated.attrs.width) img.style.width = `${updated.attrs.width}px`
           if (updated.attrs.height && updated.attrs.height !== 'auto') {
@@ -174,13 +183,20 @@ const showCropPopup = ref(false)
 const cropImageSrc = ref('')
 const cropAspect = ref<number | null>(null)
 const cropperRef = ref<{ getResult?: () => { canvas?: HTMLCanvasElement | null; image?: HTMLImageElement | null } } | null>(null)
+const blogService = useBlogService()
 
 let cropResolve: ((result: string | null) => void) | null = null
 let cropObjectUrl: string | null = null
 
 const editor = useEditor({
   content: props.modelValue || '',
-  extensions: [StarterKit, ResizableImage],
+  extensions: [
+    StarterKit,
+    ResizableImage,
+    TextAlign.configure({
+      types: ['heading', 'paragraph'],
+    }),
+  ],
   editorProps: {
     attributes: { class: 'prosemirror-editor' },
   },
@@ -200,9 +216,12 @@ watch(() => props.modelValue, (value) => {
 })
 
 const insertImage = (src: string, alt = '') => {
+  const resolvedSrc = getRenderableImageSrc(src)
+  if (!resolvedSrc) return
+
   editor.value?.chain().focus().insertContent({
     type: 'resizableImage',
-    attrs: { src, alt },
+    attrs: { src: resolvedSrc, alt },
   }).run()
 }
 
@@ -220,10 +239,39 @@ const addImageByFile = async (event: Event) => {
 
   for (const file of Array.from(files)) {
     const cropped = await openCropModal(file)
-    if (cropped) insertImage(cropped, file.name)
+    if (!cropped) continue
+
+    const uploadedUrl = await uploadCroppedImage(cropped)
+    if (uploadedUrl) {
+      insertImage(uploadedUrl, file.name)
+    }
   }
 
   input.value = ''
+}
+
+const uploadCroppedImage = async (base64DataUrl: string): Promise<string | null> => {
+  try {
+    const blob = await fetch(base64DataUrl).then(r => r.blob())
+    const response = await blogService.uploadImage(blob)
+    return response.url
+  } catch (error) {
+    console.error('Inline image upload failed:', error)
+    return null
+  }
+}
+
+type AlignValue = 'left' | 'center' | 'right' | 'justify'
+
+const currentTextAlign = (): AlignValue => {
+  if (editor.value?.isActive({ textAlign: 'center' })) return 'center'
+  if (editor.value?.isActive({ textAlign: 'right' })) return 'right'
+  if (editor.value?.isActive({ textAlign: 'justify' })) return 'justify'
+  return 'left'
+}
+
+const setTextAlign = (value: AlignValue) => {
+  editor.value?.chain().focus().setTextAlign(value).run()
 }
 
 const finalizeCrop = (result: string | null) => {
@@ -343,6 +391,61 @@ onBeforeUnmount(() => {
         </div>
 
         <div class="flex items-center gap-1 pr-2 mr-1 border-r border-white/10">
+          <button
+            type="button"
+            :class="['toolbar-btn', { 'is-active': currentTextAlign() === 'left' }]"
+            title="Align left"
+            @click="setTextAlign('left')"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round">
+              <line x1="4" y1="6" x2="20" y2="6" />
+              <line x1="4" y1="10" x2="14" y2="10" />
+              <line x1="4" y1="14" x2="20" y2="14" />
+              <line x1="4" y1="18" x2="12" y2="18" />
+            </svg>
+          </button>
+          <button
+            type="button"
+            :class="['toolbar-btn', { 'is-active': currentTextAlign() === 'center' }]"
+            title="Align center"
+            @click="setTextAlign('center')"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round">
+              <line x1="4" y1="6" x2="20" y2="6" />
+              <line x1="7" y1="10" x2="17" y2="10" />
+              <line x1="4" y1="14" x2="20" y2="14" />
+              <line x1="8" y1="18" x2="16" y2="18" />
+            </svg>
+          </button>
+          <button
+            type="button"
+            :class="['toolbar-btn', { 'is-active': currentTextAlign() === 'right' }]"
+            title="Align right"
+            @click="setTextAlign('right')"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round">
+              <line x1="4" y1="6" x2="20" y2="6" />
+              <line x1="10" y1="10" x2="20" y2="10" />
+              <line x1="4" y1="14" x2="20" y2="14" />
+              <line x1="12" y1="18" x2="20" y2="18" />
+            </svg>
+          </button>
+          <button
+            type="button"
+            :class="['toolbar-btn', { 'is-active': currentTextAlign() === 'justify' }]"
+            title="Justify"
+            @click="setTextAlign('justify')"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round">
+              <line x1="4" y1="6" x2="20" y2="6" />
+              <line x1="4" y1="10" x2="20" y2="10" />
+              <line x1="4" y1="14" x2="20" y2="14" />
+              <line x1="4" y1="18" x2="20" y2="18" />
+            </svg>
+          </button>
+        </div>
+
+        <div class="flex items-center gap-1 pr-2 mr-1 border-r border-white/10">
           <button type="button" class="toolbar-btn" title="Undo" @click="editor?.chain().focus().undo().run()">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg>
           </button>
@@ -366,6 +469,7 @@ onBeforeUnmount(() => {
           </button>
         </div>
       </div>
+
     </div>
 
     <div v-if="showImageUrl" class="image-url-bar flex gap-2 px-3 py-2.5">
@@ -425,8 +529,14 @@ onBeforeUnmount(() => {
 
 <style scoped>
 .editor-root {
+  display: flex;
+  flex-direction: column;
+  max-height: min(72vh, 760px);
   background: #fafafa;
   border: 1px solid rgba(24,24,27,0.12);
+  overflow: hidden;
+  position: relative;
+  isolation: isolate;
 }
 
 .toolbar-surface,
@@ -436,11 +546,20 @@ onBeforeUnmount(() => {
 }
 
 .toolbar-container {
+  flex: 0 0 auto;
+  position: relative;
+  z-index: 20;
   overflow-x: auto;
   overflow-y: hidden;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: thin;
-  scrollbar-color: rgba(24,24,27,0.18) transparent;
+  scrollbar-color: rgba(24,24,27,0.36) rgba(24,24,27,0.08);
+}
+
+.image-url-bar {
+  flex: 0 0 auto;
+  position: relative;
+  z-index: 18;
 }
 
 .toolbar-container::-webkit-scrollbar {
@@ -448,12 +567,30 @@ onBeforeUnmount(() => {
 }
 
 .toolbar-container::-webkit-scrollbar-track {
-  background: transparent;
+  background: rgba(24,24,27,0.06);
 }
 
 .toolbar-container::-webkit-scrollbar-thumb {
-  background: rgba(24,24,27,0.18);
+  background: rgba(24,24,27,0.36);
   border-radius: 2px;
+}
+
+.editor-shell {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(24,24,27,0.36) rgba(24,24,27,0.08);
+}
+
+.editor-shell::-webkit-scrollbar {
+  width: 8px;
+}
+
+.editor-shell::-webkit-scrollbar-track {
+  background: rgba(24,24,27,0.06);
+}
+
+.editor-shell::-webkit-scrollbar-thumb {
+  background: rgba(24,24,27,0.36);
+  border-radius: 999px;
 }
 
 .toolbar-scroll {
@@ -547,18 +684,37 @@ onBeforeUnmount(() => {
 }
 
 .editor-shell {
-  min-height: 360px;
+  flex: 1 1 auto;
+  min-height: 0;
+  max-height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
   background: #fafafa;
+  position: relative;
+  z-index: 1;
 }
 
 .editor-shell :deep(.ProseMirror) {
-  min-height: 320px;
+  min-height: 100%;
   padding: 1.25rem 1.5rem;
   color: #18181b;
   font-size: 0.9375rem;
   line-height: 1.75;
   outline: none;
   caret-color: #000;
+}
+
+@media (max-width: 767px) {
+  .editor-root {
+    max-height: min(78vh, 640px);
+  }
+
+  .editor-shell :deep(.ProseMirror) {
+    padding: 1rem 1rem 1.25rem;
+  }
 }
 
 .editor-shell :deep(.ProseMirror p.is-editor-empty:first-child::before) {
@@ -811,11 +967,27 @@ onBeforeUnmount(() => {
 }
 
 :global(html.dark) .toolbar-container {
-  scrollbar-color: rgba(255,255,255,0.2) transparent;
+  scrollbar-color: rgba(255,255,255,0.45) rgba(255,255,255,0.08);
+}
+
+:global(html.dark) .toolbar-container::-webkit-scrollbar-track {
+  background: rgba(255,255,255,0.06);
 }
 
 :global(html.dark) .toolbar-container::-webkit-scrollbar-thumb {
-  background: rgba(255,255,255,0.2);
+  background: rgba(255,255,255,0.45);
+}
+
+:global(html.dark) .editor-shell {
+  scrollbar-color: rgba(255,255,255,0.45) rgba(255,255,255,0.08);
+}
+
+:global(html.dark) .editor-shell::-webkit-scrollbar-track {
+  background: rgba(255,255,255,0.06);
+}
+
+:global(html.dark) .editor-shell::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.45);
 }
 
 :global(html.dark) .toolbar-scroll > div {

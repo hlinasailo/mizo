@@ -42,6 +42,9 @@
             <input
               v-model="form.name"
               type="text"
+              autocomplete="name"
+              maxlength="80"
+              required
               @focus="focused = 'name'"
               @blur="focused = null"
               :class="[$style.input, focused === 'name' ? $style.inputFocus : '']"
@@ -52,10 +55,14 @@
           <div :class="$style.fieldWrap">
             <label
               :class="[$style.fieldLabel, (focused === 'contact' || form.contact) ? $style.fieldLabelFloat : $style.fieldLabelCenter]"
-            >Email or Phone Number</label>
+            >Email</label>
             <input
               v-model="form.contact"
-              type="text"
+              type="email"
+              inputmode="email"
+              autocomplete="email"
+              maxlength="254"
+              required
               @focus="focused = 'contact'"
               @blur="focused = null"
               :class="[$style.input, focused === 'contact' ? $style.inputFocus : '']"
@@ -70,6 +77,8 @@
             <input
               v-model="form.subject"
               type="text"
+              maxlength="120"
+              required
               @focus="focused = 'subject'"
               @blur="focused = null"
               :class="[$style.input, focused === 'subject' ? $style.inputFocus : '']"
@@ -84,6 +93,9 @@
             <textarea
               v-model="form.message"
               rows="5"
+              minlength="10"
+              maxlength="2000"
+              required
               @focus="focused = 'message'"
               @blur="focused = null"
               :class="[$style.textarea, focused === 'message' ? $style.inputFocus : '']"
@@ -116,12 +128,14 @@
 
 <script setup>
 import { ref, reactive, onMounted, onUnmounted } from 'vue'
+import { toApiErrorMessage, useApiClient } from '~/services/apiClient'
 
 const scrollProgress = ref(0)
 const focused = ref(null)
 const submitted = ref(false)
 const loading = ref(false)
 const error = ref('')
+const { request } = useApiClient()
 
 const form = reactive({
   name: '',
@@ -130,17 +144,69 @@ const form = reactive({
   message: '',
 })
 
-function handleSubmit() {
+const namePattern = /^[A-Za-z][A-Za-z\s'\-]{1,79}$/
+const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+function normalize(value) {
+  return String(value || '').replace(/\s+/g, ' ').trim()
+}
+
+function validateForm() {
+  const name = normalize(form.name)
+  const email = normalize(form.contact)
+  const subject = normalize(form.subject)
+  const message = normalize(form.message)
+
+  if (!name || !email || !subject || !message) {
+    return 'All fields are required.'
+  }
+  if (!namePattern.test(name)) {
+    return 'Please enter a valid full name.'
+  }
+  if (!emailPattern.test(email)) {
+    return 'Please enter a valid email address.'
+  }
+  if (subject.length < 3) {
+    return 'Subject must be at least 3 characters.'
+  }
+  if (message.length < 10) {
+    return 'Message must be at least 10 characters.'
+  }
+  return ''
+}
+
+async function handleSubmit() {
   error.value = ''
-  if (!form.name.trim() || !form.contact.trim() || !form.subject.trim() || !form.message.trim()) {
-    error.value = 'All fields are required.'
+  const validationError = validateForm()
+  if (validationError) {
+    error.value = validationError
     return
   }
+
   loading.value = true
-  setTimeout(() => {
+
+  try {
+    await request('/api/v1/posts/api/contactus/', {
+      method: 'POST',
+      body: {
+        name: normalize(form.name),
+        email: normalize(form.contact),
+        subject: normalize(form.subject),
+        message: normalize(form.message),
+      },
+    })
+
     loading.value = false
     submitted.value = true
-  }, 1200)
+
+    form.name = ''
+    form.contact = ''
+    form.subject = ''
+    form.message = ''
+  } catch (submitError) {
+    loading.value = false
+    error.value = toApiErrorMessage(submitError, 'Failed to send message. Please try again.')
+  }
 }
 
 function onScroll() {
@@ -157,7 +223,7 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
 <style module>
 /* ─── CSS tokens — mirrors About page exactly ───────────── */
 :global(:root) {
-  --bg:       #dcdcdc;
+  --bg:       #ffffff;
   --bg-alt:   #eceae6;
   --fg:       #0a0a0a;
   --fg-muted: #555551;
@@ -327,7 +393,8 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
 .input {
   width: 100%;
   background: transparent;
-  border: 1px solid var(--border);
+  border: 2px solid var(--border);
+  border-radius: 14px;
   padding: 1.75rem 1.5rem 0.75rem;
   color: var(--fg);
   font-size: 0.9rem;
@@ -341,7 +408,8 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
 .textarea {
   width: 100%;
   background: transparent;
-  border: 1px solid var(--border);
+  border: 2px solid var(--border);
+  border-radius: 14px;
   padding: 2rem 1.5rem 1rem;
   color: var(--fg);
   font-size: 0.9rem;
@@ -364,14 +432,15 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
 /* ─── Submit button ──────────────────────────────────────── */
 .submitBtn {
   width: 100%;
-  border: 1px solid var(--border);
+  border: 2px solid var(--fg);
+  border-radius: 14px;
   padding: 1rem;
-  color: var(--fg-muted);
+  color: var(--bg);
   font-size: 0.7rem;
   font-family: 'Roboto Mono', monospace;
   text-transform: uppercase;
   letter-spacing: 0.3em;
-  background: none;
+  background: var(--fg);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -383,7 +452,7 @@ onUnmounted(() => window.removeEventListener('scroll', onScroll))
 .submitBtn:hover {
   border-color: var(--fg);
   color: var(--fg);
-  background: var(--card-bg);
+  background: transparent;
 }
 .submitBtnDisabled { opacity: 0.5; cursor: not-allowed; }
 

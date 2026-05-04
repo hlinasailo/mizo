@@ -4,6 +4,14 @@ import { useUserStore } from '~/stores/user'
 
 const userStore = useUserStore()
 const router    = useRouter()
+const route     = useRoute()
+
+const normalizeRedirectPath = (value: unknown) => {
+  const raw = String(value ?? '').trim()
+  if (!raw || !raw.startsWith('/')) return '/'
+  if (raw.startsWith('//')) return '/'
+  return raw
+}
 
 const form = reactive({
   username:   '',
@@ -38,7 +46,7 @@ const handleLogin = async () => {
     await userStore.fetchUser()
 
     const redirectCookie = useCookie<string | null>('redirect_after_login')
-    const redirectPath   = redirectCookie.value || '/'
+    const redirectPath   = normalizeRedirectPath(redirectCookie.value || '/')
     redirectCookie.value = null
 
     await router.push(redirectPath)
@@ -262,6 +270,14 @@ onMounted(() => {
     return
   }
 
+  const redirectQuery = route.query.redirect
+  const redirectFromQuery = Array.isArray(redirectQuery) ? redirectQuery[0] : redirectQuery
+  const normalizedRedirect = normalizeRedirectPath(redirectFromQuery)
+  if (normalizedRedirect !== '/') {
+    const redirectCookie = useCookie<string | null>('redirect_after_login')
+    redirectCookie.value = normalizedRedirect
+  }
+
   mediaQueryList = window.matchMedia('(min-width: 1024px)')
   const onMediaChange = () => {
     void mountThreeScene()
@@ -297,17 +313,8 @@ onBeforeUnmount(() => {
   <main :class="$style.page">
     <section :class="$style.section">
 
-      <!-- Already logged in -->
-      <div v-if="userStore.isAuthenticated" :class="$style.alreadyCard">
-        <p :class="$style.alreadyText">You are already signed in.</p>
-        <NuxtLink to="/" :class="$style.alreadyBtn">Go to Home</NuxtLink>
-      </div>
-
       <!-- Login + 3D model split -->
-      <div
-        v-else
-        :class="$style.desktopLayout"
-      >
+      <div :class="$style.desktopLayout">
         <form
           :class="$style.card"
           @submit.prevent="handleLogin"
@@ -533,6 +540,35 @@ onBeforeUnmount(() => {
   overflow: hidden;
 }
 
+.cardHeader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.cardTitle {
+  margin: 0;
+  font-family: inherit;
+  font-size: 1.9rem;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  color: var(--lg-title);
+}
+
+.cardSubtitle {
+  margin: 0;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--lg-subtitle);
+}
+
 .modelPanel {
   min-height: 560px;
   background: transparent;
@@ -547,37 +583,6 @@ onBeforeUnmount(() => {
   width: 100%;
   height: 100%;
   display: block;
-}
-
-.modelError {
-  position: absolute;
-  left: 50%;
-  bottom: 1rem;
-  transform: translateX(-50%);
-  font-size: 0.8rem;
-  color: var(--lg-subtitle);
-  background: color-mix(in srgb, var(--lg-card-bg) 85%, transparent);
-  border: 1px solid var(--lg-card-border);
-  border-radius: 999px;
-  padding: 0.45rem 0.8rem;
-  backdrop-filter: blur(4px);
-}
-
-/* ── Header ─────────────────────────────────────────────── */
-.cardHeader { text-align: center; margin-bottom: 2rem; }
-
-.cardTitle {
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: var(--lg-title);
-  letter-spacing: -0.02em;
-  margin-bottom: 0.35rem;
-}
-
-.cardSubtitle {
-  font-size: 0.875rem;
-  color: var(--lg-subtitle);
-  font-weight: 400;
 }
 
 /* ── Fields ─────────────────────────────────────────────── */
@@ -692,35 +697,6 @@ onBeforeUnmount(() => {
   text-decoration: none;
 }
 .signupLink:hover { text-decoration: underline; text-underline-offset: 3px; }
-
-/* ── Already authenticated card ────────────────────────── */
-.alreadyCard {
-  background: var(--lg-card-bg);
-  border: 1px solid var(--lg-card-border);
-  border-radius: 16px;
-  box-shadow: var(--lg-card-shadow);
-  padding: 2.5rem 2rem;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-  align-items: center;
-}
-.alreadyText { color: var(--lg-subtitle); font-size: 0.95rem; }
-.alreadyBtn {
-  display: inline-block;
-  padding: 0.75rem 2rem;
-  background: var(--lg-submit-bg);
-  color: var(--lg-submit-fg);
-  font-size: 0.85rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  border-radius: 8px;
-  text-decoration: none;
-  transition: background-color 0.2s ease !important;
-}
-.alreadyBtn:hover { background: var(--lg-submit-hover); }
 
 @media (min-width: 1024px) {
   .desktopLayout {

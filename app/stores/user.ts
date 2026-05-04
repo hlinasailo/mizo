@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
-import { useAuthService, type GetMyProfileResponse, type LoginResponse } from '~/services/authService'
+import { useAuthService } from '~/services/authService'
+import { resolveMediaUrl } from '~/utils/mediaUrl'
 
 interface User {
   id?: number
@@ -10,6 +11,7 @@ interface User {
   phonenumber?: string | null
   bio?: string
   profilePhoto?: string | null
+  coverPhoto?: string | null
 }
 
 const toLoggableError = (error: unknown) => {
@@ -31,23 +33,54 @@ const toLoggableError = (error: unknown) => {
   }
 }
 
-const normalizeMediaUrl = (url: string | null | undefined, apiBase: string) => {
-  if (!url) {
+const getUserIdFromJwt = (token?: string | null): number | undefined => {
+  if (!token) {
+    return undefined
+  }
+
+  try {
+    const payloadPart = token.split('.')[1]
+    if (!payloadPart) {
+      return undefined
+    }
+
+    const normalized = payloadPart.replace(/-/g, '+').replace(/_/g, '/')
+    const decoded = JSON.parse(atob(normalized)) as { user_id?: unknown; id?: unknown }
+    const id = Number(decoded.user_id ?? decoded.id)
+    return Number.isFinite(id) ? id : undefined
+  } catch {
+    return undefined
+  }
+}
+
+const CACHE_KEY = 'mizomade_user_cache'
+
+const getCachedUser = (): User | null => {
+  if (import.meta.server) return null
+  try {
+    const cached = localStorage.getItem(CACHE_KEY)
+    return cached ? JSON.parse(cached) : null
+  } catch {
     return null
   }
+}
 
-  if (/^(data:|blob:|https?:\/\/)/i.test(url)) {
-    return url
+const setCacheUser = (user: User | null) => {
+  if (import.meta.server) return
+  try {
+    if (user) {
+      localStorage.setItem(CACHE_KEY, JSON.stringify(user))
+    } else {
+      localStorage.removeItem(CACHE_KEY)
+    }
+  } catch {
+    // Ignore cache errors
   }
-
-  const trimmedBase = apiBase.replace(/\/$/, '')
-  const trimmedUrl = url.startsWith('/') ? url : `/${url}`
-  return `${trimmedBase}${trimmedUrl}`
 }
 
 export const useUserStore = defineStore('user', {
   state: () => ({
-    user: (useCookie<User | null>('user_info').value || null) as User | null,
+    user: (useCookie<User | null>('user_info').value || getCachedUser() || null) as User | null,
     accessToken: useCookie('access_token').value || null,
     refreshToken: useCookie('refresh_token').value || null,
   }),
@@ -58,11 +91,11 @@ export const useUserStore = defineStore('user', {
   
   actions: {
     setUser(user: User | null) {
-      const config = useRuntimeConfig()
       const normalizedUser = user
         ? {
             ...user,
-            profilePhoto: normalizeMediaUrl(user.profilePhoto, config.public.apiBase),
+            profilePhoto: resolveMediaUrl(user.profilePhoto),
+            coverPhoto: resolveMediaUrl(user.coverPhoto),
           }
         : null
 
@@ -71,8 +104,11 @@ export const useUserStore = defineStore('user', {
 
       if (!normalizedUser) {
         userCookie.value = null
+        setCacheUser(null)
         return
       }
+      
+      setCacheUser(normalizedUser)
 
       userCookie.value = {
         id: normalizedUser.id,
@@ -83,6 +119,7 @@ export const useUserStore = defineStore('user', {
         phonenumber: normalizedUser.phonenumber,
         bio: normalizedUser.bio,
         profilePhoto: null,
+        coverPhoto: null,
       }
     },
 
@@ -91,7 +128,11 @@ export const useUserStore = defineStore('user', {
       const data = await authService.login(username, password)
 
       this.setTokens(data.access, data.refresh)
+
+      const tokenUserId = getUserIdFromJwt(data.access)
+
       this.setUser({
+        id: tokenUserId,
         username: data.username ?? username,
         first_name: data.first_name ?? '',
         last_name: data.last_name ?? '',
@@ -99,6 +140,7 @@ export const useUserStore = defineStore('user', {
         phonenumber: null,
         bio: data.profile?.bio ?? '',
         profilePhoto: data.profile?.profilephoto ?? null,
+        coverPhoto: data.profile?.coverphoto ?? null,
       })
     },
 
@@ -113,9 +155,39 @@ export const useUserStore = defineStore('user', {
         refreshCookie.value = refresh
       }
     },
+
+    ensureUserIdFromToken() {
+      if (!this.user || this.user.id || !this.accessToken) {
+        return !!this.user?.id
+      }
+
+      const tokenUserId = getUserIdFromJwt(this.accessToken)
+      if (!tokenUserId) {
+        return false
+      }
+
+      this.setUser({
+        ...this.user,
+        id: tokenUserId,
+      })
+
+      return true
+    },
+
+    updateLocalProfile(partial: Partial<User>) {
+      if (!this.user) {
+        return
+      }
+
+      this.setUser({
+        ...this.user,
+        ...partial,
+      })
+    },
     
     clearAuth() {
       this.setUser(null)
+      setCacheUser(null)
       this.accessToken = null
       this.refreshToken = null
       
@@ -146,6 +218,7 @@ export const useUserStore = defineStore('user', {
             phonenumber: typeof phoneData === 'object' && phoneData ? (phoneData.phonenumber ?? null) : null,
             bio: typeof profileData === 'object' && profileData ? (profileData.bio ?? '') : '',
             profilePhoto: typeof profileData === 'object' && profileData ? (profileData.profilephoto ?? null) : null,
+            coverPhoto: typeof profileData === 'object' && profileData ? (profileData.coverphoto ?? null) : null,
           })
           return
         }
@@ -165,6 +238,30 @@ export const useUserStore = defineStore('user', {
         if (!this.user?.username) {
           this.setUser(null)
         }
+      }
+    },
+
+    async fetchMyPosts() {
+      if (!this.accessToken) return []
+
+      try {
+        const authService = useAuthService()
+        const data = await authService.fetchMyProfile(this.accessToken)
+
+        if (!Array.isArray(data)) {
+          return []
+        }
+
+        return Array.isArray(data[2]) ? data[2] : []
+      } catch (error: unknown) {
+        const parsed = toLoggableError(error)
+        console.error('Failed to fetch profile posts', parsed)
+
+        if (parsed.status === 401) {
+          this.clearAuth()
+        }
+
+        return []
       }
     },
     

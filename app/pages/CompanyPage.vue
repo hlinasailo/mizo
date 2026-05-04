@@ -77,6 +77,11 @@
             <div :class="$style.cardHeaderLeft">
               <span :class="$style.cardIcon">
                 <i v-if="card.icon.startsWith('fi')" :class="card.icon"></i>
+                <Icon
+                  v-else-if="card.icon.includes(':')"
+                  :name="card.icon"
+                  :class="$style.cardSvg"
+                />
                 <img
                   v-else-if="card.icon.startsWith('/') || card.icon.match(/\.(png|jpe?g|webp|svg)$/i)"
                   :src="card.icon"
@@ -87,7 +92,7 @@
               </span>
               <h3 :class="$style.cardTitle">{{ card.title }}</h3>
             </div>
-            <span :class="[$style.cardArrow, hoveredMission === i ? $style.cardArrowActive : '']">→</span>
+
           </div>
           <div :class="$style.cardBody">
             <p :class="$style.cardText">{{ card.text }}</p>
@@ -116,6 +121,11 @@
             <div :class="$style.cardHeaderLeft">
               <span :class="$style.cardIcon">
                 <i v-if="card.icon.startsWith('fi')" :class="card.icon"></i>
+                <Icon
+                  v-else-if="card.icon.includes(':')"
+                  :name="card.icon"
+                  :class="$style.cardSvg"
+                />
                 <img
                   v-else-if="card.icon.startsWith('/') || card.icon.match(/\.(png|jpe?g|webp|svg)$/i)"
                   :src="card.icon"
@@ -126,10 +136,7 @@
               </span>
               <h3 :class="$style.cardTitle">{{ card.title }}</h3>
             </div>
-            <div :class="$style.cardHeaderRight">
-              <span :class="[$style.cardBadge, hoveredTech === i ? $style.cardBadgeActive : '']">{{ card.tag }}</span>
-              <span :class="[$style.cardArrow, hoveredTech === i ? $style.cardArrowActive : '']">→</span>
-            </div>
+
           </div>
           <div :class="[$style.cardBody, $style.cardBodyFlex]">
             <p :class="[$style.cardText, $style.flex1]">{{ card.text }}</p>
@@ -226,17 +233,17 @@ const focusItems = [
 
 const missionCards = [
   {
-    icon: '/images/images/bulb.png',
+    icon: 'mdi:lightbulb-on-outline',
     title: 'Accessible Innovation',
     text: 'AI and digital tools designed to work even with limited connectivity — because innovation should reach every corner, not just the well-connected ones.',
   },
   {
-    icon: '/images/images/internet.png',
+    icon: 'mdi:alphabetical-variant',
     title: 'Language Stewardship',
     text: 'Collaboration with linguists and communities to preserve, document, and digitize regional languages before they are lost to the digital divide.',
   },
   {
-    icon: '/images/images/tools.png',
+    icon: 'mdi:account-group-outline',
     title: 'Community Labs',
     text: 'Workshops, creator residencies, and co-design labs that shape technology around local needs — built with communities, not just for them.',
   },
@@ -244,21 +251,21 @@ const missionCards = [
 
 const techCards = [
   {
-    icon: '/images/images/robot.png',
+    icon: 'mdi:robot-outline',
     title: 'Responsible AI',
     tag: 'AI · NLP',
     text: 'Chatbots, translation systems, and semantic search designed for low-resource languages — with transparency and community consent at the core.',
     features: ['Chatbots', 'Translation', 'Semantic Search', 'Ethical AI'],
   },
   {
-    icon: '/images/images/iot.png',
+    icon: 'mdi:access-point-network',
     title: 'IoT & Connectivity',
     tag: 'Hardware · Networks',
     text: 'Low-power sensors, mesh networks, and offline-first applications that keep communities connected even without reliable internet infrastructure.',
     features: ['Mesh Networks', 'Low-Power Sensors', 'Offline-First', 'Smart Sync'],
   },
   {
-    icon: '/images/images/zoom.png',
+    icon: 'mdi:atom-variant',
     title: 'Emerging Technology',
     tag: 'AR · XR · Gen AI',
     text: 'AR/VR storytelling, generative tools, and automation emerging from grassroots research — ensuring no community is left behind by the next wave of technology.',
@@ -311,7 +318,7 @@ onUnmounted(() => {
 <style module>
 /* ─── CSS tokens — mirrors About page exactly ───────────── */
 :global(:root) {
-  --bg:       #dcdcdc;
+  --bg:       #ffffff;
   --bg-alt:   #eceae6;
   --fg:       #0a0a0a;
   --fg-muted: #555551;
@@ -585,6 +592,11 @@ onUnmounted(() => {
 
 .cardIcon { font-size: 1.5rem; display: flex; align-items: center; }
 .cardImg  { width: 2rem; height: 2rem; object-fit: contain; }
+.cardSvg {
+  width: 1.75rem;
+  height: 1.75rem;
+  color: var(--fg);
+}
 
 .cardTitle {
   font-family: 'Bebas Neue', sans-serif;

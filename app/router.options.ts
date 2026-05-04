@@ -43,6 +43,31 @@ export default <RouterConfig>{
         name: 'user-profile',
         path: '/user-profile',
         component: () => import('./blog/userProfile.vue')
+      },
+      {
+        name: 'edit-profile',
+        path: '/edit-profile',
+        component: () => import('./blog/editProfile.vue')
+      },
+      {
+        name: 'settings',
+        path: '/settings',
+        component: () => import('./pages/settings.vue')
+      },
+      {
+        name: 'change-phone-number',
+        path: '/settings/change-phone-number',
+        component: () => import('./pages/settings/change-phone-number.vue')
+      },
+      {
+        name: 'password-change',
+        path: '/settings/password-change',
+        component: () => import('./pages/settings/password-change.vue')
+      },
+      {
+        name: 'disable-account',
+        path: '/settings/disable-account',
+        component: () => import('./pages/settings/disable-account.vue')
       }
     ]
   }

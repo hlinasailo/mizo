@@ -1,11 +1,13 @@
 <script setup lang="ts">
+import { useAuthService } from '~/services/authService'
 import { useBlogService } from '~/services/blogService'
+import { resolveMediaUrl } from '~/utils/mediaUrl'
 
 defineOptions({ name: 'BlogCardsPage' })
 
 const router = useRouter()
 const route  = useRoute()
-const config = useRuntimeConfig()
+const authService = useAuthService()
 const blogService = useBlogService()
 
 // ── Categories ────────────────────────────────────────────────
@@ -14,12 +16,83 @@ const activeCategory = computed(() => (route.query.category as string) || 'All')
 // ── Pagination (server-driven, backend page_size = 9) ─────────
 const currentPage = ref(Number(route.query.page) || 1)
 const PAGE_SIZE   = 9
+const SORT_KEY = 'blog:sortBy'
+
+const sortBy = ref<'latest' | 'likes'>(
+  (() => {
+    const fromQuery = route.query.sort as string
+    if (fromQuery === 'latest' || fromQuery === 'likes') return fromQuery
+
+    const saved = import.meta.client
+      ? (localStorage.getItem(SORT_KEY) as 'latest' | 'likes' | null)
+      : null
+    return saved === 'likes' ? 'likes' : 'latest'
+  })()
+)
+
+watch(sortBy, (val) => {
+  if (import.meta.client) localStorage.setItem(SORT_KEY, val)
+})
 
 // ── API types ─────────────────────────────────────────────────
 const data = ref<Awaited<ReturnType<typeof blogService.fetchPosts>> | null>(null)
+const postsWithLikes = ref<Array<(Awaited<ReturnType<typeof blogService.fetchPosts>>['results'][number]) & { likecount: number }>>([])
+const authorPhotoCache = ref<Record<string, string>>({})
+
+const normalizeUsername = (value?: string | null) => String(value || '').trim().toLowerCase()
+
+const getAuthorPhotoFromCache = (username?: string | null) => {
+  const key = normalizeUsername(username)
+  return key ? authorPhotoCache.value[key] || '' : ''
+}
+
+const setAuthorPhotoCache = (username: string, photoUrl: string) => {
+  const key = normalizeUsername(username)
+  if (!key) return
+  authorPhotoCache.value = {
+    ...authorPhotoCache.value,
+    [key]: photoUrl,
+  }
+}
+
+const getPostAvatarSrc = (post: Record<string, unknown>) => {
+  const authorName = String(post.author || '').trim()
+  const cachedPhoto = getAuthorPhotoFromCache(authorName)
+  if (cachedPhoto) return cachedPhoto
+
+  const directPhoto = resolveMediaUrl(post.authorphoto as string | null | undefined)
+  if (directPhoto) return directPhoto
+
+  return ''
+}
+
+const loadAuthorPhotos = async (posts: Array<Record<string, unknown>>) => {
+  const uniqueAuthors = [...new Set(posts.map(post => String(post.author || '').trim()).filter(Boolean))]
+
+  await Promise.allSettled(uniqueAuthors.map(async (username) => {
+    const key = normalizeUsername(username)
+    if (!key || authorPhotoCache.value[key]) return
+
+    const result = await authService.fetchProfilePhotoByUsername(username)
+    const photoUrl = resolveMediaUrl(result?.profilephoto) || ''
+    if (photoUrl) {
+      setAuthorPhotoCache(username, photoUrl)
+    }
+  }))
+}
 
 const loadPosts = async () => {
   data.value = await blogService.fetchPosts(currentPage.value, activeCategory.value)
+
+  const basePosts = data.value?.results ?? []
+  const likes = await Promise.allSettled(basePosts.map(post => blogService.fetchLikes(post.id)))
+
+  await loadAuthorPhotos(basePosts as unknown as Array<Record<string, unknown>>)
+
+  postsWithLikes.value = basePosts.map((post, index) => ({
+    ...post,
+    likecount: likes[index]?.status === 'fulfilled' ? likes[index].value.likecount : 0,
+  }))
 }
 
 await loadPosts()
@@ -27,16 +100,42 @@ watch([activeCategory, currentPage], () => {
   void loadPosts()
 })
 
-const posts      = computed(() => data.value?.results ?? [])
+const posts      = computed(() => postsWithLikes.value)
+const getPostTimestamp = (post: Record<string, unknown>) => {
+  const rawDate =
+    post.date ??
+    post.created_at ??
+    post.createdAt ??
+    post.created ??
+    ''
+
+  const time = new Date(String(rawDate)).getTime()
+  return Number.isFinite(time) ? time : 0
+}
+
+const sortedPosts = computed(() => {
+  const results = [...posts.value]
+
+  if (sortBy.value === 'likes') {
+    return results.sort((a, b) => {
+      if (b.likecount !== a.likecount) {
+        return b.likecount - a.likecount
+      }
+
+      return getPostTimestamp(b as unknown as Record<string, unknown>) - getPostTimestamp(a as unknown as Record<string, unknown>)
+    })
+  }
+
+  return results.sort(
+    (a, b) => getPostTimestamp(b as unknown as Record<string, unknown>) - getPostTimestamp(a as unknown as Record<string, unknown>)
+  )
+})
+
 const totalCount = computed(() => data.value?.count ?? 0)
 const totalPages = computed(() => Math.ceil(totalCount.value / PAGE_SIZE))
 
 // Reset to page 1 when category changes
 watch(activeCategory, () => { currentPage.value = 1 })
-
-// authorphoto comes back as a relative path e.g. "profilephoto/user.jpg"
-const avatarUrl = (path: string) =>
-  path ? `${config.public.apiBase}/media/${path}` : null
 
 // ── Pagination controls ───────────────────────────────────────
 const visiblePages = computed((): (number | '...')[] => {
@@ -64,6 +163,21 @@ const formatDate = (dateStr: string) =>
 const capitalizeCategory = (category: string) => {
   if (category === 'beauty and fashion') return 'Beauty & Fashion'
   return category.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
+}
+
+const getPostCategoryKey = (post: Record<string, unknown>) => {
+  const rawCategory = String(
+    post.category ?? post.category_name ?? post.categoryName ?? ''
+  ).trim()
+
+  if (rawCategory) return rawCategory.toLowerCase()
+  if (activeCategory.value !== 'All') return activeCategory.value.toLowerCase()
+  return ''
+}
+
+const getPostCategoryLabel = (post: Record<string, unknown>) => {
+  const categoryKey = getPostCategoryKey(post)
+  return categoryKey ? capitalizeCategory(categoryKey) : ''
 }
 
 const categoryGradient: Record<string, string> = {
@@ -110,15 +224,25 @@ const getGradient = (category: string) =>
       </div>
 
       <!-- ── Post Count ─────────────────────────────────────── -->
-      <p :class="$style.postCount">
-        {{ totalCount }} post{{ totalCount !== 1 ? 's' : '' }}
-        <span v-if="activeCategory !== 'All'">· {{ capitalizeCategory(activeCategory) }}</span>
-      </p>
+      <div :class="$style.toolbar">
+        <p :class="$style.postCount">
+          {{ totalCount }} post{{ totalCount !== 1 ? 's' : '' }}
+          <span v-if="activeCategory !== 'All'">· {{ capitalizeCategory(activeCategory) }}</span>
+        </p>
+
+        <label :class="$style.sortWrap">
+          <span :class="$style.sortLabel">Sort by</span>
+          <select v-model="sortBy" :class="$style.sortSelect">
+            <option value="latest">Latest</option>
+            <option value="likes">Most liked</option>
+          </select>
+        </label>
+      </div>
 
       <!-- ── Cards Grid ─────────────────────────────────────── -->
       <div v-if="posts.length > 0" :class="$style.grid">
         <article
-          v-for="post in posts"
+          v-for="post in sortedPosts"
           :key="post.id"
           :class="$style.card"
           @click="router.push(`/blog/${post.slug}`)"
@@ -127,15 +251,15 @@ const getGradient = (category: string) =>
           <div :class="$style.thumb">
             <img
               v-if="post.coverimage"
-              :src="post.coverimage"
+              :src="resolveMediaUrl(post.coverimage) || ''"
               :alt="post.title"
               :class="$style.thumbImg"
             >
             <div
               v-else
-              :class="[$style.thumbFallback, `bg-gradient-to-br`, getGradient(activeCategory)]"
+              :class="[$style.thumbFallback, `bg-gradient-to-br`, getGradient(getPostCategoryKey(post))]"
             >
-              <span :class="$style.thumbFallbackLabel">{{ activeCategory !== 'All' ? capitalizeCategory(activeCategory) : '' }}</span>
+              <span :class="$style.thumbFallbackLabel">{{ getPostCategoryLabel(post) }}</span>
             </div>
 
             <!-- Category badge — only shown when filtering by category -->
@@ -152,8 +276,8 @@ const getGradient = (category: string) =>
               <!-- Avatar -->
               <div :class="$style.avatar">
                 <img
-                  v-if="post.authorphoto"
-                  :src="avatarUrl(post.authorphoto)!"
+                  v-if="getPostAvatarSrc(post)"
+                  :src="getPostAvatarSrc(post)"
                   :alt="post.author"
                   :class="$style.avatarImg"
                 >
@@ -163,7 +287,7 @@ const getGradient = (category: string) =>
               </div>
 
               <div :class="$style.authorMeta">
-                <span :class="$style.authorName">@{{ post.author }}</span>
+                <span :class="$style.authorName">{{ post.author_name || post.author }}</span>
                 <span :class="$style.authorDate">{{ formatDate(post.date) }}</span>
               </div>
             </div>
@@ -219,7 +343,7 @@ const getGradient = (category: string) =>
    These mirror what your navbar toggle sets on <html>.
    Light = default  |  Dark = html.dark                     */
 :global(:root) {
-  --pg-bg:          #cbcbcb;
+  --pg-bg:          #f9f9f9;
   --pg-surface:     #e3e3e3;
   --pg-border:      rgba(0, 0, 0, 0.216);
   --pg-fg:          #111110;
@@ -227,11 +351,12 @@ const getGradient = (category: string) =>
   --pg-fg-soft:     rgba(17,17,16,0.40);
   --pg-badge-bg:    rgba(0,0,0,0.07);
   --pg-badge-fg:    #444441;
+  
   --pg-thumb-over:  rgba(0,0,0,0.02);
   --pg-page-active-bg:  #111110;
   --pg-page-active-fg:  #ffffff;
-  --pg-page-idle-border: rgba(0,0,0,0.18);
-  --pg-page-idle-fg:     #6b6b67;
+  --pg-page-idle-border: rgb(0, 0, 0);
+  --pg-page-idle-fg:     #2f2f2f;
   --pg-empty-bg:    rgba(0,0,0,0.04);
   --pg-link:        #111110;
 }
@@ -328,7 +453,52 @@ const getGradient = (category: string) =>
   font-size: 0.625rem;
   text-transform: uppercase;
   letter-spacing: 0.2em;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
   margin-bottom: 1.75rem;
+  flex-wrap: wrap;
+}
+
+.sortWrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sortLabel {
+  color: var(--pg-fg-soft);
+  font-size: 0.625rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  font-weight: 700;
+}
+
+.sortSelect {
+  height: 2rem;
+  padding: 0 0.6rem;
+  border-radius: 6px;
+  border: 1px solid var(--pg-page-idle-border);
+  background: transparent;
+  color: var(--pg-fg);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+}
+
+.sortSelect:focus {
+  outline: none;
+  border-color: var(--pg-fg);
+}
+
+.sortSelect option {
+  color: #111110;
 }
 
 /* ── Grid ───────────────────────────────────────────────── */

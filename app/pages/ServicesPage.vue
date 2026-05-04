@@ -11,6 +11,8 @@
           Ser<span :class="$style.h1Ghost">vices</span>
         </h1>
         <p :class="$style.heroText">
+          Build AI-powered tools and platforms that enable creation, learning, and publishing for low-resource languages.
+           <br :class="$style.heroBreak">
           Technology and tools for creators working in low-resource languages.
           MizoMade combines cultural understanding with modern AI to help
           communities publish, build, and innovate.
@@ -38,14 +40,11 @@
                 :alt="`${service.title} icon`"
                 :class="$style.iconImg"
               />
-              <span v-else :class="$style.iconEmoji">{{ service.icon }}</span>
+              <Icon v-else :name="service.icon" :class="$style.iconSvg" />
             </div>
             <h3 :class="$style.cardTitle">{{ service.title }}</h3>
           </div>
-          <div :class="$style.cardHeaderRight">
-            <span :class="[$style.cardBadge, hovered === i ? $style.cardBadgeActive : '']">{{ service.tag }}</span>
-            <span :class="[$style.cardArrow, hovered === i ? $style.cardArrowActive : '']">→</span>
-          </div>
+
         </div>
 
         <!-- Card Body -->
@@ -60,10 +59,7 @@
               >{{ feat }}</span>
             </div>
           </div>
-          <div :class="$style.cardDeco">
-            <div :class="[$style.decoLine, hovered === i ? $style.decoLineActive : '']" />
-            <span :class="$style.decoLabel">mizomade</span>
-          </div>
+
         </div>
 
         <!-- Bottom accent line -->
@@ -92,13 +88,13 @@ const services = [
     tag: 'AI · Language',
     icon: '/images/images/hriatna.png',
     desc: 'An AI assistant trained on Mizoram dialects that helps answer questions, support learning, and generate culturally relevant content — built for the community, by the community.',
-    features: ['Dialect Training', 'Cultural Context', 'Q&A Engine', 'Content Generation'],
+    
   },
   {
     id: 'research',
     title: 'AI Research Studio',
     tag: 'Research · NLP',
-    icon: '/images/images/lab.png',
+    icon: 'mdi:flask-outline',
     desc: 'Deep research in translation, summarization, and generative storytelling specifically designed for low-resource languages where mainstream AI still falls short.',
     features: ['Translation Models', 'Summarization', 'Generative Storytelling', 'Low-Resource NLP'],
   },
@@ -106,7 +102,7 @@ const services = [
     id: 'tools',
     title: 'AI Tools & APIs',
     tag: 'Developer · API',
-    icon: '/images/images/setting.png',
+    icon: 'mdi:api',
     desc: 'Ready-to-integrate APIs and modules for automated editing, voice generation, recommendation systems, and multilingual workflows — built for developers.',
     features: ['Voice Generation', 'Auto Editing', 'Recommendations', 'Multilingual API'],
   },
@@ -114,7 +110,7 @@ const services = [
     id: 'software',
     title: 'Software Development',
     tag: 'Web · Mobile',
-    icon: '/images/images/laptop.png',
+    icon: 'mdi:laptop',
     desc: 'Custom web, mobile, and backend systems built for creators, publishers, and organisations serving low-resource language communities at any scale.',
     features: ['Web Apps', 'Mobile', 'Backend Systems', 'Custom Builds'],
   },
@@ -122,7 +118,7 @@ const services = [
     id: 'emerging',
     title: 'Emerging Tech Lab',
     tag: 'AR · XR · Web3',
-    icon: '/images/images/flask.png',
+    icon: 'mdi:cube-outline',
     desc: 'Prototyping with AR, XR, and distributed systems so low-resource communities stay connected to the future of technology — not left behind by it.',
     features: ['AR / XR', 'Distributed Systems', 'Prototyping', 'Future Tech'],
   },
@@ -130,7 +126,7 @@ const services = [
     id: 'innovation',
     title: 'Innovation & Partnerships',
     tag: 'Collaboration',
-    icon: '/images/images/handshake.png',
+    icon: 'mdi:handshake-outline',
     desc: 'Collaboration with creators, researchers, and universities to build responsible AI tools and cultural technology that serves real people and real languages.',
     features: ['Research Collab', 'University Partners', 'Responsible AI', 'Cultural Tech'],
   },
@@ -169,11 +165,13 @@ onUnmounted(() => {
 <style module>
 /* ─── CSS tokens — mirrors About page exactly ───────────── */
 :global(:root) {
-  --bg:       #dcdcdc;
+  --bg:       #ffffff;
   --bg-alt:   #eceae6;
-  --fg:       #0a0a0a;
-  --fg-muted: #555551;
-  --fg-soft:  rgba(10,10,10,0.50);
+  --fg:       #000000;
+  --hero-fg:  #000000;
+  --desc-fg:  #000000;
+  --fg-muted: #000000;
+  --fg-soft:  #000000;
   --border:   rgba(10,10,10,0.14);
   --card-bg:  rgba(10,10,10,0.259);
   --grid-c:   rgba(10,10,10,0.107);
@@ -181,9 +179,11 @@ onUnmounted(() => {
 :global(html.dark) {
   --bg:       #0a0a0a;
   --bg-alt:   #0f0f0f;
-  --fg:       #f0ede8;
-  --fg-muted: rgba(240,237,232,0.72);
-  --fg-soft:  rgba(240,237,232,0.50);
+  --fg:       #ffffff;
+  --hero-fg:  #ffffff;
+  --desc-fg:  #ffffff;
+  --fg-muted: #ffffff;
+  --fg-soft:  #ffffff;
   --border:   rgba(240,237,232,0.18);
   --card-bg:  rgba(255,255,255,0.06);
   --grid-c:   rgba(237,237,237,0.088);
@@ -265,10 +265,15 @@ onUnmounted(() => {
 .h1Ghost { color: var(--fg-soft); }
 
 .heroText {
-  color: var(--fg-muted);
+  color: var(--hero-fg);
   font-size: 1.125rem;
   line-height: 1.75;
   max-width: 42rem;
+}
+
+.heroBreak {
+  display: block;
+  margin-top: 0.3rem;
 }
 
 /* ─── Stack section ──────────────────────────────────────── */
@@ -325,6 +330,11 @@ onUnmounted(() => {
 
 .iconImg   { width: 2rem; height: 2rem; object-fit: contain; }
 .iconEmoji { font-size: 1.25rem; }
+.iconSvg {
+  width: 1.35rem;
+  height: 1.35rem;
+  color: var(--fg);
+}
 
 .cardTitle {
   font-family: 'Bebas Neue', sans-serif;
@@ -372,7 +382,7 @@ onUnmounted(() => {
 .cardBodyText { flex: 1; }
 
 .cardDesc {
-  color: var(--fg-muted);
+  color: var(--desc-fg);
   font-size: 0.9rem;
   line-height: 1.75;
   margin-bottom: 1rem;

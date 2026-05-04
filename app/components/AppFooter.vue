@@ -31,27 +31,27 @@
     <br>
     <div class="flex gap-4 mt-3 md:mt-0 text-zinc-400 text-xl">
 
-  <a href="#" class="hover:text-[#0A66C2] transition">
+  <a href="https://www.linkedin.com/company/mizomade/posts/?feedView=all" target="_blank" rel="noopener noreferrer" class="hover:text-[#0A66C2] transition">
     <Icon name="mdi:linkedin" />
   </a>
 
-  <a href="#" class="hover:text-[#E4405F] transition">
+  <a href="https://www.instagram.com/mizomade/" target="_blank" rel="noopener noreferrer" class="hover:text-[#E4405F] transition">
     <Icon name="mdi:instagram" />
   </a>
 
-  <a href="#" class="hover:text-[#FF0000] transition">
+  <a href="https://www.youtube.com/channel/UCQ0g4WL4IhPOzsKa7l0Jisg" target="_blank" rel="noopener noreferrer" class="hover:text-[#FF0000] transition">
     <Icon name="mdi:youtube" />
   </a>
 
-  <a href="#" class="hover:text-[#1DA1F2] transition">
+  <a href="https://x.com/mizo_made" target="_blank" rel="noopener noreferrer" class="hover:text-[#1DA1F2] transition">
     <Icon name="mdi:twitter" />
   </a>
 
-  <a href="#" class="hover:text-[#1877F2] transition">
+  <a href="https://www.facebook.com/profile.php?id=100064397650728#" target="_blank" rel="noopener noreferrer" class="hover:text-[#1877F2] transition">
     <Icon name="mdi:facebook" />
   </a>
 
-  <a href="https://wa.me/1234567890" class="hover:text-[#25D366] transition">
+  <a href="https://api.whatsapp.com/send/?phone=916009229392&text=Mizomade+chungchang+hriat+chian+ka+duh+e.&type=phone_number&app_absent=0" target="_blank" rel="noopener noreferrer" class="hover:text-[#25D366] transition">
     <Icon name="mdi:whatsapp" />
   </a>
 

@@ -17,6 +17,7 @@ interface _GlobalComponents {
   AppFooter: typeof import("../../app/components/AppFooter.vue")['default']
   BlogContentEditor: typeof import("../../app/components/BlogContentEditor.vue")['default']
   ButtomFooter: typeof import("../../app/components/ButtomFooter.vue")['default']
+  BlogPost: typeof import("../../app/components/blogPost.vue")['default']
   ProseA: typeof import("../../node_modules/@nuxtjs/mdc/dist/runtime/components/prose/ProseA.vue")['default']
   ProseBlockquote: typeof import("../../node_modules/@nuxtjs/mdc/dist/runtime/components/prose/ProseBlockquote.vue")['default']
   ProseCode: typeof import("../../node_modules/@nuxtjs/mdc/dist/runtime/components/prose/ProseCode.vue")['default']
@@ -74,6 +75,7 @@ interface _GlobalComponents {
   LazyAppFooter: LazyComponent<typeof import("../../app/components/AppFooter.vue")['default']>
   LazyBlogContentEditor: LazyComponent<typeof import("../../app/components/BlogContentEditor.vue")['default']>
   LazyButtomFooter: LazyComponent<typeof import("../../app/components/ButtomFooter.vue")['default']>
+  LazyBlogPost: LazyComponent<typeof import("../../app/components/blogPost.vue")['default']>
   LazyProseA: LazyComponent<typeof import("../../node_modules/@nuxtjs/mdc/dist/runtime/components/prose/ProseA.vue")['default']>
   LazyProseBlockquote: LazyComponent<typeof import("../../node_modules/@nuxtjs/mdc/dist/runtime/components/prose/ProseBlockquote.vue")['default']>
   LazyProseCode: LazyComponent<typeof import("../../node_modules/@nuxtjs/mdc/dist/runtime/components/prose/ProseCode.vue")['default']>

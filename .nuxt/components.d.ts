@@ -17,6 +17,7 @@ type LazyComponent<T> = DefineComponent<HydrationStrategies, {}, {}, {}, {}, {},
 export const AppFooter: typeof import("../app/components/AppFooter.vue")['default']
 export const BlogContentEditor: typeof import("../app/components/BlogContentEditor.vue")['default']
 export const ButtomFooter: typeof import("../app/components/ButtomFooter.vue")['default']
+export const BlogPost: typeof import("../app/components/blogPost.vue")['default']
 export const ProseA: typeof import("../node_modules/@nuxtjs/mdc/dist/runtime/components/prose/ProseA.vue")['default']
 export const ProseBlockquote: typeof import("../node_modules/@nuxtjs/mdc/dist/runtime/components/prose/ProseBlockquote.vue")['default']
 export const ProseCode: typeof import("../node_modules/@nuxtjs/mdc/dist/runtime/components/prose/ProseCode.vue")['default']
@@ -74,6 +75,7 @@ export const NuxtIsland: typeof import("../node_modules/nuxt/dist/app/components
 export const LazyAppFooter: LazyComponent<typeof import("../app/components/AppFooter.vue")['default']>
 export const LazyBlogContentEditor: LazyComponent<typeof import("../app/components/BlogContentEditor.vue")['default']>
 export const LazyButtomFooter: LazyComponent<typeof import("../app/components/ButtomFooter.vue")['default']>
+export const LazyBlogPost: LazyComponent<typeof import("../app/components/blogPost.vue")['default']>
 export const LazyProseA: LazyComponent<typeof import("../node_modules/@nuxtjs/mdc/dist/runtime/components/prose/ProseA.vue")['default']>
 export const LazyProseBlockquote: LazyComponent<typeof import("../node_modules/@nuxtjs/mdc/dist/runtime/components/prose/ProseBlockquote.vue")['default']>
 export const LazyProseCode: LazyComponent<typeof import("../node_modules/@nuxtjs/mdc/dist/runtime/components/prose/ProseCode.vue")['default']>

@@ -24,6 +24,7 @@ export default defineNuxtConfig({
   runtimeConfig: {
     public: {
       apiBase: process.env.API_BASE_URL || 'http://127.0.0.1:8000',
+      mediaBase: process.env.MEDIA_BASE_URL || process.env.NUXT_PUBLIC_MEDIA_BASE_URL || '',
     }
   }
 })

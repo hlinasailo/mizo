@@ -191,7 +191,7 @@ const linkNotes = [
 <style module>
 /* ─── CSS tokens — mirrors About page exactly ───────────── */
 :global(:root) {
-  --bg:       #dcdcdc;
+  --bg:       #ffffff;
   --bg-alt:   #eceae6;
   --fg:       #0a0a0a; 
   --fg-muted: #555551;
@@ -223,7 +223,7 @@ const linkNotes = [
 .page {
   background: var(--bg);
   color: var(--fg);
-  --card-bg: #eaeaea;
+  --card-bg: #ffffff;
   min-height: 100vh;
   font-family: 'Roboto Mono', 'JetBrains Mono', 'Consolas', monospace;
   overflow-x: hidden;

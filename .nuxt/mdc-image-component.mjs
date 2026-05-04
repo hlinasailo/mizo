@@ -1,1 +1,1 @@
-export { default } from "C:/Users/hlina/OneDrive/Desktop/zddd/mizomade_web_intern/node_modules/@nuxt/image/dist/runtime/components/NuxtImg.vue"
+export { default } from "D:/mizo/mizomade_web_intern/node_modules/@nuxt/image/dist/runtime/components/NuxtImg.vue"

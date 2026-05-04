@@ -1,9 +1,15 @@
 <script setup lang="ts">
-import { onBeforeUnmount, ref, onMounted } from 'vue'
+import { onBeforeUnmount, ref, onMounted, computed } from 'vue'
+import MarkdownIt from 'markdown-it'
+import TurndownService from 'turndown'
 import { Cropper } from 'vue-advanced-cropper'
 import 'vue-advanced-cropper/dist/style.css'
 import { useUserStore } from '~/stores/user'
 import { useBlogService } from '~/services/blogService'
+
+definePageMeta({
+  middleware: 'auth',
+})
 
 defineOptions({ name: 'BlogCreatePage' })
 
@@ -11,33 +17,187 @@ defineOptions({ name: 'BlogCreatePage' })
 const userStore = useUserStore()
 const blogService = useBlogService()
 const router = useRouter()
+const config = useRuntimeConfig()
+
+// ── Constants ──
+const VALID_CATEGORIES = ['Zirna', 'Gospel', 'Hriselna', 'Thiamna', 'Beauty and Fashion', 'Story', 'Politics', 'Infiamna', 'Others']
+
+// ── Utility Functions ──
+const getValidCategory = (categoryValue: string | null | undefined): string => {
+  const trimmed = (categoryValue || '').trim()
+  return VALID_CATEGORIES.includes(trimmed) ? trimmed : 'Others'
+}
+
+const getFullImageUrl = (imageUrl: string): string => {
+  if (!imageUrl) return ''
+  if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+    return imageUrl
+  }
+  if (imageUrl.startsWith('/')) {
+    return `${config.public.apiBase}${imageUrl}`
+  }
+  return imageUrl
+}
 
 // Form data
 const title       = ref('')
 const category    = ref('Others')
 const content     = ref('')
 const thumbnail   = ref('')
+const originalThumbnail = ref('')
 const coverImageFile = ref<File | null>(null)
 const draftId     = ref<number | null>(null)
+const tagsInput   = ref('')
 
 // UI states
-const isSubmitting  = ref(false)
-const isSavingDraft = ref(false)
-const showMetaPopup = ref(false)
-const showCropPopup = ref(false)
-const cropImageSrc  = ref('')
-const cropAspect    = ref<number | null>(16 / 9)
-const cropperRef    = ref<{ getResult?: () => { canvas?: HTMLCanvasElement | null; image?: HTMLImageElement | null } } | null>(null)
-const errorMessage  = ref('')
+const isSubmitting      = ref(false)
+const isSavingDraft     = ref(false)
+const isDraftSaved      = ref(false)
+const isUploadingImages = ref(false)
+const showMetaPopup     = ref(false)
+const showCropPopup     = ref(false)
+const cropImageSrc      = ref('')
+const cropAspect        = ref<number | null>(16 / 9)
+const cropperRef        = ref<{ getResult?: () => { canvas?: HTMLCanvasElement | null; image?: HTMLImageElement | null } } | null>(null)
+const errorMessage      = ref('')
 
 // Notification
-const showNotification = ref(false)
+const showNotification    = ref(false)
 const notificationMessage = ref('')
-const notificationType = ref<'success' | 'error'>('success')
+const notificationType    = ref<'success' | 'error'>('success')
 let notificationTimer: NodeJS.Timeout | null = null
 
 let cropResolve:   ((result: string | null) => void) | null = null
 let cropObjectUrl: string | null = null
+let lastSavedDraftContent = ''
+
+// ── Computed Properties ──
+const displayThumbnailUrl = computed(() => {
+  if (!thumbnail.value) return ''
+  if (thumbnail.value.startsWith('data:')) {
+    return thumbnail.value
+  }
+  return getFullImageUrl(thumbnail.value)
+})
+
+const normalizeContent = (value: string) => String(value || '').trim()
+
+const markdownParser = new MarkdownIt({
+  html: false,
+  linkify: true,
+  breaks: true,
+  typographer: true,
+})
+
+const turndownService = new TurndownService({
+  headingStyle: 'atx',
+  codeBlockStyle: 'fenced',
+  emDelimiter: '*',
+})
+
+type SupportedTextAlign = 'left' | 'center' | 'right' | 'justify'
+
+const getNodeTextAlign = (node: Node): SupportedTextAlign | null => {
+  if (!(node instanceof HTMLElement)) return null
+
+  const inline = String(node.style?.textAlign || '').trim().toLowerCase()
+  const attribute = String(node.getAttribute('text-align') || '').trim().toLowerCase()
+  const alignAttr = String(node.getAttribute('align') || '').trim().toLowerCase()
+  const candidate = inline || attribute || alignAttr
+
+  if (candidate === 'left' || candidate === 'center' || candidate === 'right' || candidate === 'justify') {
+    return candidate
+  }
+
+  return null
+}
+
+const wrapAlignmentMarker = (content: string, align: SupportedTextAlign | null) => {
+  const normalized = content.trim()
+  if (!normalized || !align) return normalized
+  return `[[align:${align}]]${normalized}[[/align]]`
+}
+
+turndownService.addRule('preserveParagraphAlignment', {
+  filter: (node) => node.nodeName === 'P',
+  replacement: (content, node) => {
+    const align = getNodeTextAlign(node)
+    const body = wrapAlignmentMarker(content, align)
+    return body ? `\n\n${body}\n\n` : '\n\n'
+  },
+})
+
+turndownService.addRule('preserveHeadingAlignment', {
+  filter: (node) => /^H[1-6]$/.test(node.nodeName),
+  replacement: (content, node) => {
+    const align = getNodeTextAlign(node)
+    const headingNode = node as HTMLElement
+    const level = Number(headingNode.tagName.charAt(1)) || 1
+    const hashes = '#'.repeat(Math.min(Math.max(level, 1), 6))
+    const body = wrapAlignmentMarker(content, align)
+    return body ? `\n\n${hashes} ${body}\n\n` : '\n\n'
+  },
+})
+
+const parsePositiveInt = (value: string | null | undefined) => {
+  const parsed = Number(value)
+  if (!Number.isFinite(parsed)) return null
+  const rounded = Math.round(parsed)
+  return rounded > 0 ? rounded : null
+}
+
+turndownService.addRule('preserveResizableImageSize', {
+  filter: (node) => node.nodeName === 'IMG',
+  replacement: (_content, node) => {
+    const imageNode = node as HTMLElement
+    const src = String(imageNode.getAttribute('src') || '').trim()
+    if (!src) return ''
+
+    const alt = String(imageNode.getAttribute('alt') || '').replace(/\]/g, '\\]')
+    const width = parsePositiveInt(imageNode.getAttribute('width'))
+    const height = parsePositiveInt(imageNode.getAttribute('height'))
+
+    const sizeMeta = (width || height)
+      ? `size:${width ?? 'auto'}x${height ?? 'auto'}`
+      : ''
+
+    const titlePart = sizeMeta ? ` "${sizeMeta}"` : ''
+    return `![${alt}](${src}${titlePart})`
+  },
+})
+
+const isProbablyHtml = (value: string) => /<\/?[a-z][\s\S]*>/i.test(value)
+
+const processAlignmentMarkersInHtml = (html: string) => {
+  const withAlignedBlocks = html.replace(
+    /<(p|h[1-6])>(?:\s|&nbsp;)*\[\[align:(left|center|right|justify)\]\]([\s\S]*?)\[\[\/align\]\](?:\s|&nbsp;)*<\/\1>/gi,
+    (_match, tag: string, align: string, content: string) => `<${tag} style="text-align:${align}">${content}</${tag}>`,
+  )
+
+  const withoutEmptyAlignMarkers = withAlignedBlocks.replace(
+    /<p>(?:\s|&nbsp;|<br\s*\/?\s*>)*\[\[align:(left|center|right|justify)\]\](?:\s|&nbsp;|<br\s*\/?\s*>)*\[\[\/align\]\](?:\s|&nbsp;|<br\s*\/?\s*>)*<\/p>/gi,
+    '',
+  )
+
+  return withoutEmptyAlignMarkers.replace(/\[\[align:(left|center|right|justify)\]\]|\[\[\/align\]\]/gi, '')
+}
+
+const toEditorHtml = (storedContent: string) => {
+  const normalized = normalizeContent(storedContent)
+  if (!normalized) return ''
+  if (isProbablyHtml(normalized)) return normalized
+  const rendered = markdownParser.render(normalized)
+  return processAlignmentMarkersInHtml(rendered)
+}
+
+const toStorageMarkdown = (editorContent: string) => {
+  const normalized = normalizeContent(editorContent)
+  if (!normalized) return ''
+  if (!isProbablyHtml(normalized)) return normalized
+  return turndownService.turndown(normalized).trim()
+}
+
+const getCurrentDraftContent = () => toStorageMarkdown(content.value)
 
 // ── Initialization ──
 onMounted(async () => {
@@ -46,13 +206,99 @@ onMounted(async () => {
     return
   }
 
-  // Create a draft on page load
-  try {
-    const draft = await blogService.createDraft('')
-    draftId.value = draft.id
-  } catch (err) {
-    console.error('Failed to initialize draft:', err)
-    errorMessage.value = 'Failed to initialize editor'
+  const route = useRoute()
+
+  // Load existing owned post by ID (preferred, avoids slug collisions)
+  const postIdQueryRaw = route.query.postId as string | undefined
+  const postIdQuery = postIdQueryRaw ? Number(postIdQueryRaw) : NaN
+
+  if (Number.isFinite(postIdQuery) && postIdQuery > 0) {
+    try {
+      const response = await blogService.fetchDraftDetail(postIdQuery)
+      if (response?.post) {
+        const post = response.post
+        title.value    = post.title || ''
+        category.value = getValidCategory(post.category)
+        content.value  = toEditorHtml(post.content)
+        if (post.coverimage) {
+          thumbnail.value = post.coverimage
+          originalThumbnail.value = post.coverimage
+        }
+        if (post.tags && post.tags.length > 0) {
+          tagsInput.value = post.tags.join(', ')
+        }
+        draftId.value  = post.id
+      }
+    } catch (error) {
+      console.error('Failed to load post for editing:', error)
+      errorMessage.value = 'Failed to load post. Please try again.'
+    }
+    return
+  }
+
+  // Load existing draft by ID when editing from Drafts tab
+  const draftIdQueryRaw = route.query.draftId as string | undefined
+  const draftIdQuery = draftIdQueryRaw ? Number(draftIdQueryRaw) : NaN
+
+  if (Number.isFinite(draftIdQuery) && draftIdQuery > 0) {
+    try {
+      const response = await blogService.fetchDraftDetail(draftIdQuery)
+      if (response?.post) {
+        const post = response.post
+        title.value    = post.title || ''
+        category.value = getValidCategory(post.category)
+        content.value  = toEditorHtml(post.content)
+        if (post.coverimage) {
+          thumbnail.value = post.coverimage
+          originalThumbnail.value = post.coverimage
+        }
+        if (post.tags && post.tags.length > 0) {
+          tagsInput.value = post.tags.join(', ')
+        }
+        draftId.value  = post.id
+      }
+    } catch (error) {
+      console.error('Failed to load draft for editing:', error)
+      errorMessage.value = 'Failed to load draft. Please try again.'
+    }
+    return
+  }
+
+  // Load existing published post if editing by slug
+  const postSlug = route.query.postSlug as string | undefined
+  if (postSlug) {
+    const normalizedSlug = String(postSlug).trim().toLowerCase()
+    if (
+      !normalizedSlug ||
+      normalizedSlug === 'none' ||
+      normalizedSlug === 'nonenone' ||
+      normalizedSlug === 'null' ||
+      normalizedSlug === 'undefined'
+    ) {
+      errorMessage.value = 'This post link is invalid. Please open the post from your profile again.'
+      return
+    }
+
+    try {
+      const response = await blogService.fetchPostDetail(postSlug)
+      if (response?.post) {
+        const post = response.post
+        title.value    = post.title || ''
+        category.value = getValidCategory(post.category)
+        content.value  = toEditorHtml(post.content)
+        if (post.coverimage) {
+          thumbnail.value = post.coverimage
+          originalThumbnail.value = post.coverimage
+        }
+        if (post.tags && post.tags.length > 0) {
+          tagsInput.value = post.tags.join(', ')
+        }
+        draftId.value  = post.id
+      }
+    } catch (error) {
+      console.error('Failed to load post for editing:', error)
+      errorMessage.value = error instanceof Error ? error.message : 'Failed to load post. Please try again.'
+    }
   }
 })
 
@@ -61,12 +307,78 @@ const addThumbnailByFile = async (event: Event) => {
   const input = event.target as HTMLInputElement
   const file  = input.files?.[0]
   if (!file) return
+  await processThumbnailFile(file)
+  input.value = ''
+}
+
+const dataUrlToFile = async (dataUrl: string, filename = 'coverimage.jpg'): Promise<File> => {
+  const response = await fetch(dataUrl)
+  const blob = await response.blob()
+  const extension = blob.type === 'image/png' ? 'png' : 'jpg'
+  const safeName = filename.replace(/\.(jpg|jpeg|png)$/i, `.${extension}`)
+  return new File([blob], safeName, { type: blob.type || 'image/jpeg' })
+}
+
+const uploadCroppedImage = async (base64DataUrl: string): Promise<string | null> => {
+  try {
+    isUploadingImages.value = true
+    errorMessage.value = ''
+
+    // Convert base64 to Blob
+    const blob = await fetch(base64DataUrl).then(r => r.blob())
+    
+    // Upload using blog service
+    const response = await blogService.uploadImage(blob)
+    
+    return response.url  // Server returns compressed image URL
+  } catch (error) {
+    console.error('Image upload error:', error)
+    errorMessage.value = 'Failed to upload image. Please try again.'
+    return null
+  } finally {
+    isUploadingImages.value = false
+  }
+}
+
+const processThumbnailFile = async (file: File) => {
+  if (!file.type.startsWith('image/')) return
   const cropped = await openCropModal(file)
   if (cropped) {
+    // Keep a file for publish API (current backend expects multipart file field)
+    coverImageFile.value = await dataUrlToFile(cropped, 'coverimage.jpg')
+
+    // Upload immediately and store server URL
+    const imageUrl = await uploadCroppedImage(cropped)
+    if (imageUrl) {
+      thumbnail.value = imageUrl        // Store server URL, not base64
+      originalThumbnail.value = imageUrl
+      return
+    }
+
+    // Fallback preview if immediate upload fails; publish can still use coverImageFile.
     thumbnail.value = cropped
-    coverImageFile.value = file
+    originalThumbnail.value = cropped
   }
-  input.value = ''
+}
+
+const handleThumbnailDragOver = (event: DragEvent) => {
+  event.preventDefault()
+  event.stopPropagation()
+}
+
+const handleThumbnailDrop = async (event: DragEvent) => {
+  event.preventDefault()
+  event.stopPropagation()
+
+  const file = event.dataTransfer?.files?.[0]
+  if (!file) return
+
+  await processThumbnailFile(file)
+}
+
+const clearThumbnail = () => {
+  thumbnail.value      = ''
+  coverImageFile.value = null
 }
 
 const finalizeCrop = (result: string | null) => {
@@ -81,9 +393,9 @@ const openCropModal = async (file: File) => {
   if (!import.meta.client) return null
   if (!file.type.startsWith('image/')) return null
   if (cropObjectUrl) URL.revokeObjectURL(cropObjectUrl)
-  cropObjectUrl      = URL.createObjectURL(file)
-  cropImageSrc.value = cropObjectUrl
-  cropAspect.value   = 16 / 9
+  cropObjectUrl       = URL.createObjectURL(file)
+  cropImageSrc.value  = cropObjectUrl
+  cropAspect.value    = 16 / 9
   showCropPopup.value = true
   return new Promise<string | null>((resolve) => { cropResolve = resolve })
 }
@@ -109,34 +421,80 @@ const applyCrop = () => {
   finalizeCrop(result)
 }
 
-const closeCrop     = () => finalizeCrop(null)
-const openMetaPopup = () => { showMetaPopup.value = true; errorMessage.value = '' }
+const closeCrop = () => finalizeCrop(null)
 
-// ── Notifications ──
-const _displayNotification = (message: string, type: 'success' | 'error' = 'success', duration: number = 2000) => {
-  // Clear any existing timer
-  if (notificationTimer) clearTimeout(notificationTimer)
-  
-  // Set the message and type
-  notificationMessage.value = message
-  notificationType.value = type
-  showNotification.value = true
-  
-  // Auto-hide after duration
-  notificationTimer = setTimeout(() => {
-    showNotification.value = false
-  }, duration)
+const parseTags = (input: string): string[] => {
+  const normalized = input
+    .split(/[,\s]+/)
+    .map(tag => tag.replace(/^#+/, '').replace(/[^a-zA-Z0-9_-]/g, '').trim().toLowerCase())
+    .filter(tag => tag.length > 0)
+  return [...new Set(normalized)]
 }
 
-// ── API calls ──
-const submitPost = async () => {
-  if (!draftId.value) {
-    errorMessage.value = 'Error: Draft not initialized'
+// ── Draft persistence ────────────────────────────────────────────────────────
+/**
+ * Converts editor HTML → markdown, uploads any embedded base64
+ * images to the server, then saves the cleaned markdown to the API.
+ */
+const persistDraftContent = async (markdownContent = toStorageMarkdown(content.value)) => {
+  const body = markdownContent
+
+  if (draftId.value) {
+    await blogService.updateDraft(draftId.value, body)
+    return { draftId: draftId.value, content: body }
+  }
+
+  const draft = await blogService.createDraft(body)
+  draftId.value = draft.id
+  return { draftId: draft.id, content: body }
+}
+
+watch(content, () => {
+  if (isSavingDraft.value) return
+
+  const currentContent = getCurrentDraftContent()
+  isDraftSaved.value = !!currentContent && currentContent === lastSavedDraftContent
+})
+
+const handleNextStep = async () => {
+  if (!toStorageMarkdown(content.value).trim()) {
+    errorMessage.value = 'Please write your post content before continuing.'
     return
   }
 
+  isSavingDraft.value = true
+  errorMessage.value  = ''
+
+  try {
+    await persistDraftContent()
+    showMetaPopup.value = true
+  } catch (error) {
+    errorMessage.value = error instanceof Error ? error.message : 'Failed to save draft'
+    console.error('Next step save error:', error)
+  } finally {
+    isSavingDraft.value = false
+  }
+}
+
+// ── Notifications ──
+const _displayNotification = (message: string, type: 'success' | 'error' = 'success', duration = 2000) => {
+  if (notificationTimer) clearTimeout(notificationTimer)
+  notificationMessage.value = message
+  notificationType.value    = type
+  showNotification.value    = true
+  notificationTimer = setTimeout(() => { showNotification.value = false }, duration)
+}
+
+// ── Publish ──────────────────────────────────────────────────────────────────
+const submitPost = async () => {
   if (!title.value.trim()) {
     errorMessage.value = 'Please enter a blog title'
+    return
+  }
+
+  const markdownContent = toStorageMarkdown(content.value)
+  if (!markdownContent.trim()) {
+    errorMessage.value = 'Please add post content before publishing'
     return
   }
 
@@ -144,22 +502,22 @@ const submitPost = async () => {
   errorMessage.value = ''
 
   try {
-    // Convert thumbnail to File if it's a data URL
+    // Persist a cleaned draft first, then publish the same sanitized body.
+    const { draftId: currentDraftId, content: cleanedContent } = await persistDraftContent(markdownContent)
+
+    // Thumbnail already uploaded and stored as server URL
+    // No need to convert or re-upload
     let coverImageFileToPublish: File | undefined
-    if (thumbnail.value && !coverImageFile.value) {
-      // thumbnail is a data URL from crop, convert it back to File
-      const blob = await fetch(thumbnail.value).then(r => r.blob())
-      coverImageFileToPublish = new File([blob], 'thumbnail.jpg', { type: 'image/jpeg' })
-    } else if (coverImageFile.value) {
+    if (coverImageFile.value) {
       coverImageFileToPublish = coverImageFile.value
     }
 
     const publishPayload = {
-      id: draftId.value,
-      title: title.value.trim(),
-      category: category.value,
-      tags: [], // Add tag parsing if you implement tags UI
-      content: content.value,
+      id:         currentDraftId,
+      title:      title.value.trim(),
+      category:   category.value,
+      tags:       parseTags(tagsInput.value),
+      content:    cleanedContent,
       coverimage: coverImageFileToPublish,
     }
 
@@ -167,7 +525,6 @@ const submitPost = async () => {
 
     if (result.save === 1) {
       showMetaPopup.value = false
-      // Show success message and redirect
       await new Promise(resolve => setTimeout(resolve, 500))
       router.push(`/blog/${result.slug}`)
     } else {
@@ -181,23 +538,21 @@ const submitPost = async () => {
   }
 }
 
+// ── Save Draft ───────────────────────────────────────────────────────────────
 const saveDraft = async () => {
-  if (!draftId.value) {
-    errorMessage.value = 'Error: Draft not initialized'
-    return
-  }
-
   isSavingDraft.value = true
-  errorMessage.value = ''
+  errorMessage.value  = ''
 
   try {
-    await blogService.updateDraft(draftId.value, content.value)
-    console.log('Draft saved successfully')
+    const savedContent = getCurrentDraftContent()
+    await persistDraftContent(savedContent)
+    lastSavedDraftContent = savedContent
+    isDraftSaved.value = true
     _displayNotification('Draft saved successfully', 'success')
   } catch (error) {
     errorMessage.value = error instanceof Error ? error.message : 'Failed to save draft'
     console.error('Draft save error:', error)
-    console.log('Draft save failed:', error)
+    isDraftSaved.value = false
   } finally {
     isSavingDraft.value = false
   }
@@ -223,7 +578,7 @@ onBeforeUnmount(() => { if (cropObjectUrl) URL.revokeObjectURL(cropObjectUrl) })
           </button>
         </div>
         <div :class="$style.headerBar" />
-        <p :class="$style.headerSub">Write and publish with the same Mizomade style.</p>
+        <p :class="$style.headerSub">Write and publish insight.</p>
       </div>
 
       <!-- ── Error Message ─────────────────────────────── -->
@@ -231,15 +586,30 @@ onBeforeUnmount(() => { if (cropObjectUrl) URL.revokeObjectURL(cropObjectUrl) })
         {{ errorMessage }}
       </div>
 
+      <!-- ── Image upload progress ──────────────────────── -->
+      <div v-if="isUploadingImages" :class="$style.infoBanner">
+         Uploading images…
+      </div>
+
       <!-- ── Form ───────────────────────────────────────── -->
       <form :class="$style.form" @submit.prevent="submitPost">
         <BlogContentEditor v-model="content" />
 
         <div :class="$style.actions">
-          <button type="button" :class="$style.draftBtn" :disabled="isSavingDraft" @click="saveDraft">
-            <span>{{ isSavingDraft ? 'Saving…' : 'Save Draft' }}</span>
+          <button
+            type="button"
+            :class="$style.draftBtn"
+            :disabled="isSavingDraft || isUploadingImages"
+            @click="saveDraft"
+          >
+            <span>{{ isSavingDraft ? (isUploadingImages ? 'Uploading images…' : 'Saving…') : isDraftSaved ? 'Saved' : 'Save Draft' }}</span>
           </button>
-          <button type="button" :class="$style.publishBtn" :disabled="isSubmitting" @click="openMetaPopup">
+          <button
+            type="button"
+            :class="$style.publishBtn"
+            :disabled="isSubmitting || isSavingDraft || isUploadingImages"
+            @click="handleNextStep"
+          >
             <span>Next</span>
           </button>
         </div>
@@ -257,50 +627,69 @@ onBeforeUnmount(() => { if (cropObjectUrl) URL.revokeObjectURL(cropObjectUrl) })
             </button>
           </div>
 
-          <p :class="$style.metaSub">Add title, category, and thumbnail before publishing.</p>
+          <p :class="$style.metaSub">Add title, category, tags, and thumbnail before publishing.</p>
 
           <div v-if="errorMessage" :class="$style.errorBanner">
             {{ errorMessage }}
           </div>
 
           <div :class="$style.metaFields">
-            <label :class="$style.fieldGroup">
+            <label :class="[$style.fieldGroup, $style.fieldSpan2]">
               <span :class="$style.fieldLabel">Title</span>
-              <input v-model="title" type="text" placeholder="Enter blog title" :class="$style.fieldInput" >
+              <input v-model="title" type="text" placeholder="Enter blog title" :class="$style.fieldInput">
             </label>
 
             <label :class="$style.fieldGroup">
               <span :class="$style.fieldLabel">Category</span>
               <select v-model="category" :class="$style.fieldInput">
                 <option
-v-for="cat in ['Zirna','Gospel','Hriselna','Thiamna','Beauty & Fashion','Story','Politics','Infiamna','Others']"
-                  :key="cat" :value="cat">{{ cat }}</option>
+                  v-for="cat in ['Zirna','Gospel','Hriselna','Thiamna','Beauty and Fashion','Story','Politics','Infiamna','Others']"
+                  :key="cat"
+                  :value="cat"
+                >{{ cat }}</option>
               </select>
             </label>
 
             <label :class="$style.fieldGroup">
-              <span :class="$style.fieldLabel">Thumbnail</span>
-              <div :class="$style.thumbControls">
-                <label :class="$style.thumbUploadBtn">
-                  Upload Photo
-                  <input type="file" accept="image/*" class="hidden" @change="addThumbnailByFile" >
-                </label>
-                <button v-if="thumbnail" type="button" :class="$style.thumbRemoveBtn" @click="thumbnail = ''">Remove</button>
-              </div>
-              <div v-if="thumbnail" :class="$style.thumbPreviewWrap">
-                <img :src="thumbnail" alt="Thumbnail preview" :class="$style.thumbPreview" >
-              </div>
+              <span :class="$style.fieldLabel">Tags</span>
+              <input v-model="tagsInput" type="text" placeholder="e.g., #sports, #trending, #news" :class="$style.fieldInput">
+              <p v-if="tagsInput" :class="$style.tagPreview">Tags: {{ parseTags(tagsInput).join(', ') }}</p>
             </label>
+
+            <div :class="[$style.fieldGroup, $style.fieldSpan2]">
+              <span :class="$style.fieldLabel">Thumbnail</span>
+              <label
+                :class="[$style.thumbDropzone, { [$style.thumbDropzoneActive]: !!thumbnail }]"
+                @dragover.prevent="handleThumbnailDragOver"
+                @drop.prevent="handleThumbnailDrop"
+              >
+                <input type="file" accept="image/*" class="hidden" @change="addThumbnailByFile">
+                <template v-if="thumbnail">
+                  <img :src="displayThumbnailUrl" alt="Thumbnail preview" :class="$style.thumbDropzoneImage">
+                </template>
+                <template v-else>
+                  <span :class="$style.thumbDropzoneIconWrap">
+                    <svg :class="$style.thumbDropzoneIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                      <rect x="3" y="4" width="18" height="14" rx="2.5" />
+                      <path d="M7 14l3-3 3 3 4-4 2 2" />
+                      <circle cx="9" cy="8" r="1.3" fill="currentColor" stroke="none" />
+                    </svg>
+                  </span>
+                  <span :class="$style.thumbDropzoneText">Select or drag &amp; drop image</span>
+                </template>
+              </label>
+              <button v-if="thumbnail" type="button" :class="$style.thumbRemoveBtn" @click="clearThumbnail">Remove</button>
+            </div>
           </div>
 
           <div :class="$style.popupActions">
             <button
               type="button"
               :class="$style.applyBtn"
-              :disabled="isSubmitting || !title.trim()"
+              :disabled="isSubmitting || isUploadingImages || !title.trim()"
               @click="submitPost"
             >
-              {{ isSubmitting ? 'Publishing…' : 'Publish Post' }}
+              {{ isSubmitting ? (isUploadingImages ? 'Uploading images…' : 'Publishing…') : 'Publish Post' }}
             </button>
           </div>
         </div>
@@ -383,10 +772,11 @@ v-for="cat in ['Zirna','Gospel','Hriselna','Thiamna','Beauty & Fashion','Story',
   --cp-thumb-upload-bg: rgba(24,24,27,0.06);
   --cp-thumb-upload-bd: rgba(24,24,27,0.16);
   --cp-thumb-upload-fg: #18181b;
+  --cp-thumb-drop-bg: rgba(24,24,27,0.03);
+  --cp-thumb-drop-bd: rgba(24,24,27,0.20);
+  --cp-thumb-drop-fg: #18181b;
   --cp-thumb-remove-bd: rgba(24,24,27,0.18);
   --cp-thumb-remove-fg: #3f3f46;
-  --cp-thumb-prev-bg:   rgba(24,24,27,0.04);
-  --cp-thumb-prev-bd:   rgba(24,24,27,0.10);
 
   --cp-crop-stage-bg:   rgba(24,24,27,0.03);
   --cp-crop-stage-bd:   rgba(24,24,27,0.12);
@@ -398,6 +788,10 @@ v-for="cat in ['Zirna','Gospel','Hriselna','Thiamna','Beauty & Fashion','Story',
   --cp-apply-bg:        #18181b;
   --cp-apply-bd:        #18181b;
   --cp-apply-fg:        #fafafa;
+
+  --cp-info-bg:         rgba(59,130,246,0.08);
+  --cp-info-border:     rgba(59,130,246,0.30);
+  --cp-info-fg:         #1d4ed8;
 }
 
 :global(html.dark) {
@@ -434,10 +828,11 @@ v-for="cat in ['Zirna','Gospel','Hriselna','Thiamna','Beauty & Fashion','Story',
   --cp-thumb-upload-bg: rgba(255,255,255,0.08);
   --cp-thumb-upload-bd: rgba(255,255,255,0.20);
   --cp-thumb-upload-fg: #f4f4f5;
+  --cp-thumb-drop-bg: rgba(255,255,255,0.03);
+  --cp-thumb-drop-bd: rgba(255,255,255,0.22);
+  --cp-thumb-drop-fg: #f4f4f5;
   --cp-thumb-remove-bd: rgba(255,255,255,0.22);
   --cp-thumb-remove-fg: #d4d4d8;
-  --cp-thumb-prev-bg:   rgba(255,255,255,0.04);
-  --cp-thumb-prev-bd:   rgba(255,255,255,0.12);
 
   --cp-crop-stage-bg:   rgba(255,255,255,0.03);
   --cp-crop-stage-bd:   rgba(255,255,255,0.12);
@@ -449,6 +844,10 @@ v-for="cat in ['Zirna','Gospel','Hriselna','Thiamna','Beauty & Fashion','Story',
   --cp-apply-bg:        #f4f4f5;
   --cp-apply-bd:        #f4f4f5;
   --cp-apply-fg:        #111110;
+
+  --cp-info-bg:         rgba(59,130,246,0.12);
+  --cp-info-border:     rgba(59,130,246,0.35);
+  --cp-info-fg:         #93c5fd;
 }
 
 /* ── Smooth transitions ─────────────────────────────────── */
@@ -498,6 +897,7 @@ v-for="cat in ['Zirna','Gospel','Hriselna','Thiamna','Beauty & Fashion','Story',
   transition: color 0.2s ease !important;
 }
 .backBtn:hover { color: var(--cp-fg); }
+
 /* ── Error Banner ───────────────────────────────────────── */
 .errorBanner {
   padding: 0.875rem 1rem;
@@ -506,9 +906,6 @@ v-for="cat in ['Zirna','Gospel','Hriselna','Thiamna','Beauty & Fashion','Story',
   font-size: 0.875rem;
   font-weight: 500;
   animation: slideDown 0.3s ease;
-}
-
-:root .errorBanner {
   background: #fee;
   border: 1px solid #f99;
   color: #c33;
@@ -520,10 +917,24 @@ v-for="cat in ['Zirna','Gospel','Hriselna','Thiamna','Beauty & Fashion','Story',
   color: #fca5a5;
 }
 
+/* ── Info Banner (image upload progress) ────────────────── */
+.infoBanner {
+  padding: 0.75rem 1rem;
+  margin-bottom: 1.5rem;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  animation: slideDown 0.3s ease;
+  background: var(--cp-info-bg);
+  border: 1px solid var(--cp-info-border);
+  color: var(--cp-info-fg);
+}
+
 @keyframes slideDown {
   from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
+  to   { opacity: 1; transform: translateY(0); }
 }
+
 /* ── Form ───────────────────────────────────────────────── */
 .form    { display: flex; flex-direction: column; gap: 1.5rem; }
 .actions { display: flex; justify-content: flex-end; gap: 0.75rem; padding-top: 0.5rem; }
@@ -671,14 +1082,14 @@ v-for="cat in ['Zirna','Gospel','Hriselna','Thiamna','Beauty & Fashion','Story',
 
 /* ── Meta popup ─────────────────────────────────────────── */
 .metaPopup {
-  width: min(460px, 96vw);
+  width: min(760px, 96vw);
   max-height: 90vh;
   background: var(--cp-popup-bg);
   border: 1px solid var(--cp-popup-border);
   border-radius: 8px;
   padding: 1rem;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-rows: auto auto 1fr auto;
   overflow: hidden;
 }
 .metaSub {
@@ -686,26 +1097,83 @@ v-for="cat in ['Zirna','Gospel','Hriselna','Thiamna','Beauty & Fashion','Story',
   font-size: 0.85rem;
   color: var(--cp-popup-sub);
 }
-.metaFields { display: flex; flex-direction: column; gap: 0.95rem; }
+.metaFields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.95rem;
+  overflow-y: auto;
+  min-height: 0;
+  padding-right: 4px;
+}
+
+.fieldSpan2 {
+  grid-column: 1 / -1;
+}
+
+.popupActions {
+  position: sticky;
+  bottom: 0;
+  background: var(--cp-popup-bg);
+  padding-top: 0.7rem;
+  margin-top: 0.65rem;
+  border-top: 1px solid var(--cp-popup-border);
+}
 
 /* Thumbnail controls */
-.thumbControls  { display: flex; align-items: center; gap: 0.55rem; }
-.thumbUploadBtn {
-  display: inline-flex;
+.thumbDropzone {
+  width: 100%;
+  min-height: 190px;
+  display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 0.55rem 0.75rem;
-  font-size: 0.68rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  border: 1px solid var(--cp-thumb-upload-bd);
-  border-radius: 2px;
+  gap: 0.45rem;
+  padding: 1.25rem;
+  text-align: center;
+  border: 2px dotted var(--cp-thumb-drop-bd);
+  border-radius: 10px;
   cursor: pointer;
-  color: var(--cp-thumb-upload-fg);
-  background: var(--cp-thumb-upload-bg);
+  background: var(--cp-thumb-drop-bg);
+  color: var(--cp-thumb-drop-fg);
+  transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease !important;
 }
+.thumbDropzone:hover {
+  border-color: color-mix(in srgb, var(--cp-thumb-drop-bd) 70%, var(--cp-thumb-drop-fg));
+  background: color-mix(in srgb, var(--cp-thumb-drop-bg) 65%, var(--cp-thumb-drop-fg) 5%);
+}
+.thumbDropzoneActive {
+  min-height: 220px;
+}
+.thumbDropzoneImage {
+  width: 100%;
+  height: 100%;
+  min-height: 190px;
+  object-fit: cover;
+  border-radius: 8px;
+  display: block;
+}
+.thumbDropzoneIconWrap {
+  width: 3.25rem;
+  height: 3.25rem;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--cp-thumb-drop-fg) 8%, transparent);
+}
+.thumbDropzoneIcon {
+  width: 1.65rem;
+  height: 1.65rem;
+  color: var(--cp-thumb-drop-fg);
+}
+.thumbDropzoneText {
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--cp-thumb-drop-fg);
+}
+
 .thumbRemoveBtn {
+  align-self: flex-start;
   padding: 0.55rem 0.75rem;
   font-size: 0.68rem;
   font-weight: 800;
@@ -717,18 +1185,15 @@ v-for="cat in ['Zirna','Gospel','Hriselna','Thiamna','Beauty & Fashion','Story',
   color: var(--cp-thumb-remove-fg);
   background: transparent;
 }
-.thumbPreviewWrap {
-  margin-top: 0.55rem;
-  border: 1px solid var(--cp-thumb-prev-bd);
-  border-radius: 3px;
-  overflow: hidden;
-  background: var(--cp-thumb-prev-bg);
-}
-.thumbPreview {
-  width: 100%;
-  aspect-ratio: 16 / 9;
-  display: block;
-  object-fit: cover;
+
+@media (max-width: 640px) {
+  .metaFields {
+    grid-template-columns: 1fr;
+  }
+
+  .fieldSpan2 {
+    grid-column: auto;
+  }
 }
 
 /* ── Crop popup ─────────────────────────────────────────── */
@@ -780,4 +1245,12 @@ v-for="cat in ['Zirna','Gospel','Hriselna','Thiamna','Beauty & Fashion','Story',
   transition: opacity 0.15s ease !important;
 }
 .cropToolBtn:hover { opacity: 0.75; }
+
+/* ── Tag Preview ─────────────────────────────────────────── */
+.tagPreview {
+  margin-top: 0.35rem;
+  font-size: 0.75rem;
+  color: var(--cp-fg-muted);
+  font-weight: 500;
+}
 </style>

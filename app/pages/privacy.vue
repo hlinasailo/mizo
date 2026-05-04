@@ -320,7 +320,7 @@ const sharingEntities = [
 <style module>
 /* ─── CSS tokens — mirrors About page exactly ───────────── */
 :global(:root) {
-  --bg:       #dcdcdc;
+  --bg:       #ffffff;
   --bg-alt:   #eceae6;
   --fg:       #0a0a0a;
   --fg-muted: #555551;

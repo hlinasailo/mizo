@@ -41,6 +41,8 @@ import { RuntimeConfig as UserRuntimeConfig, PublicRuntimeConfig as UserPublicRu
   interface SharedPublicRuntimeConfig {
    apiBase: string,
 
+   mediaBase: string,
+
    mdc: {
       components: {
          prose: boolean,

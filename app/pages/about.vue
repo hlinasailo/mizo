@@ -142,6 +142,9 @@
 <script setup>
 import { onBeforeUnmount, onMounted } from 'vue'
 
+const ANIMATE_SELECTOR = '[data-animate]'
+const OBSERVER_OPTIONS = { threshold: 0.12, rootMargin: '0px 0px -40px 0px' }
+
 // ── Data ──────────────────────────────────────────────────
 const features = [
   {
@@ -170,55 +173,66 @@ const stats = [
 // ── Scroll animations ─────────────────────────────────────
 let observer
 
-onMounted(() => {
-  observer = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((e) => {
-        if (e.isIntersecting) {
-          e.target.classList.add('visible')
-          observer.unobserve(e.target)
-        }
-      })
-    },
-    { threshold: 0.12, rootMargin: '0px 0px -40px 0px' }
-  )
+const handleIntersections = (entries) => {
+  entries.forEach((entry) => {
+    if (!entry.isIntersecting) {
+      return
+    }
 
-  document.querySelectorAll('[data-animate]').forEach((el) => observer.observe(el))
+    entry.target.classList.add('visible')
+    observer?.unobserve(entry.target)
+  })
+}
+
+const observeAnimatedElements = () => {
+  document.querySelectorAll(ANIMATE_SELECTOR).forEach((element) => {
+    observer?.observe(element)
+  })
+}
+
+onMounted(() => {
+  observer = new IntersectionObserver(handleIntersections, OBSERVER_OPTIONS)
+  observeAnimatedElements()
 })
 
-onBeforeUnmount(() => observer?.disconnect())
+onBeforeUnmount(() => {
+  observer?.disconnect()
+  observer = null
+})
 </script>
 
 <style module>
-/* ─── CSS tokens via :global on <html> ─────────────────── */
-:global(:root) {
-  --bg:       #dcdcdc;
-  --bg-alt:   #eceae6;
-  --fg:       #0a0a0a;
-  --fg-muted: #555551;
-  --fg-soft:  rgba(10,10,10,0.50);
-  --border:   rgba(10,10,10,0.14);
-  --card-bg:   #ffffff;
-  --grid-c:   rgba(10, 10, 10, 0.107);
+/* ─── About page theme tokens (scoped locally) ─────────── */
+.aboutPage {
+  --bg: #ffffff;
+  --bg-alt: #ffffff;
+  --fg: #0f0f0f;
+  --fg-muted: #111111;
+  --fg-soft: rgb(10, 10, 10);
+  --border: rgba(10, 10, 10, 0.132);
+  --card-bg: #ffffff;
+  --grid-c: rgba(10, 10, 10, 0.132);
 }
-:global(html.dark) {
-  --bg:       #0a0a0a;
-  --bg-alt:   #0f0f0f;
-  --fg:       #f0ede8;
-  --fg-muted: rgba(240,237,232,0.72);
-  --fg-soft:  rgba(181, 169, 149, 0.5);
-  --border:   rgba(240,237,232,0.18);
-  --card-bg:  rgba(255,255,255,0.06);
-  --grid-c:   rgba(237, 237, 237, 0.088);
+
+:global(html.dark) .aboutPage {
+  --bg: #0a0a0a;
+  --bg-alt: #0f0f0f;
+  --fg: #f0ede8;
+  --fg-muted: rgba(240, 237, 232, 0.72);
+  --fg-soft: rgba(181, 169, 149, 0.5);
+  --border: rgba(240, 237, 232, 0.18);
+  --card-bg: rgba(255, 255, 255, 0.06);
+  --grid-c: rgba(237, 237, 237, 0.088);
 }
 
 /* ─── Smooth theme transitions ──────────────────────────── */
-:global(*) {
+.aboutPage,
+.aboutPage * {
   transition:
     background-color 0.4s ease,
-    border-color     0.4s ease,
-    color            0.4s ease,
-    box-shadow       0.4s ease;
+    border-color 0.4s ease,
+    color 0.4s ease,
+    box-shadow 0.4s ease;
 }
 
 /* ─── Scroll animations ─────────────────────────────────── */
@@ -232,9 +246,7 @@ onBeforeUnmount(() => observer?.disconnect())
 /* ─── Layout ─────────────────────────────────────────────── */
 .aboutPage {
   scroll-behavior: smooth;
-  --card-bg: #e4e3e3;
 }
-:global(html.dark) .aboutPage { --card-bg: rgba(255,255,255,0.06); }
 
 .container {
   max-width: 1280px;
@@ -248,9 +260,25 @@ onBeforeUnmount(() => observer?.disconnect())
   background: var(--bg);
   color: var(--fg);
   padding: 6rem 0 7rem;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 2px solid var(--border);
 }
 .alt { background: var(--bg-alt); }
+
+.section + .section {
+  box-shadow: inset 0 1px 0 rgba(0, 0, 0, 0.10);
+}
+
+:global(html.dark) .section + .section {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.10);
+}
+
+:global(html:not(.dark)) .aboutPage .section,
+:global(html:not(.dark)) .aboutPage .alt,
+:global(html:not(.dark)) .aboutPage .glassCard,
+:global(html:not(.dark)) .aboutPage .featureItem,
+:global(html:not(.dark)) .aboutPage .statCard {
+  background: #ffffff;
+}
 
 /* ─── Hero ───────────────────────────────────────────────── */
 .hero {
@@ -297,12 +325,14 @@ onBeforeUnmount(() => observer?.disconnect())
 .circle {
   position: absolute;
   border-radius: 50%;
-  background: var(--card-bg);
-  animation: float 22s infinite ease-in-out;
+  background: rgba(0, 0, 0, 0.14);
+  animation: float 16s infinite ease-in-out;
+  will-change: transform;
 }
-.c1 { width: 320px; height: 320px; top: 8%;   left: 8%;   animation-delay: 0s; }
-.c2 { width: 210px; height: 210px; top: 58%;  right: 8%;  animation-delay: 6s; }
-.c3 { width: 260px; height: 260px; bottom: 8%; left: 48%; animation-delay: 12s; }
+.c1 { width: 320px; height: 320px; top: 8%;   left: 8%;   animation-delay: 0s; animation-duration: 16s; }
+.c2 { width: 210px; height: 210px; top: 58%;  right: 8%;  animation-delay: 2s; animation-duration: 13s; }
+.c3 { width: 260px; height: 260px; bottom: 8%; left: 48%; animation-delay: 4s; animation-duration: 18s; }
+:global(html.dark) .circle { background: rgba(255, 255, 255, 0.10); }
 @media(max-width:768px) { .circle { width: 150px !important; height: 150px !important; } }
 
 /* ─── Mission ────────────────────────────────────────────── */
@@ -438,8 +468,9 @@ onBeforeUnmount(() => observer?.disconnect())
 /* ─── Keyframes ──────────────────────────────────────────── */
 @keyframes float {
   0%,100% { transform: translate(0,0) rotate(0deg); }
-  33%     { transform: translate(28px,-28px) rotate(120deg); }
-  66%     { transform: translate(-28px,28px) rotate(240deg); }
+  25%     { transform: translate(38px,-34px) rotate(90deg); }
+  50%     { transform: translate(-18px,-52px) rotate(180deg); }
+  75%     { transform: translate(-42px,30px) rotate(270deg); }
 }
 @keyframes bounce {
   0%,100% { transform: translateX(-50%) translateY(0); }
